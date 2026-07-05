@@ -1165,16 +1165,20 @@
   <button onclick="envoyerQuestionnaire()"
     style="width:100%;margin-top:20px;padding:16px;background:var(--accent);color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;letter-spacing:0.02em;transition:background 0.2s"
     onmouseover="this.style.background='#A0622A'" onmouseout="this.style.background='var(--accent)'">
-    ✉ Envoyer le questionnaire
+    ✅ Terminer et télécharger mon questionnaire
   </button>
 
-  <div id="envoi_confirmation" hidden style="margin-top:16px;padding:16px 20px;background:#e8f5e9;border-radius:10px;border:1px solid #2d6a4f;color:#2d6a4f;font-size:13px;text-align:center">
-    ✅ <strong>Questionnaire enregistré !</strong> Un fichier a été téléchargé sur votre appareil.
+  <div id="envoi_confirmation" hidden style="margin-top:16px;padding:18px 20px;background:#e8f5e9;border-radius:10px;border:1px solid #2d6a4f;color:#1b4332;font-size:13px;text-align:left">
+    <div style="font-size:15px;font-weight:700;text-align:center;margin-bottom:10px">✅ Votre questionnaire a bien été enregistré dans un fichier.</div>
+    <div style="background:#fff3cd;border:1px solid #d4a72c;border-radius:8px;padding:12px 14px;color:#6b4e00;line-height:1.6">
+      <strong>⚠️ Attention, ce n'est pas encore terminé.</strong><br>
+      Ce fichier vient d'être <strong>téléchargé sur votre appareil</strong> (dossier « Téléchargements »). <strong>Rien n'a été transmis automatiquement.</strong> Vous devez maintenant <strong>l'envoyer vous-même à votre praticienne</strong> pour qu'elle le reçoive.
+    </div>
     <button onclick="partagerIntake()" id="btn_partager_intake"
-      style="width:100%;margin-top:12px;padding:14px;background:#2d6a4f;color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer">
-      📤 Envoyer le fichier à ma praticienne
+      style="width:100%;margin-top:14px;padding:15px;background:#2d6a4f;color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer">
+      📤 Envoyer le fichier à ma praticienne maintenant
     </button>
-    <div style="font-size:11px;margin-top:8px;opacity:0.8">Si rien ne se passe, retrouvez le fichier téléchargé (dossier "Téléchargements") et joignez-le à un email.</div>
+    <div style="font-size:12px;margin-top:10px;line-height:1.6;opacity:0.9">Si le bouton n'ouvre rien : retrouvez le fichier <strong>« synaxone-intake-…json »</strong> dans vos <strong>Téléchargements</strong>, puis joignez-le à un email adressé à votre praticienne.</div>
   </div>
 
   <button onclick="imprimerQuestionnaire()"
@@ -4103,7 +4107,7 @@ async function envoyerQuestionnaire() {
   var hiddenSubs = showAllSubDivs();
 
   var btn = document.querySelector('[onclick="envoyerQuestionnaire()"]');
-  if (btn) { btn.textContent = '⏳ Envoi en cours…'; btn.disabled = true; }
+  if (btn) { btn.textContent = '⏳ Préparation du fichier…'; btn.disabled = true; }
 
   // Sécurité : si l'envoi n'a abouti (ni succès ni erreur) après un long délai,
   // on réactive le bouton. Le traitement côté Apps Script (génération du plan)
@@ -4111,7 +4115,7 @@ async function envoyerQuestionnaire() {
   // réactivait le bouton trop tôt et permettait un double-clic → 2 plans identiques.
   setTimeout(function() {
     var b = document.querySelector('[onclick="envoyerQuestionnaire()"]');
-    if (b && b.disabled && !_envoiValide) { b.disabled = false; b.textContent = '✉ Envoyer'; }
+    if (b && b.disabled && !_envoiValide) { b.disabled = false; b.textContent = '✅ Terminer et télécharger mon questionnaire'; }
   }, 90000);
 
   // Build simple message
@@ -4341,7 +4345,7 @@ function showConfirmation() {
   var conf = document.getElementById('envoi_confirmation');
   if (conf) conf.removeAttribute('hidden');
   var btn = document.querySelector('[onclick="envoyerQuestionnaire()"]');
-  if (btn) { btn.textContent = '\u2705 Envoyé !'; }
+  if (btn) { btn.textContent = '\u2705 Fichier téléchargé'; }
   setTimeout(() => goToSection(11), 2000);
 }
 
