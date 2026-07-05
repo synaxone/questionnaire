@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synaxone — Bilan 10 séances</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FDF6EE;
+    --surface: #ffffff;
+    --border: #E8C49A;
+    --text: #2C1A0E;
+    --text-muted: #7A4A1E;
+    --accent: #C17A3E;
+    --accent-light: #F5D5A8;
+    --practitioner: #8B4513;
+    --practitioner-light: #FAEBD7;
+    --shadow: 0 2px 16px rgba(0,0,0,0.06);
+    --green: #4A7C59;
+    --green-light: #E8F5EE;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 20px 32px;
+    text-align: center;
+  }
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* MAIN */
+  main { max-width: 720px; margin: 0 auto; padding: 32px 20px 80px; }
+
+  /* INTRO */
+  .intro-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow);
+  }
+  .intro-card h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    color: var(--practitioner);
+    margin-bottom: 8px;
+  }
+  .intro-card p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 6px;
+  }
+  .intro-card .client-info {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+  }
+  .intro-card .client-info strong { color: var(--accent); }
+
+  /* SECTION */
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px;
+    color: var(--practitioner);
+    margin: 32px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title span { font-size: 20px; }
+
+  /* QUESTION CARD */
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    transition: border-color 0.15s;
+  }
+  .question-card:focus-within { border-color: var(--accent); }
+  .question-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .question-label .q-num {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-right: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+
+  /* SLIDER */
+  .slider-container {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) 50%, var(--border) 50%, var(--border) 100%);
+    outline: none;
+    cursor: pointer;
+    flex: 1;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid white;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.2);
+    cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid white;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.2);
+    cursor: pointer;
+  }
+  .slider-value {
+    min-width: 36px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+    font-family: 'Cormorant Garamond', serif;
+  }
+  .slider-wrapper { flex: 1; }
+
+  /* TEXTE LIBRE */
+  .libre-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+  }
+  .libre-card label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    display: block;
+    margin-bottom: 4px;
+    line-height: 1.5;
+  }
+  .libre-card .question-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    font-style: italic;
+    line-height: 1.5;
+  }
+  textarea {
+    width: 100%;
+    min-height: 90px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    resize: vertical;
+    line-height: 1.5;
+  }
+  textarea:focus { outline: none; border-color: var(--accent); background: white; }
+
+  /* BOUTON ENVOI */
+  .submit-section {
+    margin-top: 36px;
+    text-align: center;
+  }
+  .submit-section p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .btn-submit {
+    background: var(--practitioner);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 14px 40px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(139,69,19,0.25);
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-submit:active { transform: translateY(0); }
+  .btn-share {
+    background: var(--green);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    max-width: 340px;
+    margin-top: 16px;
+  }
+  .btn-share:hover { opacity: 0.9; }
+  #confirmation .fallback-note {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 10px;
+  }
+
+  /* CONFIRMATION */
+  #confirmation {
+    display: none;
+    background: var(--green-light);
+    border: 1px solid var(--green);
+    border-radius: 12px;
+    padding: 32px;
+    text-align: center;
+    margin-top: 20px;
+  }
+  #confirmation h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    color: var(--green);
+    margin-bottom: 10px;
+  }
+  #confirmation p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* ERREUR CONFIG */
+  #erreur-config {
+    display: none;
+    background: #FFF3E0;
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 24px;
+    text-align: center;
+    margin: 40px 0;
+  }
+  #erreur-config h3 { color: var(--practitioner); margin-bottom: 8px; font-family: 'Cormorant Garamond', serif; font-size: 18px; }
+  #erreur-config p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  /* PROGRESS */
+  .progress-bar-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.3s;
+    width: 0%;
+  }
+  .progress-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+  @media (max-width: 600px) {
+    main { padding: 20px 12px 60px; }
+    header { padding: 16px; }
+    .slider-value { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Synaxone</div>
+  <div class="subtitle">Bilan d'évolution — 10 séances</div>
+</header>
+
+<div class="progress-bar-wrap">
+  <div class="progress-bar"><div class="progress-bar-fill" id="progress-fill"></div></div>
+  <span class="progress-label" id="progress-label">0 %</span>
+</div>
+
+<main>
+
+  <div class="intro-card">
+    <h2>Votre bilan d'évolution</h2>
+    <p>Ce questionnaire vous est envoyé par votre praticien pour faire le point après vos 10 dernières séances de neurofeedback.</p>
+    <p>Pour chaque symptôme, indiquez comment vous vous sentez <strong>aujourd'hui</strong>, de 0 (pas du tout) à 10 (au maximum). Il n'y a pas de bonne ou mauvaise réponse — soyez le plus honnête possible.</p>
+    <div class="client-info" id="client-info-box"></div>
+  </div>
+
+  <div id="erreur-config">
+    <h3>Configuration manquante</h3>
+    <p>Ce lien ne contient pas de configuration valide.<br>Demandez à votre praticien de régénérer le lien depuis l'interface de sélection.</p>
+  </div>
+
+  <div id="questionnaire-container"></div>
+
+  <div class="submit-section" id="submit-section" style="display:none">
+    <p>En envoyant ce bilan, vous transmettez vos réponses de façon sécurisée à votre praticien.<br>Aucune donnée nominative n'est stockée — vos réponses sont pseudonymisées.</p>
+    <button class="btn-submit" onclick="envoyerBilan()">Envoyer mon bilan</button>
+  </div>
+
+  <div id="confirmation">
+    <h3>Bilan enregistré ✓</h3>
+    <p>Merci pour vos réponses. Un fichier vient d'être téléchargé sur cet appareil.<br><br>À très bientôt.</p>
+    <button class="btn-share" id="btn_partager_bilan" onclick="partagerBilan()">📤 Envoyer le fichier à ma praticienne</button>
+    <p class="fallback-note">Si rien ne se passe, retrouvez le fichier téléchargé (dossier "Téléchargements") et joignez-le à un email.</p>
+  </div>
+
+</main>
+
+<script src="crypto-utils.js"></script>
+<script>
+// GARDE-FOU CHIFFREMENT — clé PUBLIQUE du praticien (Camille), sans danger à exposer
+// ici. Sert à chiffrer le bilan avant téléchargement, voir crypto-utils.js et
+// CLAUDE.md §5. Doit rester identique à celle utilisée dans index.html.
+var CLE_PUBLIQUE_PRATICIEN = {"key_ops":["encrypt"],"ext":true,"alg":"RSA-OAEP-256","kty":"RSA","n":"uJaPTNu2D6vuarnZV53bgyQ99SCcnojGTSzapIpMjLvNidvZg4VpF9UG8jXHJCVxLsRk5emBFp4U6u1iz59R5_O7kJleC7mPZwmltiwMXMRyNWt-qZanw8biMYfr78RbGeG4P3Lx8Cmq0SZvnhI2ZugdfFW3JU6V34qx1umwrqCrVs89XgktCgpLXhIgJfZ9AYv1y1-J_TPnIMWeytODMCAVJywt0XFY0AJsYqG7uVYuyV7HwRRCrkCfTJBEM19CGkjvaaNCUDlAxDEh8GohUd_5LDNjLc2ksJo_nUPYHy-iI4zZnyS34nQJedMEgz_atEOOqhR9giLsIC0L3MqIdQ","e":"AQAB"};
+
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+// Ancien envoi via Google Apps Script — retiré (migration vers export JSON local,
+// en attendant l'hébergement Infomaniak). Le schéma JSON produit par envoyerBilan()
+// est stable : il suffira de remplacer le téléchargement par un fetch POST vers
+// Infomaniak le moment venu, sans rien changer côté Synaxone NFB (import JSON).
+
+// Questions générales communes (toujours présentes)
+var QUESTIONS_COMMUNES = [
+  { id: 'qc_bien_etre',     num: 201, texte: 'Bien-être général en ce moment',                        labelRange: ['0 · pas du tout', '5', '10 · excellent'] },
+  { id: 'qc_qualite_vie',   num: 202, texte: 'Qualité de vie globale',                                labelRange: ['0 · très mauvaise', '5', '10 · excellente'] },
+  { id: 'qc_energie',       num: 203, texte: 'Niveau d\'énergie dans la journée',                     labelRange: ['0 · aucune', '5', '10 · très élevée'] },
+  { id: 'qc_fatigue_chrono',num: 204, texte: 'Fatigue chronique (ressenti général)',                  labelRange: ['0 · pas du tout', '5', '10 · épuisé(e)'] },
+  { id: 'qc_sommeil',       num: 205, texte: 'Qualité générale du sommeil',                           labelRange: ['0 · très mauvaise', '5', '10 · excellente'] },
+  { id: 'qc_endormissement',num: 206, texte: 'Facilité à s\'endormir',                                labelRange: ['0 · très difficile', '5', '10 · très facile'] },
+  { id: 'qc_reveil',        num: 207, texte: 'Sensation d\'être reposé(e) au réveil',                 labelRange: ['0 · pas du tout', '5', '10 · très reposé(e)'] },
+  { id: 'qc_stress',        num: 208, texte: 'Niveau de stress global',                               labelRange: ['0 · aucun', '5', '10 · intense'] },
+  { id: 'qc_stabilite_emo', num: 209, texte: 'Stabilité émotionnelle',                               labelRange: ['0 · très instable', '5', '10 · très stable'] },
+  { id: 'qc_anxiete',       num: 210, texte: 'Niveau d\'anxiété général',                             labelRange: ['0 · aucune', '5', '10 · intense'] },
+  { id: 'qc_concentration', num: 211, texte: 'Capacité de concentration',                             labelRange: ['0 · très difficile', '5', '10 · excellente'] },
+  { id: 'qc_clarte',        num: 212, texte: 'Clarté mentale (absence de brouillard mental)',         labelRange: ['0 · très floue', '5', '10 · très claire'] },
+  { id: 'qc_memoire',       num: 213, texte: 'Mémoire (ressenti général)',                            labelRange: ['0 · très mauvaise', '5', '10 · excellente'] },
+  { id: 'qc_tensions',      num: 214, texte: 'Tensions musculaires / douleurs physiques',             labelRange: ['0 · aucune', '5', '10 · intenses'] },
+  { id: 'qc_digestif',      num: 215, texte: 'Confort digestif',                                      labelRange: ['0 · très inconfortable', '5', '10 · excellent'] },
+  { id: 'qc_motivation',    num: 216, texte: 'Motivation pour les activités habituelles',             labelRange: ['0 · aucune', '5', '10 · très élevée'] },
+  { id: 'qc_relations',     num: 217, texte: 'Qualité des relations avec les autres',                 labelRange: ['0 · très difficiles', '5', '10 · excellentes'] },
+  { id: 'qc_controle',      num: 218, texte: 'Sentiment de contrôle sur sa vie',                     labelRange: ['0 · aucun', '5', '10 · très élevé'] },
+];
+
+// ─────────────────────────────────────────────
+// LECTURE DE LA CONFIG DANS L'URL
+// ─────────────────────────────────────────────
+var CONFIG = null;
+var totalQuestions = 0;
+var answered = 0;
+
+function lireConfig() {
+  var params = new URLSearchParams(window.location.search);
+  var raw = params.get('config');
+  if (!raw) return null;
+  try {
+    return JSON.parse(decodeURIComponent(escape(atob(raw))));
+  } catch(e) {
+    return null;
+  }
+}
+
+// ─────────────────────────────────────────────
+// CONSTRUCTION DU QUESTIONNAIRE
+// ─────────────────────────────────────────────
+function construire(config) {
+  var container = document.getElementById('questionnaire-container');
+  var submitSection = document.getElementById('submit-section');
+  var infoBox = document.getElementById('client-info-box');
+
+  // Info client
+  infoBox.innerHTML = '<strong>Code :</strong> ' + (config.clientCode || '—') +
+    ' &nbsp;·&nbsp; <strong>Suivi depuis le :</strong> ' + (config.debutSuivi || '—') +
+    ' &nbsp;·&nbsp; <strong>Bilan du :</strong> ' + new Date().toLocaleDateString('fr-FR');
+
+  // ── SECTION 1 : Symptômes spécifiques ──
+  var specifiques = config.symptomesSpecifiques || [];
+  if (specifiques.length > 0) {
+    var h1 = document.createElement('div');
+    h1.className = 'section-title';
+    h1.innerHTML = '<span>🎯</span> Vos symptômes personnalisés';
+    container.appendChild(h1);
+
+    // Regrouper par catégorie
+    var byCat = {};
+    specifiques.forEach(function(s) {
+      var cat = s.categorie || 'Autres';
+      if (!byCat[cat]) byCat[cat] = [];
+      byCat[cat].push(s);
+    });
+
+    Object.keys(byCat).forEach(function(cat) {
+      var catTitle = document.createElement('div');
+      catTitle.style.cssText = 'font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin:16px 0 8px;';
+      catTitle.textContent = cat;
+      container.appendChild(catTitle);
+
+      byCat[cat].forEach(function(s) {
+        container.appendChild(creerCarteSlider('Q' + s.num, s.texte));
+        totalQuestions++;
+      });
+    });
+  }
+
+  // ── SECTION 2 : Questions générales ──
+  var h2 = document.createElement('div');
+  h2.className = 'section-title';
+  h2.innerHTML = '<span>🌐</span> Questions générales';
+  container.appendChild(h2);
+
+  QUESTIONS_COMMUNES.forEach(function(q) {
+    container.appendChild(creerCarteSlider('Q' + q.num, q.texte, q.labelRange));
+    totalQuestions++;
+  });
+
+  // ── SECTION 3 : Questions libres ──
+  var h3 = document.createElement('div');
+  h3.className = 'section-title';
+  h3.innerHTML = '<span>💬</span> Vos observations';
+  container.appendChild(h3);
+
+  container.appendChild(creerCarteLibre(
+    'libre_changements',
+    'Depuis que vous avez commencé le neurofeedback, avez-vous remarqué certains changements ?',
+    'Décrivez les changements que vous avez observés, même subtils, dans votre quotidien, votre corps, vos émotions, votre sommeil…'
+  ));
+  container.appendChild(creerCarteLibre(
+    'libre_nouveau',
+    'Y a-t-il quelque chose de nouveau qu\'il vous semble important d\'améliorer ?',
+    'Un symptôme qui est apparu, une difficulté que vous n\'aviez pas mentionnée, un domaine de votre vie que vous aimeriez travailler…'
+  ));
+  container.appendChild(creerCarteLibre(
+    'libre_priorite',
+    'Qu\'est-ce qui reste le plus important à travailler à ce jour ?',
+    'Parmi tout ce que vous avez évoqué, qu\'est-ce qui vous pèse le plus ou que vous souhaiteriez voir évoluer en priorité ?'
+  ));
+
+  submitSection.style.display = 'block';
+  majProgressBar();
+}
+
+function creerCarteSlider(qnum, label, labelRange) {
+  var id = 'slider_' + qnum.replace('Q', '');
+  var card = document.createElement('div');
+  card.className = 'question-card';
+  var rangeMin = labelRange ? labelRange[0] : '0 · pas du tout';
+  var rangeMax = labelRange ? labelRange[2] : '10 · énormément';
+  card.innerHTML = `
+    <div class="question-label"><span class="q-num">${qnum}</span>${label}</div>
+    <div class="slider-container">
+      <div class="slider-wrapper">
+        <input type="range" id="${id}" min="0" max="10" value="5"
+               oninput="majSlider(this)" onchange="majProgressBar()">
+        <div class="slider-labels">
+          <span>${rangeMin}</span>
+          <span>${rangeMax}</span>
+        </div>
+      </div>
+      <div class="slider-value" id="val_${id}">5</div>
+    </div>
+  `;
+  // Initialiser gradient
+  setTimeout(function() {
+    var inp = card.querySelector('input[type="range"]');
+    if (inp) majSlider(inp);
+  }, 50);
+  return card;
+}
+
+function creerCarteLibre(id, label, hint) {
+  var div = document.createElement('div');
+  div.className = 'libre-card';
+  div.innerHTML = `
+    <label for="${id}">${label}</label>
+    <p class="question-hint">${hint}</p>
+    <textarea id="${id}" placeholder="Votre réponse…" rows="4"></textarea>
+  `;
+  return div;
+}
+
+function majSlider(inp) {
+  var val = parseInt(inp.value);
+  var pct = val * 10;
+  inp.style.background = 'linear-gradient(to right, var(--accent) 0%, var(--accent) ' + pct + '%, var(--border) ' + pct + '%, var(--border) 100%)';
+  var vid = 'val_' + inp.id;
+  var valEl = document.getElementById(vid);
+  if (valEl) valEl.textContent = val;
+}
+
+function majProgressBar() {
+  if (totalQuestions === 0) return;
+  var sliders = document.querySelectorAll('input[type="range"]');
+  // On considère que l'utilisateur a "répondu" à partir du moment où il a touché le slider
+  // Ici on compte ceux dont la valeur diffère de 5 (valeur par défaut), ou on compte tout
+  var fill = document.getElementById('progress-fill');
+  var lbl = document.getElementById('progress-label');
+  // Compter sliders touchés : on utilise dataset
+  sliders.forEach(function(s) {
+    s.addEventListener('input', function() { s.dataset.touched = '1'; }, {once: false});
+  });
+  var touched = document.querySelectorAll('input[type="range"][data-touched="1"]').length;
+  var pct = Math.round((touched / totalQuestions) * 100);
+  fill.style.width = pct + '%';
+  lbl.textContent = pct + ' %';
+}
+
+// ─────────────────────────────────────────────
+// ENVOI
+// ─────────────────────────────────────────────
+async function envoyerBilan() {
+  if (!CONFIG) return;
+
+  // Symptômes spécifiques : num = qnum du grand questionnaire (réutilisé tel quel
+  // par le module plan-logic.js côté Synaxone NFB pour recalculer les placements).
+  var specifiques = (CONFIG.symptomesSpecifiques || []).map(function(s) {
+    var inp = document.getElementById('slider_' + s.num);
+    return {
+      num: s.num,
+      texte: s.texte,
+      categorie: s.categorie || '',
+      valeur: inp ? parseInt(inp.value, 10) : null
+    };
+  });
+
+  var generales = QUESTIONS_COMMUNES.map(function(q) {
+    var inp = document.getElementById('slider_' + q.num);
+    return { num: q.num, texte: q.texte, valeur: inp ? parseInt(inp.value, 10) : null };
+  });
+
+  var changements = document.getElementById('libre_changements');
+  var nouveau = document.getElementById('libre_nouveau');
+  var priorite = document.getElementById('libre_priorite');
+
+  var data = {
+    type: 'bilan10seances',
+    version: 1,
+    clientCode: CONFIG.clientCode || '',
+    debutSuivi: CONFIG.debutSuivi || '',
+    dateBilan: new Date().toISOString().slice(0, 10),
+    symptomesSpecifiques: specifiques,
+    questionsGenerales: generales,
+    libres: {
+      changements: changements && changements.value.trim() ? changements.value.trim() : '',
+      nouveau: nouveau && nouveau.value.trim() ? nouveau.value.trim() : '',
+      priorite: priorite && priorite.value.trim() ? priorite.value.trim() : ''
+    }
+  };
+
+  // Export JSON local — pas d'envoi serveur pour l'instant (RGPD : aucun nom/prénom,
+  // seulement le code pseudonymisé). Le fichier est à transmettre au/à la praticien(ne)
+  // (import direct dans Synaxone NFB, onglet Clients → Bilans → Importer un bilan).
+  // Chiffré de façon transparente pour le client (voir crypto-utils.js et CLAUDE.md §5).
+  var enveloppe = await chiffrerPourPraticien(data, CLE_PUBLIQUE_PRATICIEN);
+  var blob = new Blob([JSON.stringify(enveloppe)], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'synaxone-bilan-' + (data.clientCode || 'client') + '-' + data.dateBilan + '.json';
+  a.click();
+
+  _lastBilanBlob = blob;
+  _lastBilanFilename = a.download;
+
+  afficherConfirmation();
+}
+
+function afficherConfirmation() {
+  document.getElementById('submit-section').style.display = 'none';
+  document.getElementById('confirmation').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─────────────────────────────────────────────
+// PARTAGE DU FICHIER — Web Share API (mobile) avec repli sur mailto (desktop).
+// Le téléchargement local ci-dessus reste la garantie principale (aucune perte de
+// données) ; ce bouton ne fait que fluidifier la remise du fichier à la praticienne.
+// ─────────────────────────────────────────────
+var _lastBilanBlob = null;
+var _lastBilanFilename = '';
+
+function partagerBilan() {
+  if (!_lastBilanBlob) return;
+  var file = new File([_lastBilanBlob], _lastBilanFilename, { type: 'application/json' });
+
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    navigator.share({
+      files: [file],
+      title: 'Bilan Synaxone',
+      text: 'Voici mon bilan de suivi pour Synaxone.'
+    }).catch(function() {});
+    return;
+  }
+
+  var subject = encodeURIComponent('Bilan Synaxone');
+  var body = encodeURIComponent(
+    'Bonjour,\n\nVeuillez trouver ci-joint mon bilan de suivi.\n' +
+    'Le fichier a été téléchargé sur cet appareil (dossier "Téléchargements") — ' +
+    'merci de l\'ajouter en pièce jointe avant l\'envoi.\n\nCordialement'
+  );
+  window.location.href = 'mailto:synaxone.nfb@gmail.com?subject=' + subject + '&body=' + body;
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function() {
+  CONFIG = lireConfig();
+  if (!CONFIG) {
+    document.getElementById('erreur-config').style.display = 'block';
+    return;
+  }
+  construire(CONFIG);
+});
+</script>
+</body>
+</html>
