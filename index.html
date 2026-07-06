@@ -4584,6 +4584,13 @@ window.addEventListener('message', function(ev) {
     _synaxoneEmbedded = true;
     _synaxoneSource = ev.source;
     _synaxoneOrigin = ev.origin && ev.origin !== 'null' ? ev.origin : '*';
+    // Ouvert depuis Synaxone : la praticienne est déjà authentifiée dans l'app.
+    // On lève donc l'écran de code d'accès (et l'éventuel écran mot de passe
+    // praticien) qui, sinon, recouvre le formulaire et empêche de compléter.
+    var pwdScreen = document.getElementById('password-screen');
+    if (pwdScreen) pwdScreen.style.display = 'none';
+    var pratPwdScreen = document.getElementById('praticien-pwd-screen');
+    if (pratPwdScreen) pratPwdScreen.style.display = 'none';
     try { if (typeof activatePraticienMode === 'function') activatePraticienMode(); } catch (e) {}
     if (typeof d.body === 'string' && d.body.trim()) {
       try { restoreFromText(d.body); } catch (e) { console.error('restoreFromText:', e); }
