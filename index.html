@@ -1197,6 +1197,15 @@
       style="width:100%;margin-top:8px;padding:15px;background:#2d6a4f;color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer">
       📤 Envoyer le fichier maintenant
     </button>
+    <div style="margin-top:12px;padding:12px 14px;background:white;border:1px solid #d4a72c;border-radius:8px;font-size:13px;line-height:1.6">
+      Si votre messagerie demande <strong>« À : »</strong>, envoyez à cette adresse :
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <span id="adresse_praticien" style="font-weight:700;font-size:14px;user-select:all">synaxone.nfb@gmail.com</span>
+        <button type="button" onclick="copierAdresse(this)"
+          style="padding:8px 12px;background:#6b4e00;color:white;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">📋 Copier l'adresse</button>
+      </div>
+      <div style="font-size:12px;margin-top:8px;opacity:0.85">Astuce : si vous choisissez WhatsApp ou Messages, sélectionnez simplement le contact de votre praticienne — pas besoin d'adresse.</div>
+    </div>
     <div id="partage_fallback_note" hidden style="margin-top:12px;padding:12px 14px;background:white;border:1px solid #d4a72c;border-radius:8px;font-size:13px;line-height:1.7">
       <strong>Le partage direct n'est pas disponible sur cet appareil.</strong><br>
       Pas d'inquiétude : le fichier de votre questionnaire est <strong>déjà enregistré</strong> dans votre dossier <strong>« Téléchargements »</strong>. Pour l'envoyer : ouvrez votre messagerie (Gmail, Outlook…), créez un nouvel email pour votre praticienne, <strong>joignez ce fichier</strong> (icône trombone 📎) et envoyez-le.
@@ -4313,6 +4322,33 @@ async function envoyerQuestionnaire() {
 var _lastIntakeBlob = null;
 var _lastIntakeFilename = '';
 var _lastIntakeDestEmail = '';
+
+function copierAdresse(btn) {
+  var adresse = 'synaxone.nfb@gmail.com';
+  var ok = function () {
+    if (btn) {
+      var t = btn.textContent;
+      btn.textContent = '✅ Adresse copiée';
+      setTimeout(function () { btn.textContent = t; }, 2000);
+    }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(adresse).then(ok).catch(function () {
+      // repli : sélectionner le texte pour un copier manuel
+      var el = document.getElementById('adresse_praticien');
+      if (el && window.getSelection && document.createRange) {
+        var r = document.createRange(); r.selectNodeContents(el);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      }
+    });
+  } else {
+    var el = document.getElementById('adresse_praticien');
+    if (el && window.getSelection && document.createRange) {
+      var r = document.createRange(); r.selectNodeContents(el);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    }
+  }
+}
 
 function partagerIntake() {
   if (!_lastIntakeBlob) return;
