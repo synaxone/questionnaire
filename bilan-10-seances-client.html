@@ -371,9 +371,43 @@
 
   <div id="confirmation">
     <h3>Bilan enregistré ✓</h3>
-    <p>Merci pour vos réponses. Un fichier vient d'être téléchargé sur cet appareil.<br><br>À très bientôt.</p>
-    <button class="btn-share" id="btn_partager_bilan" onclick="partagerBilan()">📤 Envoyer le fichier à ma praticienne</button>
-    <p class="fallback-note">Si rien ne se passe, retrouvez le fichier téléchargé (dossier "Téléchargements") et joignez-le à un email.</p>
+    <p style="margin-bottom:18px">Merci pour vos réponses 🌿 Votre bilan est prêt ! Il ne me parviendra que si vous me l'envoyez. Deux petits gestes suffisent :</p>
+
+    <!-- Étape 1 : copier l'adresse -->
+    <div style="display:flex;gap:10px;align-items:flex-start;background:white;border:1px solid var(--green);border-radius:8px;padding:12px 14px;text-align:left">
+      <div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--green);color:white;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px">1</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px;color:var(--text)">Copiez mon adresse email</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span id="adresse_praticien" style="font-weight:700;font-size:14px;user-select:all;color:var(--text)">synaxone.nfb@gmail.com</span>
+          <button type="button" onclick="copierAdresse(this)"
+            style="padding:8px 12px;background:var(--green);color:white;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">📋 Copier l'adresse</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Étape 2 : envoyer le fichier -->
+    <div style="display:flex;gap:10px;align-items:flex-start;background:white;border:1px solid var(--green);border-radius:8px;padding:12px 14px;margin-top:10px;text-align:left">
+      <div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--green);color:white;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px">2</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;margin-bottom:8px;color:var(--text)">Envoyez-moi le fichier</div>
+        <button onclick="partagerBilan()" id="btn_partager_bilan"
+          style="width:100%;padding:15px;background:var(--green);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer">
+          📤 Envoyer le fichier maintenant
+        </button>
+        <div style="font-size:12.5px;line-height:1.6;margin-top:8px;color:var(--text-muted)">
+          Choisissez votre messagerie (Gmail, Mail…), <strong>collez mon adresse</strong> dans le champ « À », puis envoyez.<br>
+          <span style="opacity:0.85">Astuce : si vous préférez WhatsApp ou Messages, choisissez simplement mon contact — rien à coller.</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="partage_fallback_note" hidden style="margin-top:10px;padding:12px 14px;background:white;border:1px solid var(--green);border-radius:8px;font-size:13px;line-height:1.7;text-align:left;color:var(--text)">
+      <strong>Le partage direct n'est pas disponible sur cet appareil.</strong><br>
+      Pas d'inquiétude : le fichier de votre bilan est <strong>déjà enregistré</strong> dans votre dossier <strong>« Téléchargements »</strong>. Ouvrez votre messagerie, créez un email pour moi (collez mon adresse ci-dessus dans « À »), <strong>joignez ce fichier</strong> (icône trombone 📎) et envoyez-le.
+    </div>
+
+    <p style="font-size:13px;margin:16px 0 0 0">Merci beaucoup, et à très bientôt 🌿</p>
   </div>
 
 </main>
@@ -624,10 +658,14 @@ async function envoyerBilan() {
   // (import direct dans Synaxone NFB, onglet Clients → Bilans → Importer un bilan).
   // Chiffré de façon transparente pour le client (voir crypto-utils.js et CLAUDE.md §5).
   var enveloppe = await chiffrerPourPraticien(data, CLE_PUBLIQUE_PRATICIEN);
-  var blob = new Blob([JSON.stringify(enveloppe)], { type: 'application/json' });
+  // Fichier .txt (et non .json) : Chrome/Safari refusent de PARTAGER les fichiers .json
+  // via le partage natif (feuille « Partager via… »). En .txt (texte simple), le partage
+  // un-tap mobile fonctionne. Le contenu reste du JSON chiffré ; Synaxone NFB lit le
+  // contenu (JSON.parse) quelle que soit l'extension, et accepte .txt et .json.
+  var blob = new Blob([JSON.stringify(enveloppe)], { type: 'text/plain' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'synaxone-bilan-' + (data.clientCode || 'client') + '-' + data.dateBilan + '.json';
+  a.download = 'synaxone-bilan-' + (data.clientCode || 'client') + '-' + data.dateBilan + '.txt';
   a.click();
 
   _lastBilanBlob = blob;
@@ -643,33 +681,67 @@ function afficherConfirmation() {
 }
 
 // ─────────────────────────────────────────────
-// PARTAGE DU FICHIER — Web Share API (mobile) avec repli sur mailto (desktop).
+// PARTAGE DU FICHIER — Web Share API (mobile) avec repli explicatif (desktop).
 // Le téléchargement local ci-dessus reste la garantie principale (aucune perte de
 // données) ; ce bouton ne fait que fluidifier la remise du fichier à la praticienne.
 // ─────────────────────────────────────────────
 var _lastBilanBlob = null;
 var _lastBilanFilename = '';
 
+function copierAdresse(btn) {
+  var adresse = 'synaxone.nfb@gmail.com';
+  var ok = function () {
+    if (btn) {
+      var t = btn.textContent;
+      btn.textContent = '✅ Adresse copiée';
+      setTimeout(function () { btn.textContent = t; }, 2000);
+    }
+  };
+  var selectionner = function () {
+    var el = document.getElementById('adresse_praticien');
+    if (el && window.getSelection && document.createRange) {
+      var r = document.createRange(); r.selectNodeContents(el);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(adresse).then(ok).catch(selectionner);
+  } else {
+    selectionner();
+  }
+}
+
 function partagerBilan() {
   if (!_lastBilanBlob) return;
-  var file = new File([_lastBilanBlob], _lastBilanFilename, { type: 'application/json' });
 
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    navigator.share({
-      files: [file],
-      title: 'Bilan Synaxone',
-      text: 'Voici mon bilan de suivi pour Synaxone.'
-    }).catch(function() {});
-    return;
-  }
+  // Affiche la consigne « le fichier est déjà téléchargé, joignez-le à un email ».
+  // On NE re-télécharge PAS (le fichier a déjà été téléchargé à l'envoi du bilan).
+  var montrerConsigne = function () {
+    var note = document.getElementById('partage_fallback_note');
+    if (note) {
+      note.hidden = false;
+      note.removeAttribute('hidden');
+      note.style.display = 'block';
+      try { note.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+    }
+  };
 
-  var subject = encodeURIComponent('Bilan Synaxone');
-  var body = encodeURIComponent(
-    'Bonjour,\n\nVeuillez trouver ci-joint mon bilan de suivi.\n' +
-    'Le fichier a été téléchargé sur cet appareil (dossier "Téléchargements") — ' +
-    'merci de l\'ajouter en pièce jointe avant l\'envoi.\n\nCordialement'
-  );
-  window.location.href = 'mailto:synaxone.nfb@gmail.com?subject=' + subject + '&body=' + body;
+  // Sur mobile : on tente la feuille de partage native (envoi direct avec le fichier
+  // en pièce jointe). Si elle ne s'ouvre pas / échoue / est annulée, on explique quoi faire.
+  try {
+    var file = new File([_lastBilanBlob], _lastBilanFilename, { type: 'text/plain' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({
+        files: [file],
+        title: 'Bilan Synaxone',
+        text: 'Voici mon bilan de suivi pour Synaxone.'
+      }).catch(function () { montrerConsigne(); });
+      return;
+    }
+  } catch (e) {}
+
+  // Pas de partage natif disponible : on explique directement.
+  montrerConsigne();
 }
 
 // ─────────────────────────────────────────────
