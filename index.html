@@ -650,7 +650,11 @@
   }
 
   .question-card {
-    animation: fadeUp 0.3s ease both;
+    /* fill-mode "backwards" (et non "both") : l'effet d'apparition joue avant le
+       délai, mais AUCUN transform ne subsiste après l'animation → le texte n'est
+       plus laissé sur une couche GPU floue (bug de netteté sous Windows + mise à
+       l'échelle de l'affichage à 125/150 %). */
+    animation: fadeUp 0.3s ease backwards;
   }
 
   .question-card:nth-child(1) { animation-delay: 0.05s; }
