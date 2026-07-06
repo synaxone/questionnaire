@@ -1195,40 +1195,37 @@
     </p>
 
     <!-- Étape 1 : copier l'adresse -->
-    <div style="display:flex;gap:10px;align-items:flex-start;background:white;border:1px solid #d4a72c;border-radius:8px;padding:12px 14px">
-      <div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#6b4e00;color:white;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px">1</div>
+    <div style="display:flex;gap:12px;align-items:flex-start;background:white;border:1px solid #d4a72c;border-radius:10px;padding:16px 16px">
+      <div style="flex-shrink:0;width:30px;height:30px;border-radius:50%;background:#6b4e00;color:white;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:16px">1</div>
       <div style="flex:1">
-        <div style="font-size:14px;font-weight:600;margin-bottom:6px">Copiez mon adresse email</div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span id="adresse_praticien" style="font-weight:700;font-size:14px;user-select:all">synaxone.nfb@gmail.com</span>
-          <button type="button" onclick="copierAdresse(this)"
-            style="padding:8px 12px;background:#6b4e00;color:white;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">📋 Copier l'adresse</button>
-        </div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:10px">Copiez mon adresse email</div>
+        <div style="font-size:18px;font-weight:700;user-select:all;background:#fdf6ea;border:1px solid #e8c49a;border-radius:8px;padding:10px 12px;text-align:center;letter-spacing:0.01em" id="adresse_praticien">synaxone.nfb@gmail.com</div>
+        <button type="button" onclick="copierAdresse(this)"
+          style="width:100%;margin-top:10px;padding:14px;background:#6b4e00;color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;cursor:pointer">📋 Copier l'adresse</button>
       </div>
     </div>
 
-    <!-- Étape 2 : envoyer le fichier -->
-    <div style="display:flex;gap:10px;align-items:flex-start;background:white;border:1px solid #d4a72c;border-radius:8px;padding:12px 14px;margin-top:10px">
-      <div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#6b4e00;color:white;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px">2</div>
+    <!-- Étape 2 : envoyer le fichier par email -->
+    <div style="display:flex;gap:12px;align-items:flex-start;background:white;border:1px solid #d4a72c;border-radius:10px;padding:16px 16px;margin-top:12px">
+      <div style="flex-shrink:0;width:30px;height:30px;border-radius:50%;background:#6b4e00;color:white;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:16px">2</div>
       <div style="flex:1">
-        <div style="font-size:14px;font-weight:600;margin-bottom:8px">Envoyez-moi le fichier</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:10px">Envoyez-moi le fichier par email</div>
         <button onclick="partagerIntake()" id="btn_partager_intake"
-          style="width:100%;padding:15px;background:#2d6a4f;color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer">
-          📤 Envoyer le fichier maintenant
+          style="width:100%;padding:18px;background:#2d6a4f;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:17px;font-weight:700;cursor:pointer">
+          📧 M'envoyer par email
         </button>
-        <div style="font-size:12.5px;line-height:1.6;margin-top:8px">
-          Choisissez votre messagerie (Gmail, Mail…), <strong>collez mon adresse</strong> dans le champ « À », puis envoyez.<br>
-          <span style="opacity:0.85">Astuce : si vous préférez WhatsApp ou Messages, choisissez simplement mon contact — rien à coller.</span>
+        <div style="font-size:14px;line-height:1.7;margin-top:12px;color:#6b4e00">
+          Votre messagerie va s'ouvrir. <strong>Collez mon adresse</strong> dans le champ « À », <strong>joignez le fichier</strong> déjà téléchargé (icône trombone 📎), puis envoyez.
         </div>
       </div>
     </div>
 
-    <div id="partage_fallback_note" hidden style="margin-top:10px;padding:12px 14px;background:white;border:1px solid #d4a72c;border-radius:8px;font-size:13px;line-height:1.7">
-      <strong>Le partage direct n'est pas disponible sur cet appareil.</strong><br>
-      Pas d'inquiétude : le fichier de votre questionnaire est <strong>déjà enregistré</strong> dans votre dossier <strong>« Téléchargements »</strong>. Ouvrez votre messagerie, créez un email pour moi (collez mon adresse ci-dessus dans « À »), <strong>joignez ce fichier</strong> (icône trombone 📎) et envoyez-le.
+    <div id="partage_fallback_note" hidden style="margin-top:12px;padding:14px 16px;background:white;border:1px solid #d4a72c;border-radius:10px;font-size:14px;line-height:1.7;color:#6b4e00">
+      <strong>Votre messagerie ne s'est pas ouverte ?</strong> Pas d'inquiétude — le fichier de votre questionnaire est <strong>déjà enregistré</strong> dans votre dossier <strong>« Téléchargements »</strong>.<br>
+      Ouvrez vous-même votre boîte mail (Gmail, Outlook…), écrivez-moi à l'adresse ci-dessus (bouton « Copier l'adresse »), <strong>joignez ce fichier</strong> (icône trombone 📎) et envoyez-le.
     </div>
 
-    <p style="font-size:13px;text-align:center;margin:14px 0 0 0">Merci beaucoup, et à très bientôt 🌿</p>
+    <p style="font-size:14px;text-align:center;margin:16px 0 0 0">Merci beaucoup, et à très bientôt 🌿</p>
   </div>
 
   <div style="text-align:center;padding:32px 16px 16px">
@@ -4118,40 +4115,11 @@ function collectStructuredAnswers() {
 }
 
 
-async function envoyerQuestionnaire() {
-  // Adresse destinataire : pré-remplie et masquée (le client ne la saisit plus).
-  // Repli en dur au cas où le champ serait vide, pour ne jamais bloquer l'envoi.
-  var emailEl = document.getElementById('praticien_email');
-  var email = (emailEl ? emailEl.value.trim() : '') || 'synaxone.nfb@gmail.com';
-
-  var consentEl = document.getElementById('consent_rgpd');
-  if (consentEl && !consentEl.checked) {
-    consentEl.parentElement.style.outline = '2px solid #c0392b';
-    consentEl.parentElement.style.borderRadius = '8px';
-    consentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return;
-  }
-
-  // Show all sections AND sub-divs to access all values
-  var allSections = document.querySelectorAll('.section');
-  var hiddenSections = [];
-  allSections.forEach(function(s) {
-    if (s.style.display === 'none') { hiddenSections.push(s); s.style.display = 'block'; }
-  });
-  var hiddenSubs = showAllSubDivs();
-
-  var btn = document.querySelector('[onclick="envoyerQuestionnaire()"]');
-  if (btn) { btn.textContent = '⏳ Préparation du fichier…'; btn.disabled = true; }
-
-  // Sécurité : si l'envoi n'a abouti (ni succès ni erreur) après un long délai,
-  // on réactive le bouton. Le traitement côté Apps Script (génération du plan)
-  // peut prendre plusieurs dizaines de secondes ; un délai trop court (ex. 5s)
-  // réactivait le bouton trop tôt et permettait un double-clic → 2 plans identiques.
-  setTimeout(function() {
-    var b = document.querySelector('[onclick="envoyerQuestionnaire()"]');
-    if (b && b.disabled && !_envoiValide) { b.disabled = false; b.textContent = '✅ Terminer et télécharger mon questionnaire'; }
-  }, 90000);
-
+// Construit le corps texte des réponses (format identique à l’export). Extrait de
+// envoyerQuestionnaire() pour être réutilisé par le pont Synaxone (postMessage).
+// Prérequis : toutes les sections/sous-sections doivent être visibles avant l’appel
+// (voir avecFormulaireVisible()).
+function construireBodyReponses() {
   // Build simple message
   var nom = '';
   var pnom = document.getElementById('p_nom'); if (pnom) nom = pnom.value;
@@ -4287,6 +4255,44 @@ async function envoyerQuestionnaire() {
     var lbl = cb.parentElement ? cb.parentElement.textContent.trim() : '';
     if (qt && lbl) msg += qt.textContent + ' [praticien] : ' + lbl + '\n';
   });
+  return msg;
+}
+
+async function envoyerQuestionnaire() {
+  // Adresse destinataire : pré-remplie et masquée (le client ne la saisit plus).
+  // Repli en dur au cas où le champ serait vide, pour ne jamais bloquer l'envoi.
+  var emailEl = document.getElementById('praticien_email');
+  var email = (emailEl ? emailEl.value.trim() : '') || 'synaxone.nfb@gmail.com';
+
+  var consentEl = document.getElementById('consent_rgpd');
+  if (consentEl && !consentEl.checked) {
+    consentEl.parentElement.style.outline = '2px solid #c0392b';
+    consentEl.parentElement.style.borderRadius = '8px';
+    consentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  // Show all sections AND sub-divs to access all values
+  var allSections = document.querySelectorAll('.section');
+  var hiddenSections = [];
+  allSections.forEach(function(s) {
+    if (s.style.display === 'none') { hiddenSections.push(s); s.style.display = 'block'; }
+  });
+  var hiddenSubs = showAllSubDivs();
+
+  var btn = document.querySelector('[onclick="envoyerQuestionnaire()"]');
+  if (btn) { btn.textContent = '⏳ Préparation du fichier…'; btn.disabled = true; }
+
+  // Sécurité : si l'envoi n'a abouti (ni succès ni erreur) après un long délai,
+  // on réactive le bouton. Le traitement côté Apps Script (génération du plan)
+  // peut prendre plusieurs dizaines de secondes ; un délai trop court (ex. 5s)
+  // réactivait le bouton trop tôt et permettait un double-clic → 2 plans identiques.
+  setTimeout(function() {
+    var b = document.querySelector('[onclick="envoyerQuestionnaire()"]');
+    if (b && b.disabled && !_envoiValide) { b.disabled = false; b.textContent = '✅ Terminer et télécharger mon questionnaire'; }
+  }, 90000);
+
+  var msg = construireBodyReponses();
 
   // Note RGPD : un "lien praticien" encodant l'intégralité des réponses en base64
   // dans l'URL était généré ici mais n'était lu nulle part au chargement de la page
@@ -4371,6 +4377,7 @@ function copierAdresse(btn) {
 
 function partagerIntake() {
   if (!_lastIntakeBlob) return;
+  var email = _lastIntakeDestEmail || 'synaxone.nfb@gmail.com';
 
   // Affiche la consigne « le fichier est déjà téléchargé, joignez-le à un email ».
   // On NE re-télécharge PAS (le fichier a déjà été téléchargé au clic « Terminer »).
@@ -4384,22 +4391,37 @@ function partagerIntake() {
     }
   };
 
-  // Sur mobile : on tente la feuille de partage native (envoi direct avec le fichier
-  // en pièce jointe). Si elle ne s'ouvre pas / échoue / est annulée, on explique quoi faire.
-  try {
-    var file = new File([_lastIntakeBlob], _lastIntakeFilename, { type: 'text/plain' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({
-        files: [file],
-        title: 'Questionnaire Synaxone',
-        text: 'Voici mon questionnaire rempli pour Synaxone.'
-      }).catch(function () { montrerConsigne(); });
-      return;
-    }
-  } catch (e) {}
+  // Le canal est TOUJOURS l'email. Sur MOBILE (téléphone/tablette), la feuille de
+  // partage native permet de joindre le fichier en un geste → on la privilégie.
+  // Sur ORDINATEUR, cette feuille (fenêtre « Partager » de Windows) est confuse et
+  // ne gère pas bien l'email : on ouvre directement la messagerie (mailto), le
+  // fichier étant déjà téléchargé, à joindre.
+  var estMobile = /Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(navigator.userAgent || '');
 
-  // Pas de partage natif disponible : on explique directement.
+  if (estMobile) {
+    try {
+      var file = new File([_lastIntakeBlob], _lastIntakeFilename, { type: 'text/plain' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+          files: [file],
+          title: 'Questionnaire Synaxone',
+          text: 'Voici mon questionnaire rempli pour Synaxone.'
+        }).catch(function () { montrerConsigne(); });
+        return;
+      }
+    } catch (e) {}
+    montrerConsigne();
+    return;
+  }
+
+  // Ordinateur : ouvrir la messagerie pré-adressée. On affiche aussi la consigne
+  // (au cas où aucune messagerie par défaut n'est configurée → rien ne s'ouvre).
   montrerConsigne();
+  var subject = encodeURIComponent('Mon questionnaire Synaxone');
+  var corps = "Bonjour,\n\nVoici mon questionnaire rempli.\n\n"
+    + "IMPORTANT : le fichier a été téléchargé sur mon ordinateur (dossier « Téléchargements »). "
+    + "Merci de vérifier qu'il est bien joint à cet email avant l'envoi (icône trombone).\n\nBien à vous";
+  try { window.location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + encodeURIComponent(corps); } catch (e) {}
 }
 
 
@@ -4467,6 +4489,99 @@ function restoreSubDivs(hidden) {
     }
   });
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PONT SYNAXONE — permet à l'app Synaxone NFB d'ouvrir ce questionnaire (en
+// iframe locale) pré-rempli avec les réponses déjà envoyées par un client, pour
+// que la praticienne le COMPLÈTE avec le client en séance, puis renvoie les
+// réponses modifiées à Synaxone (qui recalcule le plan). Voir CLAUDE.md §4.
+//
+// Sans danger pour l'usage client en ligne : le listener n'agit que sur un
+// message explicitement estampillé 'synaxone-app', et ne fait que pré-remplir un
+// formulaire (aucune donnée sensible n'est exposée par ce mécanisme). Le renvoi
+// (postMessage 'save') ne part que vers la fenêtre qui a envoyé le 'load'.
+// ═══════════════════════════════════════════════════════════════════════════
+var _synaxoneEmbedded = false;
+var _synaxoneSource = null;
+var _synaxoneOrigin = '*';
+
+// Rend tout le formulaire visible (sections + sous-divs), exécute fn, puis restaure.
+function avecFormulaireVisible(fn) {
+  var allSections = document.querySelectorAll('.section');
+  var hiddenSections = [];
+  allSections.forEach(function(s) {
+    if (s.style.display === 'none') { hiddenSections.push(s); s.style.display = 'block'; }
+  });
+  var hiddenSubs = showAllSubDivs();
+  try {
+    return fn();
+  } finally {
+    restoreSubDivs(hiddenSubs);
+    hiddenSections.forEach(function(s) { s.style.display = 'none'; });
+  }
+}
+
+function renvoyerASynaxone() {
+  if (!_synaxoneSource) return;
+  var body = avecFormulaireVisible(construireBodyReponses);
+  var pcode = document.getElementById('p_code');
+  _synaxoneSource.postMessage({
+    source: 'synaxone-questionnaire',
+    type: 'save',
+    body: body,
+    clientCode: (pcode && pcode.value) ? pcode.value.trim() : ''
+  }, _synaxoneOrigin);
+  var b = document.getElementById('synaxone-return-btn');
+  if (b) { b.textContent = '✅ Renvoyé à Synaxone'; b.disabled = true; }
+}
+
+function injecterBarreSynaxone(needsPaste) {
+  if (document.getElementById('synaxone-return-bar')) return;
+  var bar = document.createElement('div');
+  bar.id = 'synaxone-return-bar';
+  bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:10000;background:var(--practitioner,#8B4513);' +
+    'box-shadow:0 -2px 12px rgba(0,0,0,0.2);padding:10px 16px;display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap';
+  var texteInfo = needsPaste
+    ? 'Ancien questionnaire — collez le texte de l’email dans l’encadré ✦ en haut, puis complétez'
+    : 'Mode praticien — questionnaire ouvert depuis Synaxone';
+  bar.innerHTML =
+    '<span style="color:#fff;font-size:13px;font-weight:600">' + texteInfo + '</span>' +
+    '<button id="synaxone-return-btn" onclick="renvoyerASynaxone()" ' +
+    'style="padding:10px 18px;background:#fff;color:var(--practitioner,#8B4513);border:none;border-radius:8px;' +
+    'font-family:inherit;font-size:14px;font-weight:700;cursor:pointer">✅ Terminer et renvoyer à Synaxone</button>';
+  document.body.appendChild(bar);
+  document.body.style.paddingBottom = '72px';
+}
+
+window.addEventListener('message', function(ev) {
+  var d = ev.data;
+  if (!d || d.source !== 'synaxone-app') return;
+  if (d.type === 'load') {
+    _synaxoneEmbedded = true;
+    _synaxoneSource = ev.source;
+    _synaxoneOrigin = ev.origin && ev.origin !== 'null' ? ev.origin : '*';
+    try { if (typeof activatePraticienMode === 'function') activatePraticienMode(); } catch (e) {}
+    if (typeof d.body === 'string' && d.body.trim()) {
+      try { restoreFromText(d.body); } catch (e) { console.error('restoreFromText:', e); }
+    }
+    injecterBarreSynaxone(!!d.needsPaste);
+    if (d.needsPaste) {
+      // Ancien questionnaire sans texte : mettre en évidence la case où coller
+      // le texte de l'email (déjà visible en mode praticien).
+      var zone = document.getElementById('reload_textarea');
+      if (zone) {
+        zone.style.outline = '3px solid var(--practitioner)';
+        zone.style.background = '#fff8e6';
+        var st = document.getElementById('reload_status');
+        if (st) st.textContent = '➡ Collez ici le texte de l’email « Questionnaire Neurofeedback reçu » de ce client, puis cliquez « Charger ces réponses ».';
+        try { zone.scrollIntoView({ behavior: 'smooth', block: 'center' }); zone.focus(); } catch (e) {}
+      }
+    } else {
+      try { window.scrollTo(0, 0); } catch (e) {}
+    }
+    _synaxoneSource.postMessage({ source: 'synaxone-questionnaire', type: 'ready' }, _synaxoneOrigin);
+  }
+});
 
 function imprimerQuestionnaire() {
   sauvegarderBrouillon(); // protection si le navigateur mobile vide la page
