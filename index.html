@@ -650,11 +650,10 @@
   }
 
   .question-card {
-    /* fill-mode "backwards" (et non "both") : l'effet d'apparition joue avant le
-       délai, mais AUCUN transform ne subsiste après l'animation → le texte n'est
-       plus laissé sur une couche GPU floue (bug de netteté sous Windows + mise à
-       l'échelle de l'affichage à 125/150 %). */
-    animation: fadeUp 0.3s ease backwards;
+    /* Animation d'apparition RETIRÉE volontairement : sous Windows (Chrome/Edge),
+       une carte animée reste posée sur une couche GPU où le texte perd le rendu
+       net « ClearType » (sous-pixel) → texte flou, surtout sur les encadrés
+       colorés à l'intérieur. Sans animation, le texte reste net partout. */
   }
 
   /* Sur ordinateur, les étapes d'envoi par email sont affichées d'emblée (pas
