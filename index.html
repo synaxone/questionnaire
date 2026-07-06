@@ -1382,7 +1382,7 @@ function restoreFromText(text) {
       if (tag === 'commentaire') {
         var com = document.getElementById('com_' + qid);
         if (com) {
-          com.value = valStr;
+          com.value = valStr.replace(/ ⏎ /g, '\n');
           com.style.height = 'auto';
           com.style.height = com.scrollHeight + 'px';
           count++;
@@ -1492,6 +1492,16 @@ function restoreFromText(text) {
     if (colonIdx2 === -1) return;
     var label2 = line.substring(0, colonIdx2).trim();
     var value2 = line.substring(colonIdx2 + 3).trim();
+
+    // Filet de sécurité : « Complément[<id>] : valeur » → recharge par identifiant
+    // (zones de texte captées par le filet de construireBodyReponses).
+    var mComp = label2.match(/^Complément\[(.+)\]$/);
+    if (mComp) {
+      var elComp = document.getElementById(mComp[1]);
+      if (elComp) { elComp.value = value2.replace(/ ⏎ /g, '\n'); count++; }
+      return;
+    }
+
     var fieldId = headerMap[label2];
     if (fieldId) {
       var el = document.getElementById(fieldId);
@@ -2144,7 +2154,7 @@ function buildQuestionCard(q) {
             <label>Commentaires</label>
             <textarea class="field-input" placeholder="${niPh}" id="com_${id}" rows="2" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
           </div>
-          ${q.noDate ? '' : '<div class="response-group" style="max-width:260px"><label>Depuis quand ?</label><input class="field-input" type="text" placeholder="ex : 6 mois…" id="dep_${id}"></div>'}
+          ${q.noDate ? '' : `<div class="response-group" style="max-width:260px"><label>Depuis quand ?</label><input class="field-input" type="text" placeholder="ex : 6 mois…" id="dep_${id}"></div>`}
         </div>
       </div>
       ${(q.pContexts && q.pContexts.length) ? `<div class="practitioner-only" style="margin:0 16px 10px;padding:8px;background:var(--practitioner-light);border-radius:8px;border-left:3px solid var(--practitioner)">
@@ -4191,6 +4201,7 @@ function construireBodyReponses() {
 
   // Add ALL inputs with values (range, number, text, select, checkbox, yesno)
   var processedCards = new Set();
+  var extras = []; // filet de sécurité : zones de texte non captées autrement (voir plus bas)
   document.querySelectorAll('.question-card').forEach(function(card) {
     var qt = card.querySelector('.q-num');
     var ql = card.querySelector('.q-text');
@@ -4270,11 +4281,33 @@ function construireBodyReponses() {
     if (cardLines.length > 0) {
       msg += cardLines.join('\n') + '\n';
     }
-    // Commentaire / réponse libre (toujours vérifié, même sans autre réponse — Q1, Q58, Q58b, Q112…)
-    var comment = card.querySelector('textarea.field-input');
-    if (comment && comment.value) msg += qid + ' [commentaire] : ' + comment.value + '\n';
-    var depEl = card.querySelector('input[id^=dep_]');
+    // Commentaire principal (id conventionnel com_<qid>) — sélection par id fiable.
+    // L'ancien querySelector('textarea.field-input') ratait les cartes où la case
+    // commentaire n'était pas la 1re zone de texte (Q28, Q150, Q164…).
+    var qidNum = qid.replace('Q', '');
+    var commentEl = document.getElementById('com_' + qidNum);
+    if (commentEl && commentEl.value) msg += qid + ' [commentaire] : ' + commentEl.value.replace(/\r?\n/g, ' ⏎ ') + '\n';
+    var depEl = document.getElementById('dep_' + qidNum);
     if (depEl && depEl.value) msg += qid + ' [depuis] : ' + depEl.value + '\n';
+
+    // FILET DE SÉCURITÉ — capture TOUTE zone texte/nombre de la carte par son
+    // identifiant (commentaires, "depuis" à suffixe lettré 58b/31b, champs
+    // spéciaux : réveils, addictions addqty_/adddep_, texte médicament,
+    // commentaires par choix com8_8_x…). Les lignes sémantiques ci-dessus
+    // restent pour le calcul du plan ; ce filet garantit un RECHARGEMENT fidèle
+    // à 100 % par id, indépendamment du format. Aucune saisie ne peut être perdue.
+    card.querySelectorAll('input[type=text], input[type=number], textarea').forEach(function(el) {
+      if (!el.id) return;
+      if (!el.value || !String(el.value).trim()) return;
+      if (/search|recherche/i.test(el.id)) return;
+      extras.push({ id: el.id, val: el.value });
+    });
+  });
+
+  // Émission du filet de sécurité — hors format "Q…" pour ne pas perturber le
+  // parseur (plan-logic.js ignore ces lignes ; restoreFromText les recharge par id).
+  extras.forEach(function(ex) {
+    msg += 'Complément[' + ex.id + '] : ' + String(ex.val).replace(/\r?\n/g, ' ⏎ ') + '\n';
   });
 
   // Add praticien notes from annotations
@@ -4793,7 +4826,7 @@ function buildPrintHtml(vierge) {
   // ── Section infos personnelles ──
   body += '<div class="st">Informations personnelles</div>';
   body += '<div class="ct">Identit&eacute;</div>';
-  var id_fields = [['Nom',g('p_nom')],['Pr&eacute;nom',g('p_prenom')],['Date de naissance',g('p_ddn')],['&Acirc;ge',g('p_age')],['T&eacute;l&eacute;phone',g('p_tel')],['Email',g('p_email')],['Ville',g('p_ville')],['Enceinte',g('p_enceinte')],['Main dominante',g('p_main')],['Comment connu le NFB',g('p_source')]];
+  var id_fields = [['Nom',g('p_nom')],['Pr&eacute;nom',g('p_prenom')],['Code',g('p_code')],['Date de naissance',g('p_ddn')],['&Acirc;ge',g('p_age')],['T&eacute;l&eacute;phone',g('p_tel')],['Email',g('p_email')],['Ville',g('p_ville')],['Enceinte',g('p_enceinte')],['Main dominante',g('p_main')],['Comment connu le NFB',g('p_source')]];
   id_fields.forEach(function(f){ if(f[1]) body += '<div class="f"><span class="fl">'+f[0]+' :</span><span class="fv">'+f[1]+'</span></div>'; });
 
   body += '<div class="ct">Raison de la venue</div>';
@@ -4885,9 +4918,12 @@ function buildPrintHtml(vierge) {
       card.querySelectorAll('select').forEach(function(sel) {
         if (sel.value) lines.push(sel.value);
       });
-      var comment = null;
+      // Toutes les zones de texte libres non déjà utilisées (et pas seulement la
+      // première) : évite d'omettre un 2e champ texte d'une même carte à l'impression
+      // (ex. texte médicament medoc_text_106 en plus du commentaire com_106).
+      var commentsList = [];
       card.querySelectorAll('textarea.field-input').forEach(function(ta) {
-        if (!comment && !isConsumed(ta)) comment = ta;
+        if (!isConsumed(ta) && ta.value) commentsList.push(ta.value);
       });
       var dep = card.querySelector('input[id^=dep_]');
       var annot = card.querySelector('.practitioner-annotation textarea');
@@ -4895,11 +4931,11 @@ function buildPrintHtml(vierge) {
       card.querySelectorAll('input[id^=pctx_]').forEach(function(cb) {
         if (cb.checked) pctxChecked.push(cb);
       });
-      if (lines.length === 0 && !(comment && comment.value) && !(dep && dep.value) && !(annot && annot.value) && pctxChecked.length === 0) return;
+      if (lines.length === 0 && commentsList.length === 0 && !(dep && dep.value) && !(annot && annot.value) && pctxChecked.length === 0) return;
       secContent += '<div class="q"><div class="qn">' + qnum.textContent + '</div>';
       if (qtext) secContent += '<div class="qt">' + qtext.textContent.trim() + '</div>';
       if (lines.length > 0) secContent += '<div class="qv">' + lines.join(' | ') + '</div>';
-      if (comment && comment.value) secContent += '<div class="qc">' + comment.value + '</div>';
+      commentsList.forEach(function(cv) { secContent += '<div class="qc">' + cv + '</div>'; });
       if (dep && dep.value) secContent += '<div class="qc">Depuis: ' + dep.value + '</div>';
       if (annot && annot.value) secContent += '<div class="qp">' + annot.value + '</div>';
       pctxChecked.forEach(function(cb) {
