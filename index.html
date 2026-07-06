@@ -1346,7 +1346,13 @@ function restoreFromText(text) {
   var headerMap = {
     'Nom': 'p_nom', 'Prénom': 'p_prenom', 'Code': 'p_code',
     'Date naissance': 'p_ddn', 'Email': 'p_email', 'Téléphone': 'p_tel',
-    'Ville': 'p_ville', 'Main': 'p_main', 'Raison': 'p_raison'
+    'Ville': 'p_ville', 'Main': 'p_main', 'Raison': 'p_raison',
+    // Contexte de vie + relations familiales (voir construireBodyReponses)
+    'Enceinte': 'p_enceinte', 'Source': 'p_source',
+    'Profession': 'p_profession', 'Travail': 'p_travail',
+    'Situation familiale': 'p_situation', "Nombre d'enfants": 'p_enfants',
+    'Relation père': 'p_pere', 'Relation mère': 'p_mere', 'Fratrie': 'p_fratrie',
+    'Relation enfants': 'p_rel_enfants', 'Loisirs': 'p_loisirs', 'Événements': 'p_evenements'
     // 'Age' volontairement omis : recalculé via calcAgeSel() à partir de la date de naissance
   };
 
@@ -1490,7 +1496,9 @@ function restoreFromText(text) {
     if (fieldId) {
       var el = document.getElementById(fieldId);
       if (el) {
-        el.value = value2;
+        // Redécode les retours à la ligne encodés « ⏎ » (zones de texte du
+        // contexte de vie / relations). Sans effet sur les champs mono-ligne.
+        el.value = value2.replace(/ ⏎ /g, '\n');
         count++;
       }
     }
@@ -4157,6 +4165,28 @@ function construireBodyReponses() {
   msg += 'Ville : ' + (pville2 ? pville2.value : '') + '\n';
   msg += 'Main : ' + (pmain2 ? pmain2.value : '') + '\n';
   msg += 'Raison : ' + (praison2 ? praison2.value : '') + '\n';
+
+  // Contexte de vie + relations familiales : ces champs étaient collectés mais
+  // JAMAIS transmis (manque pré-existant du circuit). Ajoutés ici pour être
+  // exportés, parsés (plan-logic.js patientInfo) et rechargeables (restoreFromText).
+  // Les retours à la ligne des zones de texte sont encodés « ⏎ » pour tenir sur
+  // une seule ligne (format ligne-par-ligne du parseur), redécodés au rechargement.
+  function _champ1(id) {
+    var e = document.getElementById(id);
+    return e ? String(e.value || '').replace(/\r?\n/g, ' ⏎ ').trim() : '';
+  }
+  msg += 'Enceinte : ' + _champ1('p_enceinte') + '\n';
+  msg += 'Source : ' + _champ1('p_source') + '\n';
+  msg += 'Profession : ' + _champ1('p_profession') + '\n';
+  msg += 'Travail : ' + _champ1('p_travail') + '\n';
+  msg += 'Situation familiale : ' + _champ1('p_situation') + '\n';
+  msg += "Nombre d'enfants : " + _champ1('p_enfants') + '\n';
+  msg += 'Relation père : ' + _champ1('p_pere') + '\n';
+  msg += 'Relation mère : ' + _champ1('p_mere') + '\n';
+  msg += 'Fratrie : ' + _champ1('p_fratrie') + '\n';
+  msg += 'Relation enfants : ' + _champ1('p_rel_enfants') + '\n';
+  msg += 'Loisirs : ' + _champ1('p_loisirs') + '\n';
+  msg += 'Événements : ' + _champ1('p_evenements') + '\n';
   msg += '\n';
 
   // Add ALL inputs with values (range, number, text, select, checkbox, yesno)
