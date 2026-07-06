@@ -4312,36 +4312,45 @@ var _lastIntakeDestEmail = '';
 
 function partagerIntake() {
   if (!_lastIntakeBlob) return;
-  var file = new File([_lastIntakeBlob], _lastIntakeFilename, { type: 'application/json' });
 
-  // Sur mobile : feuille de partage native (envoi direct par email/messagerie avec
-  // le fichier en pièce jointe). C'est le cas d'usage principal (clients au téléphone).
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    navigator.share({
-      files: [file],
-      title: 'Questionnaire Synaxone',
-      text: 'Voici mon questionnaire rempli pour Synaxone.'
-    }).catch(function() {});
-    return;
-  }
+  // Repli universel : re-télécharge le fichier (pour être sûr qu'il est disponible)
+  // et affiche une consigne claire. Utilisé quand le partage natif est absent OU échoue.
+  // Le bouton fait donc TOUJOURS quelque chose de visible.
+  var repli = function () {
+    try {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(_lastIntakeBlob);
+      a.download = _lastIntakeFilename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (e) {}
+    var note = document.getElementById('partage_fallback_note');
+    if (note) {
+      note.removeAttribute('hidden');
+      note.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
 
-  // Repli ordinateur (pas de partage natif) : un mailto ne peut PAS joindre le fichier
-  // et n'ouvre souvent rien (webmail sans client de messagerie configuré). On re-télécharge
-  // donc le fichier pour être sûr qu'il est disponible, et on affiche une consigne claire —
-  // le bouton fait toujours quelque chose de visible.
+  // Sur mobile : feuille de partage native (envoi direct avec le fichier en pièce jointe).
+  // C'est le cas d'usage principal (clients au téléphone). Mais elle peut échouer (navigateur
+  // intégré à une appli, type de fichier refusé…) : dans ce cas on bascule sur le repli.
   try {
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(_lastIntakeBlob);
-    a.download = _lastIntakeFilename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    var file = new File([_lastIntakeBlob], _lastIntakeFilename, { type: 'application/json' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({
+        files: [file],
+        title: 'Questionnaire Synaxone',
+        text: 'Voici mon questionnaire rempli pour Synaxone.'
+      }).catch(function (err) {
+        // L'utilisateur a annulé, ou le partage a échoué : on montre la consigne de repli.
+        if (!err || err.name !== 'AbortError') repli();
+      });
+      return;
+    }
   } catch (e) {}
-  var note = document.getElementById('partage_fallback_note');
-  if (note) {
-    note.removeAttribute('hidden');
-    note.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
+
+  repli();
 }
 
 
