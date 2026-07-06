@@ -1370,13 +1370,21 @@ function restoreFromText(text) {
       if (!/^\d+$/.test(qid)) return;
 
       var rest = line.substring(spaceIdx + 1).replace(/^[–—-] /, '');
-      var colonIdx = rest.lastIndexOf(' : ');
-      if (colonIdx === -1) return;
-      var rawLabel = rest.substring(0, colonIdx).trim();
-      var valStr = rest.substring(colonIdx + 3).trim();
-
-      var tagMatch = rawLabel.match(/\[(.*?)\]\s*$/);
-      var tag = tagMatch ? tagMatch[1].trim() : null;
+      // Séparateur label/valeur : couper au " : " qui suit le tag [..] (la valeur
+      // peut contenir un " : ", ex. case "Hypersensible au toucher (ex : …)").
+      var rawLabel, valStr, tag;
+      var mTag2 = rest.match(/\[([^\]]*)\]\s*:\s/);
+      if (mTag2) {
+        tag = mTag2[1].trim();
+        rawLabel = rest.substring(0, mTag2.index + mTag2[0].indexOf(']') + 1).trim();
+        valStr = rest.substring(mTag2.index + mTag2[0].length).trim();
+      } else {
+        var colonIdx = rest.lastIndexOf(' : ');
+        if (colonIdx === -1) return;
+        rawLabel = rest.substring(0, colonIdx).trim();
+        valStr = rest.substring(colonIdx + 3).trim();
+        tag = null;
+      }
 
       // Commentaire libre
       if (tag === 'commentaire') {
