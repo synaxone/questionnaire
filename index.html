@@ -4285,10 +4285,14 @@ async function envoyerQuestionnaire() {
   // le fichier téléchargé est illisible sans la clé privée de la praticienne, même
   // s'il traîne dans les téléchargements ou est intercepté en transit par email.
   var enveloppe = await chiffrerPourPraticien(dataExport, CLE_PUBLIQUE_PRATICIEN);
-  var blob = new Blob([JSON.stringify(enveloppe)], { type: 'application/json' });
+  // Fichier .txt (et non .json) : Chrome/Safari refusent de PARTAGER les fichiers .json
+  // via le partage natif (feuille « Partager via… »). En .txt (texte simple), le partage
+  // en un tap fonctionne partout. Le contenu reste le JSON chiffré ; l'import de Synaxone
+  // NFB lit le contenu (JSON.parse) quelle que soit l'extension, et accepte .txt et .json.
+  var blob = new Blob([JSON.stringify(enveloppe)], { type: 'text/plain' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'synaxone-intake-' + (dataExport.clientCode || 'client') + '-' + dateEnvoi + '.json';
+  a.download = 'synaxone-intake-' + (dataExport.clientCode || 'client') + '-' + dateEnvoi + '.txt';
   a.click();
 
   _lastIntakeBlob = blob;
@@ -4328,7 +4332,7 @@ function partagerIntake() {
   // Sur mobile : on tente la feuille de partage native (envoi direct avec le fichier
   // en pièce jointe). Si elle ne s'ouvre pas / échoue / est annulée, on explique quoi faire.
   try {
-    var file = new File([_lastIntakeBlob], _lastIntakeFilename, { type: 'application/json' });
+    var file = new File([_lastIntakeBlob], _lastIntakeFilename, { type: 'text/plain' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       navigator.share({
         files: [file],
