@@ -1168,17 +1168,8 @@
     ✅ Terminer et télécharger mon questionnaire
   </button>
 
-  <div id="envoi_confirmation" hidden style="margin-top:16px;padding:18px 20px;background:#e8f5e9;border-radius:10px;border:1px solid #2d6a4f;color:#1b4332;font-size:13px;text-align:left">
-    <div style="font-size:15px;font-weight:700;text-align:center;margin-bottom:10px">✅ Votre questionnaire a bien été enregistré dans un fichier.</div>
-    <div style="background:#fff3cd;border:1px solid #d4a72c;border-radius:8px;padding:12px 14px;color:#6b4e00;line-height:1.6">
-      <strong>⚠️ Attention, ce n'est pas encore terminé.</strong><br>
-      Ce fichier vient d'être <strong>téléchargé sur votre appareil</strong> (dossier « Téléchargements »). <strong>Rien n'a été transmis automatiquement.</strong> Vous devez maintenant <strong>l'envoyer vous-même à votre praticienne</strong> pour qu'elle le reçoive.
-    </div>
-    <button onclick="partagerIntake()" id="btn_partager_intake"
-      style="width:100%;margin-top:14px;padding:15px;background:#2d6a4f;color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer">
-      📤 Envoyer le fichier à ma praticienne maintenant
-    </button>
-    <div style="font-size:12px;margin-top:10px;line-height:1.6;opacity:0.9">Si le bouton n'ouvre rien : retrouvez le fichier <strong>« synaxone-intake-…json »</strong> dans vos <strong>Téléchargements</strong>, puis joignez-le à un email adressé à votre praticienne.</div>
+  <div id="envoi_confirmation" hidden style="margin-top:16px;padding:14px 20px;background:#e8f5e9;border-radius:10px;border:1px solid #2d6a4f;color:#1b4332;font-size:14px;font-weight:600;text-align:center">
+    ✅ Questionnaire enregistré — un instant…
   </div>
 
   <button onclick="imprimerQuestionnaire()"
@@ -1194,6 +1185,21 @@
 
 <!-- SECTION MERCI -->
 <div class="section" id="sec11" style="display:none">
+
+  <div style="margin-top:8px;padding:18px 20px;background:#fff8e6;border-radius:12px;border:2px solid #d4a72c;color:#6b4e00">
+    <div style="font-size:16px;font-weight:700;text-align:center;margin-bottom:10px">⚠️ Une dernière étape, importante</div>
+    <p style="font-size:14px;line-height:1.7;margin:0 0 8px 0">
+      Votre questionnaire a été <strong>enregistré dans un fichier téléchargé sur votre appareil</strong> (dossier « Téléchargements »). <strong>Rien n'a été transmis automatiquement.</strong> Vous devez maintenant <strong>envoyer ce fichier vous-même</strong> pour qu'il soit reçu.
+    </p>
+    <button onclick="partagerIntake()" id="btn_partager_intake"
+      style="width:100%;margin-top:8px;padding:15px;background:#2d6a4f;color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer">
+      📤 Envoyer le fichier maintenant
+    </button>
+    <div id="partage_fallback_note" hidden style="margin-top:12px;padding:12px 14px;background:white;border:1px solid #d4a72c;border-radius:8px;font-size:13px;line-height:1.7">
+      Le fichier a été (re)téléchargé dans votre dossier <strong>« Téléchargements »</strong>.<br>
+      Pour l'envoyer : ouvrez votre messagerie (Gmail, Outlook…), créez un nouvel email, <strong>joignez ce fichier</strong> (icône trombone 📎) et envoyez-le.
+    </div>
+  </div>
 
   <div style="text-align:center;padding:32px 16px 16px">
     <div style="font-size:48px;margin-bottom:16px">🌿</div>
@@ -4308,6 +4314,8 @@ function partagerIntake() {
   if (!_lastIntakeBlob) return;
   var file = new File([_lastIntakeBlob], _lastIntakeFilename, { type: 'application/json' });
 
+  // Sur mobile : feuille de partage native (envoi direct par email/messagerie avec
+  // le fichier en pièce jointe). C'est le cas d'usage principal (clients au téléphone).
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     navigator.share({
       files: [file],
@@ -4317,16 +4325,23 @@ function partagerIntake() {
     return;
   }
 
-  var pnom = document.getElementById('p_nom');
-  var pprenom = document.getElementById('p_prenom');
-  var nomComplet = ((pprenom ? pprenom.value : '') + ' ' + (pnom ? pnom.value : '')).trim();
-  var subject = encodeURIComponent('Questionnaire Synaxone' + (nomComplet ? ' — ' + nomComplet : ''));
-  var body = encodeURIComponent(
-    'Bonjour,\n\nVeuillez trouver ci-joint mon questionnaire rempli.\n' +
-    'Le fichier a été téléchargé sur cet appareil (dossier "Téléchargements") — ' +
-    'merci de l\'ajouter en pièce jointe avant l\'envoi.\n\nCordialement'
-  );
-  window.location.href = 'mailto:' + (_lastIntakeDestEmail || 'synaxone.nfb@gmail.com') + '?subject=' + subject + '&body=' + body;
+  // Repli ordinateur (pas de partage natif) : un mailto ne peut PAS joindre le fichier
+  // et n'ouvre souvent rien (webmail sans client de messagerie configuré). On re-télécharge
+  // donc le fichier pour être sûr qu'il est disponible, et on affiche une consigne claire —
+  // le bouton fait toujours quelque chose de visible.
+  try {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(_lastIntakeBlob);
+    a.download = _lastIntakeFilename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch (e) {}
+  var note = document.getElementById('partage_fallback_note');
+  if (note) {
+    note.removeAttribute('hidden');
+    note.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 }
 
 
@@ -4346,7 +4361,7 @@ function showConfirmation() {
   if (conf) conf.removeAttribute('hidden');
   var btn = document.querySelector('[onclick="envoyerQuestionnaire()"]');
   if (btn) { btn.textContent = '\u2705 Fichier téléchargé'; }
-  setTimeout(() => goToSection(11), 2000);
+  setTimeout(() => goToSection(11), 900);
 }
 
 function showAllSubDivs() {
