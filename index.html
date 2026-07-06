@@ -657,6 +657,11 @@
     animation: fadeUp 0.3s ease backwards;
   }
 
+  /* Sur ordinateur, les étapes d'envoi par email sont affichées d'emblée (pas
+     de pièce jointe automatique possible depuis un navigateur) ; sur mobile
+     elles restent en repli, le partage natif joignant le fichier tout seul. */
+  body.env-desktop #partage_fallback_note { display: block !important; }
+
   .question-card:nth-child(1) { animation-delay: 0.05s; }
   .question-card:nth-child(2) { animation-delay: 0.08s; }
   .question-card:nth-child(3) { animation-delay: 0.11s; }
@@ -1224,9 +1229,11 @@
       </div>
     </div>
 
-    <div id="partage_fallback_note" hidden style="margin-top:12px;padding:14px 16px;background:white;border:1px solid #d4a72c;border-radius:10px;font-size:14px;line-height:1.7;color:#6b4e00">
-      <strong>Votre messagerie ne s'est pas ouverte ?</strong> Pas d'inquiétude — le fichier de votre questionnaire est <strong>déjà enregistré</strong> dans votre dossier <strong>« Téléchargements »</strong>.<br>
-      Ouvrez vous-même votre boîte mail (Gmail, Outlook…), écrivez-moi à l'adresse ci-dessus (bouton « Copier l'adresse »), <strong>joignez ce fichier</strong> (icône trombone 📎) et envoyez-le.
+    <div id="partage_fallback_note" hidden style="margin-top:12px;padding:14px 16px;background:#fdf6ea;border:1px solid #d4a72c;border-radius:10px;font-size:14px;line-height:1.8;color:#6b4e00">
+      <div style="font-weight:700;margin-bottom:8px">📎 Comment me le faire parvenir (3 étapes)</div>
+      <div style="margin-bottom:5px"><strong>1.</strong> Votre fichier est <strong>déjà enregistré</strong> dans le dossier <strong>« Téléchargements »</strong> de votre appareil (rien à faire pour ça).</div>
+      <div style="margin-bottom:5px"><strong>2.</strong> Ouvrez votre boîte mail et écrivez-moi à l'adresse ci-dessus (bouton <strong>« 📋 Copier l'adresse »</strong>).</div>
+      <div><strong>3.</strong> <strong>Joignez ce fichier</strong> à l'email (icône trombone 📎), puis envoyez. C'est tout !</div>
     </div>
 
     <p style="font-size:14px;text-align:center;margin:16px 0 0 0">Merci beaucoup, et à très bientôt 🌿</p>
@@ -4427,6 +4434,19 @@ function partagerIntake() {
     + "Merci de vérifier qu'il est bien joint à cet email avant l'envoi (icône trombone).\n\nBien à vous";
   try { window.location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + encodeURIComponent(corps); } catch (e) {}
 }
+
+// Sur ordinateur : afficher d'emblée les 3 étapes d'envoi (via la classe env-desktop)
+// et adapter le libellé du bouton (il ouvre la messagerie, il n'envoie pas tout seul).
+(function () {
+  try {
+    var estMobile = /Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(navigator.userAgent || '');
+    if (!estMobile && document.body) {
+      document.body.classList.add('env-desktop');
+      var b = document.getElementById('btn_partager_intake');
+      if (b) b.textContent = '📧 Ouvrir ma messagerie';
+    }
+  } catch (e) {}
+})();
 
 
 function sendByEmail(nom, email) {
