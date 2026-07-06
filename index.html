@@ -1196,8 +1196,8 @@
       📤 Envoyer le fichier maintenant
     </button>
     <div id="partage_fallback_note" hidden style="margin-top:12px;padding:12px 14px;background:white;border:1px solid #d4a72c;border-radius:8px;font-size:13px;line-height:1.7">
-      Le fichier a été (re)téléchargé dans votre dossier <strong>« Téléchargements »</strong>.<br>
-      Pour l'envoyer : ouvrez votre messagerie (Gmail, Outlook…), créez un nouvel email, <strong>joignez ce fichier</strong> (icône trombone 📎) et envoyez-le.
+      <strong>Le partage direct n'est pas disponible sur cet appareil.</strong><br>
+      Pas d'inquiétude : le fichier de votre questionnaire est <strong>déjà enregistré</strong> dans votre dossier <strong>« Téléchargements »</strong>. Pour l'envoyer : ouvrez votre messagerie (Gmail, Outlook…), créez un nouvel email pour votre praticienne, <strong>joignez ce fichier</strong> (icône trombone 📎) et envoyez-le.
     </div>
   </div>
 
@@ -4313,28 +4313,20 @@ var _lastIntakeDestEmail = '';
 function partagerIntake() {
   if (!_lastIntakeBlob) return;
 
-  // Repli universel : re-télécharge le fichier (pour être sûr qu'il est disponible)
-  // et affiche une consigne claire. Utilisé quand le partage natif est absent OU échoue.
-  // Le bouton fait donc TOUJOURS quelque chose de visible.
-  var repli = function () {
-    try {
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(_lastIntakeBlob);
-      a.download = _lastIntakeFilename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch (e) {}
+  // Affiche la consigne « le fichier est déjà téléchargé, joignez-le à un email ».
+  // On NE re-télécharge PAS (le fichier a déjà été téléchargé au clic « Terminer »).
+  var montrerConsigne = function () {
     var note = document.getElementById('partage_fallback_note');
     if (note) {
+      note.hidden = false;
       note.removeAttribute('hidden');
-      note.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      note.style.display = 'block';
+      try { note.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
     }
   };
 
-  // Sur mobile : feuille de partage native (envoi direct avec le fichier en pièce jointe).
-  // C'est le cas d'usage principal (clients au téléphone). Mais elle peut échouer (navigateur
-  // intégré à une appli, type de fichier refusé…) : dans ce cas on bascule sur le repli.
+  // Sur mobile : on tente la feuille de partage native (envoi direct avec le fichier
+  // en pièce jointe). Si elle ne s'ouvre pas / échoue / est annulée, on explique quoi faire.
   try {
     var file = new File([_lastIntakeBlob], _lastIntakeFilename, { type: 'application/json' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -4342,15 +4334,13 @@ function partagerIntake() {
         files: [file],
         title: 'Questionnaire Synaxone',
         text: 'Voici mon questionnaire rempli pour Synaxone.'
-      }).catch(function (err) {
-        // L'utilisateur a annulé, ou le partage a échoué : on montre la consigne de repli.
-        if (!err || err.name !== 'AbortError') repli();
-      });
+      }).catch(function () { montrerConsigne(); });
       return;
     }
   } catch (e) {}
 
-  repli();
+  // Pas de partage natif disponible : on explique directement.
+  montrerConsigne();
 }
 
 
