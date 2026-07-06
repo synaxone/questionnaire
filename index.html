@@ -1129,7 +1129,9 @@
     </div>
   </div>
 
-  <div class="patient-info-card" style="margin-top:16px">
+  <!-- Adresse destinataire pré-remplie et MASQUÉE : le client n'a rien à saisir.
+       Le champ reste dans la page (caché) pour que envoyerQuestionnaire() lise sa valeur. -->
+  <div class="patient-info-card" style="margin-top:16px;display:none">
     <div class="card-header">Adresse email du praticien</div>
     <div style="padding:16px 20px">
       <input class="field-input" type="email" id="praticien_email" readonly
@@ -4089,12 +4091,10 @@ function collectStructuredAnswers() {
 
 
 async function envoyerQuestionnaire() {
+  // Adresse destinataire : pré-remplie et masquée (le client ne la saisit plus).
+  // Repli en dur au cas où le champ serait vide, pour ne jamais bloquer l'envoi.
   var emailEl = document.getElementById('praticien_email');
-  var email = emailEl ? emailEl.value.trim() : '';
-  if (!email) {
-    if (emailEl) emailEl.style.borderColor = '#c0392b';
-    return;
-  }
+  var email = (emailEl ? emailEl.value.trim() : '') || 'synaxone.nfb@gmail.com';
 
   var consentEl = document.getElementById('consent_rgpd');
   if (consentEl && !consentEl.checked) {
