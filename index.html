@@ -516,8 +516,8 @@
   .yesno-btn.selected-non {
     background: var(--accent-light);
     border-color: var(--accent);
-    color: var(--accent);
-    font-weight: 500;
+    color: var(--text-muted);
+    font-weight: 600;
   }
 
   /* CHECKBOX LIST */
@@ -547,8 +547,8 @@
   .checkbox-item.checked {
     background: var(--accent-light);
     border-color: var(--accent);
-    color: var(--accent);
-    font-weight: 500;
+    color: var(--text-muted);
+    font-weight: 600;
   }
 
   /* NAVIGATION */
@@ -731,7 +731,8 @@
   .tab.done {
     background: var(--accent-light);
     border-color: var(--accent);
-    color: var(--accent);
+    color: var(--text-muted);
+    font-weight: 600;
   }
   textarea.field-input { min-height: 60px !important; background: #fffde7 !important; border: 1px solid #f0c040 !important; box-sizing: border-box !important; }
   .response-group:has(textarea.field-input) { width: 100%; grid-column: 1 / -1; }
@@ -902,7 +903,7 @@
       </div>
       <div class="info-field">
         <label>Âge</label>
-        <input class="field-input" type="text" id="p_age" placeholder="calculé automatiquement" readonly style="color:var(--accent);font-weight:500;background:var(--accent-light);cursor:default;">
+        <input class="field-input" type="text" id="p_age" placeholder="calculé automatiquement" readonly style="color:var(--text-muted);font-weight:500;background:var(--accent-light);cursor:default;">
       </div>
       <div class="info-field">
         <label>Téléphone</label>
@@ -1118,7 +1119,7 @@
 <div class="section" id="sec10" style="display:none">
   <div class="section-title"><span class="section-num">✉</span>Envoyer le questionnaire</div>
 
-  <div style="background:var(--accent-light);border-left:3px solid var(--accent);padding:16px 20px;border-radius:0 8px 8px 0;margin-bottom:24px;font-size:13px;color:var(--accent);line-height:1.7">
+  <div style="background:var(--accent-light);border-left:3px solid var(--accent);padding:16px 20px;border-radius:0 8px 8px 0;margin-bottom:24px;font-size:13px;color:var(--text-muted);line-height:1.7">
     Merci d'avoir complété ce questionnaire. Vérifiez vos réponses puis cliquez sur <strong>Envoyer</strong> pour transmettre le questionnaire par email.
   </div>
 
@@ -1239,7 +1240,7 @@
 
   <div style="text-align:center;padding:32px 16px 16px">
     <div style="font-size:48px;margin-bottom:16px">🌿</div>
-    <h2 style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--accent);margin-bottom:8px">Merci <span id="merci_nom"></span></h2>
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;color:var(--text-muted);margin-bottom:8px">Merci <span id="merci_nom"></span></h2>
     <p style="font-size:15px;color:var(--text-muted);max-width:480px;margin:0 auto;line-height:1.7">pour le temps que vous avez consacré à ce questionnaire</p>
   </div>
 
@@ -1252,8 +1253,8 @@
     </p>
 
     <div style="background:var(--accent-light);border-left:3px solid var(--accent);padding:16px 18px;border-radius:0 8px 8px 0;margin:20px 0">
-      <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:8px">🌿 Conseils pour votre séance</div>
-      <p style="font-size:13px;line-height:1.8;color:var(--accent);margin:0">
+      <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:8px">🌿 Conseils pour votre séance</div>
+      <p style="font-size:13px;line-height:1.8;color:var(--text-muted);margin:0">
         Il est préférable de ne pas boire trop de café avant la séance, ni de prendre des substances qui peuvent modifier l'état de vigilance ou la réactivité.<br><br>
         Pour prolonger les bienfaits de votre séance, je vous invite à prévoir un moment de transition juste après. Accordez-vous quelques minutes pour profiter pleinement de cet état de détente avant de reprendre le rythme de votre journée.
       </p>
@@ -3853,7 +3854,7 @@ var familiauxQuestions = [
 function buildFamiliauxQuestions() {
   var container = document.getElementById('familiaux-questions');
   if (!container) return;
-  familiaux_intro = '<div style="background:var(--accent-light);border-left:3px solid var(--accent);padding:14px 18px;border-radius:0 8px 8px 0;margin-bottom:20px;font-size:13px;color:var(--accent);line-height:1.7">'
+  familiaux_intro = '<div style="background:var(--accent-light);border-left:3px solid var(--accent);padding:14px 18px;border-radius:0 8px 8px 0;margin-bottom:20px;font-size:13px;color:var(--text-muted);line-height:1.7">'
     + 'Pour chaque symptôme ci-dessous, indiquez <strong>Oui</strong> ou <strong>Non</strong>, précisez <strong>quel membre de la famille</strong> est concerné, et ajoutez un commentaire si besoin.'
     + '</div>';
   container.innerHTML = familiaux_intro;
@@ -3895,7 +3896,7 @@ function updateRecap() {
     container.innerHTML = sections.map(s => {
       var sec = document.getElementById(s.id);
       var hasInput = sec && sec.querySelector('input:not([type=hidden]):not([type=range]), textarea, select') !== null;
-      return `<span style="padding:4px 10px;border-radius:12px;font-size:11px;font-weight:500;background:var(--accent-light);color:var(--accent)">${s.label}</span>`;
+      return `<span style="padding:4px 10px;border-radius:12px;font-size:11px;font-weight:500;background:var(--accent-light);color:var(--text-muted)">${s.label}</span>`;
     }).join('');
   }
 }
