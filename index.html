@@ -4633,8 +4633,11 @@ function injecterBarreSynaxone(needsPaste) {
   if (document.getElementById('synaxone-return-bar')) return;
   var bar = document.createElement('div');
   bar.id = 'synaxone-return-bar';
-  bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:10000;background:var(--practitioner,#8B4513);' +
-    'box-shadow:0 -2px 12px rgba(0,0,0,0.2);padding:10px 16px;display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap';
+  // Barre en FLUX NORMAL, en haut de la page (et non position:fixed) : une barre
+  // fixed est placée sur une couche GPU où le texte reste flou sous Windows
+  // (mise à l'échelle 125/150 %). En flux normal, le texte est net.
+  bar.style.cssText = 'width:100%;box-sizing:border-box;background:var(--practitioner,#8B4513);' +
+    'box-shadow:0 2px 12px rgba(0,0,0,0.2);padding:12px 16px;display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap';
   var texteInfo = needsPaste
     ? 'Ancien questionnaire — collez le texte de l’email dans l’encadré ✦ en haut, puis complétez'
     : 'Mode praticien — questionnaire ouvert depuis Synaxone';
@@ -4643,8 +4646,7 @@ function injecterBarreSynaxone(needsPaste) {
     '<button id="synaxone-return-btn" onclick="renvoyerASynaxone()" ' +
     'style="padding:10px 18px;background:#fff;color:var(--practitioner,#8B4513);border:none;border-radius:8px;' +
     'font-family:inherit;font-size:14px;font-weight:700;cursor:pointer">✅ Terminer et renvoyer à Synaxone</button>';
-  document.body.appendChild(bar);
-  document.body.style.paddingBottom = '72px';
+  document.body.insertBefore(bar, document.body.firstChild);
 }
 
 window.addEventListener('message', function(ev) {
