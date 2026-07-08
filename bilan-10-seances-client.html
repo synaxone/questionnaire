@@ -614,8 +614,12 @@ function majProgressBar() {
 // ─────────────────────────────────────────────
 // ENVOI
 // ─────────────────────────────────────────────
-async function envoyerBilan() {
-  if (!CONFIG) return;
+// Construit l'objet de données du bilan à partir de l'état actuel du formulaire, sans
+// rien chiffrer ni télécharger — isolé de envoyerBilan() pour être testable seul par
+// verification/check-bilan-integrite.js (même principe que construireBodyReponses()
+// dans index.html). Voir AUDIT-INTAKE-DONNEES.md.
+function construireDonneesBilan() {
+  if (!CONFIG) return null;
 
   // Symptômes spécifiques : num = qnum du grand questionnaire (réutilisé tel quel
   // par le module plan-logic.js côté Synaxone NFB pour recalculer les placements).
@@ -638,7 +642,7 @@ async function envoyerBilan() {
   var nouveau = document.getElementById('libre_nouveau');
   var priorite = document.getElementById('libre_priorite');
 
-  var data = {
+  return {
     type: 'bilan10seances',
     version: 1,
     clientCode: CONFIG.clientCode || '',
@@ -652,6 +656,11 @@ async function envoyerBilan() {
       priorite: priorite && priorite.value.trim() ? priorite.value.trim() : ''
     }
   };
+}
+
+async function envoyerBilan() {
+  var data = construireDonneesBilan();
+  if (!data) return;
 
   // Export JSON local — pas d'envoi serveur pour l'instant (RGPD : aucun nom/prénom,
   // seulement le code pseudonymisé). Le fichier est à transmettre au/à la praticien(ne)
