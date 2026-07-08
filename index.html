@@ -348,12 +348,13 @@
   }
 
   .freq-tooltip {
-    font-size: 10px;
+    font-size: 13px;
+    font-weight: 600;
     color: var(--accent);
     font-style: italic;
     text-align: center;
     margin-top: 2px;
-    min-height: 14px;
+    min-height: 17px;
   }
 
   @media (min-width: 700px) {
@@ -370,9 +371,11 @@
   .range-labels {
     display: flex;
     justify-content: space-between;
-    font-size: 9px;
+    font-size: 13px;
+    font-weight: 500;
     color: var(--text-muted);
     margin-top: 3px;
+    line-height: 1.3;
   }
   .range-labels span { flex: 1; }
   .range-labels span:first-child { text-align: left; }
@@ -750,12 +753,14 @@
     width: 100%;
   }
   .intensity-display > div { flex: 1; }
-  .range-labels { 
-    display: flex; 
-    justify-content: space-between; 
-    font-size: 10px; 
+  .range-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 500;
     color: var(--text-muted);
     margin-top: 4px;
+    line-height: 1.3;
   }
 </style>
   <!-- EmailJS retiré : les données ne transitent plus par un service tiers -->
@@ -1036,10 +1041,16 @@
         <span class="q-text"><strong>Rencontrez-vous des problèmes de sommeil ?</strong></span>
       </div>
       <div class="yesno-group">
-        <button class="yesno-btn" onclick="selectYesNo(this, 'oui', 'q_intro')">Oui</button>
-        <button class="yesno-btn" onclick="selectYesNo(this, 'non', 'q_intro')">Non</button>
+        <button class="yesno-btn" onclick="selectYesNo(this,'oui','yn_intro');document.getElementById('cursor_intro').removeAttribute('hidden')">Oui</button>
+        <button class="yesno-btn" onclick="selectYesNo(this,'non','yn_intro');document.getElementById('cursor_intro').setAttribute('hidden','')">Non</button>
       </div>
-      <input type="hidden" id="q_intro" value="">
+      <input type="hidden" id="yn_intro" value="">
+      <div id="cursor_intro" style="margin-top:12px" hidden>
+        <div class="response-group" style="max-width:260px">
+          <label>Depuis quand ?</label>
+          <input class="field-input" type="text" placeholder="ex : 2 ans" id="dep_Intro">
+        </div>
+      </div>
     </div>
     <div class="practitioner-annotation" id="annot_intro">
       <label>Annotation praticien</label>
@@ -1362,6 +1373,38 @@ function restoreFromText(text) {
   lines.forEach(function(rawLine) {
     var line = rawLine.trim();
     if (!line) return;
+
+    if (line.indexOf('Intro') === 0) {
+      var spaceIdxI = line.indexOf(' ');
+      if (spaceIdxI === -1) return;
+      var restI = line.substring(spaceIdxI + 1).replace(/^[–—-] /, '');
+      var mTagI = restI.match(/\[([^\]]*)\]\s*:\s/);
+      var tagI, valStrI;
+      if (mTagI) {
+        tagI = mTagI[1].trim();
+        valStrI = restI.substring(mTagI.index + mTagI[0].length).trim();
+      } else {
+        var colonIdxI = restI.lastIndexOf(' : ');
+        if (colonIdxI === -1) return;
+        tagI = null;
+        valStrI = restI.substring(colonIdxI + 3).trim();
+      }
+      if (tagI === 'depuis') {
+        var depI = document.getElementById('dep_Intro');
+        if (depI) { depI.value = valStrI; count++; }
+        return;
+      }
+      if (valStrI === 'oui' || valStrI === 'non') {
+        document.querySelectorAll('button.yesno-btn').forEach(function(b) {
+          var oc = b.getAttribute('onclick') || '';
+          if (oc.indexOf("'yn_intro'") !== -1 && oc.indexOf("'" + valStrI + "'") !== -1) {
+            b.click();
+            count++;
+          }
+        });
+      }
+      return;
+    }
 
     if (line.charAt(0) === 'Q') {
       var spaceIdx = line.indexOf(' ');
@@ -3319,7 +3362,7 @@ function buildQuestionCard(q) {
               <span class="intensity-val" id="val_150_${i}">—</span>
               <div style="flex:1">
                 <input type="range" min="0" max="7" step="1" value="0" oninput="update150('${i}',this.value)">
-                <div class="range-labels" style="font-size:8px">
+                <div class="range-labels" style="font-size:11px">
                   <span>jamais</span><span>quelques fois/an</span><span>hebdo</span><span>quotidien</span>
                 </div>
               </div>
@@ -4024,7 +4067,7 @@ function collectAllAnswers() {
 // ne correspondent plus au moment d'un import, Synaxone NFB affiche un
 // avertissement — voir importerIntake(). À mettre à jour à chaque fois
 // qu'une question change de format ici.
-var VERSION_QUESTIONNAIRE = "2026-07-04";
+var VERSION_QUESTIONNAIRE = "2026-07-08";
 
 // GARDE-FOU CHIFFREMENT — clé PUBLIQUE du praticien (Camille), sans danger à exposer
 // ici (c'est prévu pour). Sert à chiffrer le questionnaire avant téléchargement, voir
