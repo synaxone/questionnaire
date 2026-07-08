@@ -2331,8 +2331,8 @@ function buildQuestionCard(q) {
               </div>
             </div>
             <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              <textarea class="field-input" placeholder="Précisez les circonstances…" rows="1" style="background:white" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-              <input class="field-input" type="text" placeholder="Depuis quand ?" style="background:white">
+              <textarea class="field-input" placeholder="Précisez les circonstances…" rows="1" id="c28_${id}_${ii}" style="background:white" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+              <input class="field-input" type="text" placeholder="Depuis quand ?" id="d28_${id}_${ii}" style="background:white">
             </div>
           </div>
         </div>`).join('')}
@@ -2441,8 +2441,8 @@ function buildQuestionCard(q) {
               </div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-              <textarea class="field-input" placeholder="Commentaires…" rows="1" style="background:white" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-              <input class="field-input" type="text" placeholder="Depuis quand ?" style="background:white">
+              <textarea class="field-input" placeholder="Commentaires…" rows="1" id="c68_${i}" style="background:white" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+              <input class="field-input" type="text" placeholder="Depuis quand ?" id="d68_${i}" style="background:white">
             </div>
           </div>
         </div>`).join('')}
@@ -2643,7 +2643,7 @@ function buildQuestionCard(q) {
             <span style="font-size:13px;font-weight:500">${a.label}</span>
           </label>
           <div id="adddtl_${id}_${i}" style="display:none;padding:10px 12px;background:var(--accent-light);border-radius:0 0 8px 8px;border:1px solid var(--border);border-top:none">
-            ${a.label === 'Autre' ? '<input class="field-input" type="text" placeholder="Précisez…" style="margin-bottom:8px;background:white;width:100%">' : ''}
+            ${a.label === 'Autre' ? `<input class="field-input" type="text" placeholder="Précisez…" id="addautre_${id}_${i}" style="margin-bottom:8px;background:white;width:100%">` : ''}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
               <div class="response-group">
                 <label>${a.unit}</label>
@@ -3135,16 +3135,16 @@ function buildQuestionCard(q) {
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
             <div class="response-group">
               <label>Date (approximative)</label>
-              <input class="field-input" type="text" placeholder="ex : 2018, il y a 5 ans…" style="background:white">
+              <input class="field-input" type="text" placeholder="ex : 2018, il y a 5 ans…" id="dep_${id}" style="background:white">
             </div>
             <div class="response-group">
               <label>Commentaires</label>
-              <textarea class="field-input" placeholder="${comPh_dt}" rows="1" style="background:white" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+              <textarea class="field-input" placeholder="${comPh_dt}" rows="1" id="com_${id}" style="background:white" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
             </div>
           </div>
           <div class="response-group">
             <label>Thérapie(s) suivie(s)</label>
-            <textarea class="field-input" placeholder="Chirurgie, chimiothérapie, radiothérapie, immunothérapie, autre…" rows="2" style="background:white;width:100%" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+            <textarea class="field-input" placeholder="Chirurgie, chimiothérapie, radiothérapie, immunothérapie, autre…" rows="2" id="val_therapie_${id}" style="background:white;width:100%" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
           </div>
         </div>
       </div>
@@ -3180,7 +3180,7 @@ function buildQuestionCard(q) {
           </div>
           <input type="hidden" id="yn_epi_med_${id}">
           <div id="epi_med_${id}" hidden>
-            <textarea class="field-input" placeholder="Lesquels ?" rows="2" style="background:white;width:100%" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+            <textarea class="field-input" placeholder="Lesquels ?" rows="2" id="val_epimed_${id}" style="background:white;width:100%" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
             <div class="response-group"><label>Depuis quand ?</label><input class="field-input" type="text" placeholder="si possible…" id="dep_${id}" style="background:white"></div>
@@ -3325,7 +3325,7 @@ function buildQuestionCard(q) {
               </div>
             </div>
             <div style="text-align:center;font-size:11px;color:var(--accent);margin-top:4px" id="mig_label_${i}"></div>
-            <textarea class="field-input" placeholder="Autres précisions…" rows="1" style="background:white;width:100%;margin-top:8px" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+            <textarea class="field-input" placeholder="Autres précisions…" rows="1" id="c150_${i}" style="background:white;width:100%;margin-top:8px" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
           </div>
         </div>`).join('')}
         <div class="response-group" style="margin-top:4px">
@@ -4257,6 +4257,12 @@ function construireBodyReponses() {
       var addLabel = lblSpan ? lblSpan.textContent.trim() : '';
       var qty = document.getElementById('addqty_' + qid.replace('Q','') + '_' + idx);
       var dep = document.getElementById('adddep_' + qid.replace('Q','') + '_' + idx);
+      // Précision de l'addiction "Autre" (id ajouté le 08/07/2026 — ce champ n'avait
+      // jamais eu d'id, donc son contenu était perdu, y compris via le filet de sécurité).
+      var autrePrecision = document.getElementById('addautre_' + qid.replace('Q','') + '_' + idx);
+      if (addLabel === 'Autre' && autrePrecision && autrePrecision.value.trim()) {
+        addLabel = autrePrecision.value.trim();
+      }
       var parts = [addLabel];
       if (qty && qty.value) parts.push(qty.value);
       if (dep && dep.value) parts.push('depuis ' + dep.value);
@@ -4297,6 +4303,100 @@ function construireBodyReponses() {
     if (commentEl && commentEl.value) msg += qid + ' [commentaire] : ' + commentEl.value.replace(/\r?\n/g, ' ⏎ ') + '\n';
     var depEl = document.getElementById('dep_' + qidNum);
     if (depEl && depEl.value) msg += qid + ' [depuis] : ' + depEl.value + '\n';
+
+    // Champ "libre" pur (special:'libre' — Q58, 58b, 112, 175, 182, 189…) : un simple
+    // textarea id="val_<qid>", sans .response-group/label, donc pas capté par le bloc
+    // number/text ci-dessus. Sans cette ligne sémantique, seul le filet de sécurité
+    // générique le récupérait (Complément[...]), volontairement ignoré par le parseur
+    // plan-logic.js — le texte tapé n'apparaissait donc jamais dans Synaxone.
+    // Bug remonté par Camille le 08/07/2026.
+    var libreEl = card.querySelector('textarea[id^="val_"]');
+    if (libreEl && libreEl.value && libreEl.value.trim()) {
+      msg += qid + ' [libre] : ' + libreEl.value.replace(/\r?\n/g, ' ⏎ ') + '\n';
+    }
+
+    // Listes dynamiques sans id (traumatismes Q91/183/184/187/188 via "+ Ajouter un
+    // événement", médicaments Q185/186 via "+ Ajouter") : chaque ligne ajoutée par ces
+    // boutons n'a jamais eu d'id, donc n'était captée par AUCUN mécanisme d'export
+    // (ni les lignes sémantiques, ni même le filet de sécurité générique ci-dessous, qui
+    // exige un id) — tout ce qui y était tapé était silencieusement perdu, absent même
+    // du fichier JSON exporté. Bug remonté par Camille le 08/07/2026.
+    var tlContainer = document.getElementById('tl_items_' + qidNum);
+    if (tlContainer) {
+      var tlParts = [];
+      tlContainer.querySelectorAll(':scope > div').forEach(function(row) {
+        var desc = row.querySelector('textarea');
+        var date = row.querySelector('input[type=text]');
+        var descVal = desc && desc.value ? desc.value.trim() : '';
+        var dateVal = date && date.value ? date.value.trim() : '';
+        if (descVal || dateVal) tlParts.push(descVal + (dateVal ? ' (' + dateVal + ')' : ''));
+      });
+      if (tlParts.length) msg += qid + ' [libre] : ' + tlParts.join(' ⏎ ') + '\n';
+    }
+    var medocContainer = document.getElementById('medoc_list_' + qidNum);
+    if (medocContainer) {
+      var medocParts = [];
+      medocContainer.querySelectorAll(':scope > div').forEach(function(row) {
+        var mInputs = row.querySelectorAll('input[type=text]');
+        var nom = mInputs[0] && mInputs[0].value ? mInputs[0].value.trim() : '';
+        var depuis = mInputs[1] && mInputs[1].value ? mInputs[1].value.trim() : '';
+        if (nom || depuis) medocParts.push(nom + (depuis ? ' (depuis ' + depuis + ')' : ''));
+      });
+      if (medocParts.length) msg += qid + ' [libre] : ' + medocParts.join(' ⏎ ') + '\n';
+    }
+    // Idem pour les précisions par sous-item de Q28 ("Avez-vous des difficultés à…") :
+    // "Précisez les circonstances" / "Depuis quand ?" par item coché n'avaient pas d'id.
+    if (qid === 'Q28') {
+      var q28Labels = ['Comprendre des instructions','Appliquer des instructions','Respecter un cadre'];
+      var q28Parts = [];
+      q28Labels.forEach(function(lbl, ii) {
+        var cEl = document.getElementById('c28_28_' + ii);
+        var dEl = document.getElementById('d28_28_' + ii);
+        var cVal = cEl && cEl.value ? cEl.value.trim() : '';
+        var dVal = dEl && dEl.value ? dEl.value.trim() : '';
+        if (cVal || dVal) q28Parts.push(lbl + ' : ' + cVal + (dVal ? ' (depuis ' + dVal + ')' : ''));
+      });
+      if (q28Parts.length) msg += qid + ' [libre] : ' + q28Parts.join(' ⏎ ') + '\n';
+    }
+
+    // Idem pour les précisions par item de Q67/68 (crises de colère/rage/violence).
+    if (qid === 'Q67' || qid === 'Q68') {
+      var q68Labels = ['Colère', 'Rage', 'Violence'];
+      var q68Parts = [];
+      q68Labels.forEach(function(lbl, i) {
+        var cEl = document.getElementById('c68_' + i);
+        var dEl = document.getElementById('d68_' + i);
+        var cVal = cEl && cEl.value ? cEl.value.trim() : '';
+        var dVal = dEl && dEl.value ? dEl.value.trim() : '';
+        if (cVal || dVal) q68Parts.push(lbl + ' : ' + cVal + (dVal ? ' (depuis ' + dVal + ')' : ''));
+      });
+      if (q68Parts.length) msg += qid + ' [libre] : ' + q68Parts.join(' ⏎ ') + '\n';
+    }
+
+    // Idem pour les précisions par type de migraine (Q150 : sans/avec aura).
+    if (qid === 'Q150') {
+      var q150Labels = ['Sans aura', 'Avec aura'];
+      var q150Parts = [];
+      q150Labels.forEach(function(lbl, i) {
+        var cEl = document.getElementById('c150_' + i);
+        var cVal = cEl && cEl.value ? cEl.value.trim() : '';
+        if (cVal) q150Parts.push(lbl + ' : ' + cVal);
+      });
+      if (q150Parts.length) msg += qid + ' [libre] : ' + q150Parts.join(' ⏎ ') + '\n';
+    }
+
+    // Idem pour la liste de symptômes ménopause/andropause (Q137, "+ Ajouter") : le champ
+    // description de chaque symptôme n'a jamais eu d'id (seul le curseur de sévérité en a un).
+    var menoContainer = document.getElementById('meno_items_' + qidNum);
+    if (menoContainer) {
+      var menoParts = [];
+      menoContainer.querySelectorAll(':scope > div').forEach(function(row) {
+        var descI = row.querySelector('input[type=text]');
+        var descVal = descI && descI.value ? descI.value.trim() : '';
+        if (descVal) menoParts.push(descVal);
+      });
+      if (menoParts.length) msg += qid + ' [libre] : ' + menoParts.join(' ⏎ ') + '\n';
+    }
 
     // FILET DE SÉCURITÉ — capture TOUTE zone texte/nombre de la carte par son
     // identifiant (commentaires, "depuis" à suffixe lettré 58b/31b, champs
