@@ -2718,7 +2718,7 @@ function buildQuestionCard(q) {
         <div id="dep_detail_${id}" style="display:none;padding:12px;background:var(--accent-light);border-radius:8px">
           <div class="response-group" style="margin-bottom:10px">
             <label>Quand ? (période, durée…)</label>
-            <textarea class="field-input" placeholder="ex : depuis 2 ans, épisode en 2020…" rows="2" id="dep_when_${id}" style="background:white;width:100%" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+            <textarea class="field-input" placeholder="ex : depuis 2 ans, épisode en 2020…" rows="2" id="dep_${id}" style="background:white;width:100%" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
           </div>
           <div class="yesno-group" style="margin-bottom:6px">
             <span style="font-size:13px;font-weight:500;margin-right:8px">Prenez-vous des médicaments pour cela ?</span>
@@ -2729,7 +2729,7 @@ function buildQuestionCard(q) {
           </div>
           <input type="hidden" id="yn_medoc_${id}">
           <div id="medoc_detail_${id}" style="display:none">
-            <textarea class="field-input" placeholder="Précisez lesquels…" rows="2" id="medoc_text_${id}" style="background:white;width:100%" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+            <textarea class="field-input" placeholder="Précisez lesquels…" rows="2" id="val_medocdepression_${id}" style="background:white;width:100%" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
           </div>
         </div>
         ${(q.pContexts && q.pContexts.length) ? `<div class="practitioner-only" style="margin-top:8px;padding:8px;background:var(--practitioner-light);border-radius:8px;border-left:3px solid var(--practitioner)">
