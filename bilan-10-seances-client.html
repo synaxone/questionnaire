@@ -366,6 +366,14 @@
 
   <div id="questionnaire-container"></div>
 
+  <div id="restore-banner-bilan" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:8888;background:var(--accent);color:white;padding:14px 16px;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 -2px 12px rgba(0,0,0,0.15)">
+    <span id="restore-banner-bilan-label" style="flex:1;font-size:13px;font-family:'DM Sans',sans-serif;line-height:1.4"></span>
+    <div style="display:flex;gap:8px;flex-shrink:0">
+      <button onclick="restaurerBilanDepuisBanniere()" style="padding:8px 16px;background:white;color:var(--accent);border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation">Restaurer</button>
+      <button onclick="ignorerBrouillonBilan()" style="padding:8px 16px;background:rgba(255,255,255,0.25);color:white;border:1px solid rgba(255,255,255,0.5);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;touch-action:manipulation">Ignorer</button>
+    </div>
+  </div>
+
   <div class="submit-section" id="submit-section" style="display:none">
     <p>En envoyant ce bilan, vous transmettez vos réponses de façon sécurisée à votre praticien.<br>Aucune donnée nominative n'est stockée — vos réponses sont pseudonymisées.</p>
     <button class="btn-submit" onclick="envoyerBilan()">Envoyer mon bilan</button>
@@ -682,6 +690,7 @@ async function envoyerBilan() {
   _lastBilanBlob = blob;
   _lastBilanFilename = a.download;
 
+  effacerBrouillonBilan();
   afficherConfirmation();
 }
 
@@ -756,6 +765,87 @@ function partagerBilan() {
 }
 
 // ─────────────────────────────────────────────
+// SAUVEGARDE AUTOMATIQUE (localStorage) — même principe que le "brouillon" du grand
+// questionnaire (index.html), pour éviter que le client ne perde ses réponses en
+// fermant l'onglet avant l'envoi final. Contrairement à index.html, tous les champs
+// de ce formulaire ont déjà un id propre (voir creerCarteSlider/creerCarteLibre) :
+// pas de liste de préfixes de conteneur codée en dur nécessaire ici (c'est justement
+// ce type de liste qui a causé une perte silencieuse de 11 curseurs dans index.html
+// le 09/07/2026 — voir verification/check-brouillon-integrite.js).
+// ─────────────────────────────────────────────
+var SAVE_KEY_BILAN = 'synaxone_bilan_draft';
+
+function sauvegarderBrouillonBilan() {
+  if (!CONFIG) return;
+  try {
+    var data = { _clientCode: CONFIG.clientCode || '', _debutSuivi: CONFIG.debutSuivi || '', _ts: new Date().toISOString(), champs: {} };
+    document.querySelectorAll('#questionnaire-container input[type=range][id]').forEach(function(el) {
+      data.champs[el.id] = el.value;
+    });
+    document.querySelectorAll('#questionnaire-container textarea[id]').forEach(function(el) {
+      if (el.value) data.champs[el.id] = el.value;
+    });
+    localStorage.setItem(SAVE_KEY_BILAN, JSON.stringify(data));
+  } catch(e) {}
+}
+
+function restaurerBrouillonBilan(data) {
+  try {
+    Object.keys(data.champs || {}).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.value = data.champs[id];
+      el.dispatchEvent(new Event('input'));
+      el.dispatchEvent(new Event('change'));
+    });
+  } catch(e) {}
+}
+
+function effacerBrouillonBilan() {
+  try { localStorage.removeItem(SAVE_KEY_BILAN); } catch(e) {}
+}
+
+setInterval(sauvegarderBrouillonBilan, 30000);
+
+// Appelée une fois le formulaire construit (donc les champs présents dans le DOM).
+function verifierBrouillonBilan() {
+  try {
+    var saved = localStorage.getItem(SAVE_KEY_BILAN);
+    if (!saved) return;
+    var data = JSON.parse(saved);
+    if (!data._ts) return;
+    // Un brouillon d'un autre client/lien ne doit jamais être proposé ici.
+    if (data._clientCode !== (CONFIG.clientCode || '') || data._debutSuivi !== (CONFIG.debutSuivi || '')) {
+      effacerBrouillonBilan();
+      return;
+    }
+    var age = (new Date() - new Date(data._ts)) / 1000 / 60; // minutes
+    if (age > 60 * 24 * 7) { effacerBrouillonBilan(); return; } // ignore si > 7 jours
+    var mins = Math.round(age);
+    var label = mins < 2 ? "il y a quelques instants" : "il y a " + mins + " min";
+    var banner = document.getElementById('restore-banner-bilan');
+    var bannerLabel = document.getElementById('restore-banner-bilan-label');
+    if (banner && bannerLabel) {
+      bannerLabel.textContent = "💾 Bilan sauvegardé " + label + " — voulez-vous le restaurer ?";
+      banner._data = data;
+      banner.style.display = 'flex';
+    }
+  } catch(e) {}
+}
+
+function restaurerBilanDepuisBanniere() {
+  var banner = document.getElementById('restore-banner-bilan');
+  if (banner && banner._data) restaurerBrouillonBilan(banner._data);
+  if (banner) banner.style.display = 'none';
+}
+
+function ignorerBrouillonBilan() {
+  effacerBrouillonBilan();
+  var banner = document.getElementById('restore-banner-bilan');
+  if (banner) banner.style.display = 'none';
+}
+
+// ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', function() {
@@ -765,6 +855,7 @@ window.addEventListener('DOMContentLoaded', function() {
     return;
   }
   construire(CONFIG);
+  verifierBrouillonBilan();
 });
 </script>
 </body>
