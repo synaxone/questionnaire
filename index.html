@@ -5123,10 +5123,16 @@ function sauvegarderBrouillon() {
     document.querySelectorAll('input[type=range]').forEach(function(el) {
       if (el.id && parseInt(el.value) > 0) data[el.id] = el.value;
     });
-    // Sliders sans id (domaines_cursor, Q97, Q113, Q68 colère/rage/violence) : clé basée sur le div conteneur (seulement si > 0)
-    document.querySelectorAll('div[id^="slider_"], div[id^="slider97_"], div[id^="slider113_"], div[id^="slider68_"]').forEach(function(div) {
-      var range = div.querySelector('input[type=range]');
-      if (range && !range.id && parseInt(range.value) > 0) data['__slider__' + div.id] = range.value;
+    // Sliders sans id propre : clé basée sur le plus proche ancêtre avec un id — générique,
+    // ne dépend d'aucun préfixe de nom de conteneur (bug du 09/07/2026 : une liste de
+    // préfixes codée en dur avait déjà oublié Q68 et 10 autres curseurs disséminés dans le
+    // questionnaire, chacun avec un nom de conteneur différent — voir
+    // verification/check-brouillon-integrite.js).
+    document.querySelectorAll('input[type=range]').forEach(function(range) {
+      if (range.id || !(parseInt(range.value) > 0)) return;
+      var node = range.parentElement;
+      while (node && !node.id) node = node.parentElement;
+      if (node) data['__slider__' + node.id] = range.value;
     });
     // Inputs text/number avec id (addqty_, adddep_, yn_, etc.)
     document.querySelectorAll('input[type=text][id], input[type=number][id]').forEach(function(el) {
@@ -5178,15 +5184,17 @@ function restaurerBrouillon(data) {
         else el.dispatchEvent(new Event('change'));
       }
     });
-    // 3. Sliders sans id (domaines_cursor, Q97, Q113, Q68 colère/rage/violence) — après les checkboxes
-    document.querySelectorAll('div[id^="slider_"], div[id^="slider97_"], div[id^="slider113_"], div[id^="slider68_"]').forEach(function(div) {
-      var key = '__slider__' + div.id;
+    // 3. Sliders sans id propre — clé générique basée sur le plus proche ancêtre avec un
+    //    id (voir sauvegarderBrouillon plus haut), après les checkboxes qui les rendent visibles
+    document.querySelectorAll('input[type=range]').forEach(function(range) {
+      if (range.id) return;
+      var node = range.parentElement;
+      while (node && !node.id) node = node.parentElement;
+      if (!node) return;
+      var key = '__slider__' + node.id;
       if (data[key] !== undefined) {
-        var range = div.querySelector('input[type=range]');
-        if (range) {
-          range.value = data[key];
-          range.dispatchEvent(new Event('input'));
-        }
+        range.value = data[key];
+        range.dispatchEvent(new Event('input'));
       }
     });
     // 4. Inputs text/number avec id (addqty_, adddep_, etc.) — après les checkboxes qui affichent les divs
