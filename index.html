@@ -5123,8 +5123,8 @@ function sauvegarderBrouillon() {
     document.querySelectorAll('input[type=range]').forEach(function(el) {
       if (el.id && parseInt(el.value) > 0) data[el.id] = el.value;
     });
-    // Sliders sans id (domaines_cursor, Q97, Q113) : clé basée sur le div conteneur (seulement si > 0)
-    document.querySelectorAll('div[id^="slider_"], div[id^="slider97_"], div[id^="slider113_"]').forEach(function(div) {
+    // Sliders sans id (domaines_cursor, Q97, Q113, Q68 colère/rage/violence) : clé basée sur le div conteneur (seulement si > 0)
+    document.querySelectorAll('div[id^="slider_"], div[id^="slider97_"], div[id^="slider113_"], div[id^="slider68_"]').forEach(function(div) {
       var range = div.querySelector('input[type=range]');
       if (range && !range.id && parseInt(range.value) > 0) data['__slider__' + div.id] = range.value;
     });
@@ -5178,8 +5178,8 @@ function restaurerBrouillon(data) {
         else el.dispatchEvent(new Event('change'));
       }
     });
-    // 3. Sliders sans id (domaines_cursor, Q97, Q113) — après les checkboxes
-    document.querySelectorAll('div[id^="slider_"], div[id^="slider97_"], div[id^="slider113_"]').forEach(function(div) {
+    // 3. Sliders sans id (domaines_cursor, Q97, Q113, Q68 colère/rage/violence) — après les checkboxes
+    document.querySelectorAll('div[id^="slider_"], div[id^="slider97_"], div[id^="slider113_"], div[id^="slider68_"]').forEach(function(div) {
       var key = '__slider__' + div.id;
       if (data[key] !== undefined) {
         var range = div.querySelector('input[type=range]');
