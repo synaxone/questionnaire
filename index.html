@@ -4053,15 +4053,6 @@ function collectAllAnswers() {
   return { patient: lines.join('\n'), praticien: pratLines.join('\n') };
 }
 
-// ── DÉSACTIVÉ le 04/07/2026 ────────────────────────────────────────────
-// Le questionnaire n'envoie plus vers Google Apps Script / Gmail / Sheets.
-// Il génère désormais un fichier JSON téléchargé localement (voir
-// envoyerQuestionnaire() plus bas), à importer directement dans Synaxone
-// NFB (fonction importerIntake(), sur le même principe que le bilan 10
-// séances). Conservé ici en commentaire pour mémoire, à supprimer une fois
-// la bascule validée en conditions réelles.
-// var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYCtoF_faRVoZH2jsGHEVTIsXYHCnLmrUPodEwNFS3_f1Wkk25lnDltXFvtB_-gNFqUA/exec';
-
 // GARDE-FOU 1 — doit rester identique à la constante VERSION_QUESTIONNAIRE
 // de plan-logic.js (et de sa copie dans electron-index.html). Si les deux
 // ne correspondent plus au moment d'un import, Synaxone NFB affiche un
