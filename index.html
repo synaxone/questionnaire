@@ -957,7 +957,7 @@
   </div>
 
   <div class="patient-info-card">
-    <div class="card-header">Contexte de vie actuel</div>
+    <div class="card-header">Situation professionnelle</div>
     <div class="info-grid">
       <div class="info-field">
         <label>Profession</label>
@@ -977,6 +977,12 @@
           <option>Retraité(e)</option>
         </select>
       </div>
+    </div>
+  </div>
+
+  <div class="patient-info-card">
+    <div class="card-header">Situation familiale</div>
+    <div class="info-grid">
       <div class="info-field">
         <label>Situation familiale</label>
         <select id="p_situation">
@@ -1000,12 +1006,12 @@
     <div class="card-header">Relations familiales</div>
     <div class="info-grid">
       <div class="info-field full-width">
-        <label>Relation avec vos parents — Père</label>
+        <label>Votre père</label>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · profession · lieu de résidence · nature de la relation (complice, distante, cordiale…)</div>
         <textarea rows="3" placeholder="Décrivez…" id="p_pere"></textarea>
       </div>
       <div class="info-field full-width">
-        <label>Relation avec vos parents — Mère</label>
+        <label>Votre mère</label>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · profession · lieu de résidence · nature de la relation (complice, distante, cordiale…)</div>
         <textarea rows="3" placeholder="Décrivez…" id="p_mere"></textarea>
       </div>
@@ -1015,12 +1021,12 @@
         <textarea rows="4" placeholder="Décrivez…" id="p_fratrie"></textarea>
       </div>
       <div class="info-field full-width">
-        <label>Relation avec votre conjoint(e)</label>
+        <label>Votre conjoint(e)</label>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · profession · lieu de résidence · nature de la relation (complice, distante, cordiale…)</div>
         <textarea rows="3" placeholder="Décrivez…" id="p_conjoint"></textarea>
       </div>
       <div class="info-field full-width">
-        <label>Relation avec vos enfants</label>
+        <label>Vos enfants</label>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · vivent-ils avec vous ? · nature de la relation</div>
         <textarea rows="4" placeholder="Décrivez…" id="p_rel_enfants"></textarea>
       </div>
@@ -4907,24 +4913,28 @@ function buildViergeHtml() {
   body += '<p class="note">Merci de d&eacute;crire la raison de votre venue &mdash; vos &eacute;tats &eacute;motionnels, vos probl&egrave;mes de sant&eacute; actuels, vos probl&egrave;mes cognitifs (apprentissage, m&eacute;moire&hellip;), si vous avez une maladie diagnostiqu&eacute;e.</p>';
   body += '<div class="ta-bl large"></div>';
 
-  body += '<div class="ct">Contexte de vie actuel</div>';
-  var ctxf = ['Profession','Depuis quand ?','Travaillez-vous actuellement ?','Situation familiale','Nombre d&#39;enfants'];
-  ctxf.forEach(function(f){ body += '<div class="il"><span class="lbl">'+f+' :</span><span class="bl"></span></div>'; });
+  body += '<div class="ct">Situation professionnelle</div>';
+  var travf = ['Profession','Depuis quand ?','Travaillez-vous actuellement ?'];
+  travf.forEach(function(f){ body += '<div class="il"><span class="lbl">'+f+' :</span><span class="bl"></span></div>'; });
+
+  body += '<div class="ct">Situation familiale</div>';
+  var famf = ['Situation familiale','Nombre d&#39;enfants'];
+  famf.forEach(function(f){ body += '<div class="il"><span class="lbl">'+f+' :</span><span class="bl"></span></div>'; });
 
   body += '<div class="ct">Relations familiales</div>';
-  body += '<div class="lbl">Relation avec vos parents &mdash; P&egrave;re</div>';
+  body += '<div class="lbl">Votre p&egrave;re</div>';
   body += '<p class="note">Pr&eacute;nom &middot; &acirc;ge &middot; profession &middot; lieu de r&eacute;sidence &middot; nature de la relation (complice, distante, cordiale&hellip;)</p>';
   body += '<div class="ta-bl"></div>';
-  body += '<div class="lbl">Relation avec vos parents &mdash; M&egrave;re</div>';
+  body += '<div class="lbl">Votre m&egrave;re</div>';
   body += '<p class="note">Pr&eacute;nom &middot; &acirc;ge &middot; profession &middot; lieu de r&eacute;sidence &middot; nature de la relation</p>';
   body += '<div class="ta-bl"></div>';
   body += '<div class="lbl">Fr&egrave;res et s&oelig;urs (dans l&rsquo;ordre chronologique)</div>';
   body += '<p class="note">Pr&eacute;nom &middot; &acirc;ge &middot; profession &middot; lieu de r&eacute;sidence &middot; nature de la relation</p>';
   body += '<div class="ta-bl large"></div>';
-  body += '<div class="lbl">Relation avec votre conjoint(e)</div>';
+  body += '<div class="lbl">Votre conjoint(e)</div>';
   body += '<p class="note">Pr&eacute;nom &middot; &acirc;ge &middot; profession &middot; lieu de r&eacute;sidence &middot; nature de la relation</p>';
   body += '<div class="ta-bl"></div>';
-  body += '<div class="lbl">Relation avec vos enfants</div>';
+  body += '<div class="lbl">Vos enfants</div>';
   body += '<p class="note">Pr&eacute;nom &middot; &acirc;ge &middot; vivent-ils avec vous ? &middot; nature de la relation</p>';
   body += '<div class="ta-bl"></div>';
   body += '<div class="lbl">Loisirs et passions (actuels et pass&eacute;s)</div>';
@@ -4991,9 +5001,13 @@ function buildPrintHtml(vierge) {
   body += '<div class="ct">Raison de la venue</div>';
   if(g('p_raison')) body += '<div class="ta">'+g('p_raison')+'</div>';
 
-  body += '<div class="ct">Contexte de vie</div>';
-  var ctx_fields = [['Profession',g('p_profession')],['Depuis quand',g('p_profession_depuis')],['Travail',g('p_travail')],['Situation familiale',g('p_situation')],['Nombre d&#39;enfants',g('p_enfants')]];
-  ctx_fields.forEach(function(f){ if(f[1]) body += '<div class="f"><span class="fl">'+f[0]+' :</span><span class="fv">'+f[1]+'</span></div>'; });
+  body += '<div class="ct">Situation professionnelle</div>';
+  var trav_fields = [['Profession',g('p_profession')],['Depuis quand',g('p_profession_depuis')],['Travail',g('p_travail')]];
+  trav_fields.forEach(function(f){ if(f[1]) body += '<div class="f"><span class="fl">'+f[0]+' :</span><span class="fv">'+f[1]+'</span></div>'; });
+
+  body += '<div class="ct">Situation familiale</div>';
+  var fam_fields = [['Situation familiale',g('p_situation')],['Nombre d&#39;enfants',g('p_enfants')]];
+  fam_fields.forEach(function(f){ if(f[1]) body += '<div class="f"><span class="fl">'+f[0]+' :</span><span class="fv">'+f[1]+'</span></div>'; });
 
   body += '<div class="ct">Relations familiales</div>';
   var rel_fields = [['P&egrave;re',g('p_pere')],['M&egrave;re',g('p_mere')],['Fr&egrave;res/S&oelig;urs',g('p_fratrie')],['Conjoint(e)',g('p_conjoint')],['Enfants',g('p_rel_enfants')],['Loisirs',g('p_loisirs')],['&Eacute;v&eacute;nements importants',g('p_evenements')]];
