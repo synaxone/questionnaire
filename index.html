@@ -2713,6 +2713,15 @@ function buildQuestionCard(q) {
                 <input class="field-input" type="text" placeholder="ex : 2 ans" id="adddep_${id}_${i}" style="background:white">
               </div>
             </div>
+            <div class="response-group" style="margin-top:8px">
+              <label>Intensité / gêne ressentie</label>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input type="range" min="0" max="10" step="1" value="0" id="addint_${id}_${i}" oninput="updateIntensity('${id}_add${i}',this.value)" style="flex:1">
+                <span class="intensity-val" id="val_${id}_add${i}">—</span>
+              </div>
+              <div class="range-labels"><span>0 · pas gênant</span><span>5</span><span>10 · très gênant</span></div>
+              <div class="freq-tooltip" id="freq_${id}_add${i}"></div>
+            </div>
           </div>
         </div>`).join('')}
         <div class="response-group" style="margin-top:8px">
@@ -4309,6 +4318,7 @@ function construireBodyReponses() {
       var addLabel = lblSpan ? lblSpan.textContent.trim() : '';
       var qty = document.getElementById('addqty_' + qid.replace('Q','') + '_' + idx);
       var dep = document.getElementById('adddep_' + qid.replace('Q','') + '_' + idx);
+      var intensite = document.getElementById('addint_' + qid.replace('Q','') + '_' + idx);
       // Précision de l'addiction "Autre" (id ajouté le 08/07/2026 — ce champ n'avait
       // jamais eu d'id, donc son contenu était perdu, y compris via le filet de sécurité).
       var autrePrecision = document.getElementById('addautre_' + qid.replace('Q','') + '_' + idx);
@@ -4318,6 +4328,7 @@ function construireBodyReponses() {
       var parts = [addLabel];
       if (qty && qty.value) parts.push(qty.value);
       if (dep && dep.value) parts.push('depuis ' + dep.value);
+      if (intensite && parseInt(intensite.value) > 0) parts.push('intensité ' + intensite.value + '/10');
       cardLines.push(qid + ' [addiction] : ' + parts.join(' — '));
     });
 
