@@ -2667,6 +2667,7 @@ function buildQuestionCard(q) {
   if (q.special === 'libre') {
     var highlight58 = (q.num === 58 || q.num === '58b');
     var cardStyle = highlight58 ? ' style="border:2px solid var(--accent);background:var(--accent-light);box-shadow:0 2px 8px rgba(0,0,0,0.06)"' : '';
+    var pmEligible = ['58','58b','112','170b','175','182'].indexOf(String(id)) !== -1;
     return `<div class="question-card" id="qcard_${id}"${cardStyle}>
       <div class="question-main">
         <div class="question-label">
@@ -2680,6 +2681,11 @@ function buildQuestionCard(q) {
         <label>Annotation praticien</label>
         <textarea placeholder="Notes, observations…"></textarea>
         <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;cursor:pointer;color:var(--practitioner)"><input type="checkbox" id="pctx_${id}_trauma" style="accent-color:var(--practitioner)"> Trauma</label>
+        ${pmEligible ? `<div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--practitioner)">
+          <label style="font-size:12px;color:var(--practitioner);font-weight:600">Emplacements à ajouter au plan d'entraînement</label>
+          <div id="pm_items_${id}" style="margin-top:6px"></div>
+          <button onclick="addPlacementManuelItem('${id}')" style="margin-top:2px;padding:6px 14px;border:1px dashed var(--practitioner);background:transparent;border-radius:6px;color:var(--practitioner);cursor:pointer;font-size:12px">+ Ajouter un emplacement</button>
+        </div>` : ''}
       </div>
     </div>`;
   }
@@ -3625,6 +3631,27 @@ function addTraumaItem(qid, ph) {
   container.appendChild(div);
 }
 
+// Emplacements manuels sur les questions "texte libre" (Q58/58b/112/170b/175/182) —
+// demandé par Camille le 12/07/2026 : pouvoir choisir un emplacement à ajouter au
+// plan d'entraînement + une annotation personnalisée, directement sur la question,
+// avec un "+" pour en ajouter plusieurs (une même réponse peut décrire plusieurs
+// manifestations distinctes). Exporté avec le tag [placement_manuel], voir
+// construireBodyReponses() ; parsé par plan-logic.js dans placementsManuels.
+var PM_PLACEMENT_ZONES = [
+  ['T3T4','T3/T4'], ['T4P4','T4/P4'], ['T4FP2','T4/FP2'], ['T3FP1','T3/FP1'], ['T3P3','T3/P3'],
+  ['AUTRES','Autres'], ['SYNCH','Synchronie'], ['AT','Alternance de tâches']
+];
+function addPlacementManuelItem(qid) {
+  var container = document.getElementById('pm_items_' + qid);
+  if (!container) return;
+  var div = document.createElement('div');
+  div.style.cssText = 'display:grid;grid-template-columns:130px 1fr;gap:8px;margin-bottom:6px;align-items:center';
+  var options = PM_PLACEMENT_ZONES.map(function(z) { return '<option value="' + z[0] + '">' + z[1] + '</option>'; }).join('');
+  div.innerHTML = '<select class="field-input" style="background:white">' + options + '</select>'
+    + '<input class="field-input" type="text" placeholder="Annotation (ex : Fibromyalgie diagnostiquée…)" style="background:white">';
+  container.appendChild(div);
+}
+
 function addMedocItem(qid) {
   var container = document.getElementById('medoc_list_' + qid);
   var idx = container.children.length;
@@ -4523,6 +4550,23 @@ function construireBodyReponses() {
     var qt = card.querySelector('.q-num');
     var lbl = cb.parentElement ? cb.parentElement.textContent.trim() : '';
     if (qt && lbl) msg += qt.textContent + ' [praticien] : ' + lbl + '\n';
+  });
+
+  // Add emplacements manuels ("+ Ajouter un emplacement", Q58/58b/112/170b/175/182) —
+  // aucun id sur les lignes ajoutées dynamiquement (même filet de sécurité que
+  // tl_items_/medoc_list_), donc export dédié ici, séparément par question.
+  ['58','58b','112','170b','175','182'].forEach(function(qidNum) {
+    var container = document.getElementById('pm_items_' + qidNum);
+    if (!container) return;
+    var parts = [];
+    container.querySelectorAll(':scope > div').forEach(function(row) {
+      var sel = row.querySelector('select');
+      var inp = row.querySelector('input[type=text]');
+      var emplacement = sel ? sel.value : '';
+      var annotation = inp && inp.value ? inp.value.trim() : '';
+      if (emplacement) parts.push(emplacement + '|' + annotation);
+    });
+    if (parts.length) msg += 'Q' + qidNum + ' [placement_manuel] : ' + parts.join(' ⏎ ') + '\n';
   });
   return msg;
 }
