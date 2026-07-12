@@ -964,6 +964,10 @@
         <input type="text" id="p_profession">
       </div>
       <div class="info-field">
+        <label>Depuis quand ?</label>
+        <input type="text" placeholder="ex : 2018, 5 ans…" id="p_profession_depuis">
+      </div>
+      <div class="info-field">
         <label>Travaillez-vous actuellement ?</label>
         <select id="p_travail">
           <option value="">—</option>
@@ -1360,7 +1364,7 @@ function restoreFromText(text) {
     'Ville': 'p_ville', 'Main': 'p_main', 'Raison': 'p_raison',
     // Contexte de vie + relations familiales (voir construireBodyReponses)
     'Enceinte': 'p_enceinte', 'Source': 'p_source',
-    'Profession': 'p_profession', 'Travail': 'p_travail',
+    'Profession': 'p_profession', 'Profession depuis': 'p_profession_depuis', 'Travail': 'p_travail',
     'Situation familiale': 'p_situation', "Nombre d'enfants": 'p_enfants',
     'Relation père': 'p_pere', 'Relation mère': 'p_mere', 'Fratrie': 'p_fratrie',
     'Relation enfants': 'p_rel_enfants', 'Loisirs': 'p_loisirs', 'Événements': 'p_evenements'
@@ -3956,7 +3960,7 @@ function collectAllAnswers() {
     ['Âge', 'p_age'], ['Téléphone', 'p_tel'], ['Email', 'p_email'],
     ['Ville', 'p_ville'], ['Enceinte', 'p_enceinte'], ['Main dominante', 'p_main'],
     ['Comment connu le neurofeedback', 'p_source'], ['Raison de la venue', 'p_raison'],
-    ['Profession', 'p_profession'], ['Travail actuel', 'p_travail'],
+    ['Profession', 'p_profession'], ['Profession depuis', 'p_profession_depuis'], ['Travail actuel', 'p_travail'],
     ['Situation familiale', 'p_situation'], ['Nombre enfants', 'p_enfants'],
   ];
   lines.push('── INFORMATIONS PERSONNELLES ──');
@@ -4058,7 +4062,7 @@ function collectAllAnswers() {
 // ne correspondent plus au moment d'un import, Synaxone NFB affiche un
 // avertissement — voir importerIntake(). À mettre à jour à chaque fois
 // qu'une question change de format ici.
-var VERSION_QUESTIONNAIRE = "2026-07-08";
+var VERSION_QUESTIONNAIRE = "2026-07-12";
 
 // GARDE-FOU CHIFFREMENT — clé PUBLIQUE du praticien (Camille), sans danger à exposer
 // ici (c'est prévu pour). Sert à chiffrer le questionnaire avant téléchargement, voir
@@ -4230,6 +4234,7 @@ function construireBodyReponses() {
   msg += 'Enceinte : ' + _champ1('p_enceinte') + '\n';
   msg += 'Source : ' + _champ1('p_source') + '\n';
   msg += 'Profession : ' + _champ1('p_profession') + '\n';
+  msg += 'Profession depuis : ' + _champ1('p_profession_depuis') + '\n';
   msg += 'Travail : ' + _champ1('p_travail') + '\n';
   msg += 'Situation familiale : ' + _champ1('p_situation') + '\n';
   msg += "Nombre d'enfants : " + _champ1('p_enfants') + '\n';
@@ -4896,7 +4901,7 @@ function buildViergeHtml() {
   body += '<div class="ta-bl large"></div>';
 
   body += '<div class="ct">Contexte de vie actuel</div>';
-  var ctxf = ['Profession','Travaillez-vous actuellement ?','Situation familiale','Nombre d&#39;enfants'];
+  var ctxf = ['Profession','Depuis quand ?','Travaillez-vous actuellement ?','Situation familiale','Nombre d&#39;enfants'];
   ctxf.forEach(function(f){ body += '<div class="il"><span class="lbl">'+f+' :</span><span class="bl"></span></div>'; });
 
   body += '<div class="ct">Relations familiales</div>';
@@ -4977,7 +4982,7 @@ function buildPrintHtml(vierge) {
   if(g('p_raison')) body += '<div class="ta">'+g('p_raison')+'</div>';
 
   body += '<div class="ct">Contexte de vie</div>';
-  var ctx_fields = [['Profession',g('p_profession')],['Travail',g('p_travail')],['Situation familiale',g('p_situation')],['Nombre d&#39;enfants',g('p_enfants')]];
+  var ctx_fields = [['Profession',g('p_profession')],['Depuis quand',g('p_profession_depuis')],['Travail',g('p_travail')],['Situation familiale',g('p_situation')],['Nombre d&#39;enfants',g('p_enfants')]];
   ctx_fields.forEach(function(f){ if(f[1]) body += '<div class="f"><span class="fl">'+f[0]+' :</span><span class="fv">'+f[1]+'</span></div>'; });
 
   body += '<div class="ct">Relations familiales</div>';
@@ -5105,7 +5110,7 @@ function sauvegarderBrouillon() {
     var data = {};
     // Champs texte/select
     ['p_nom','p_prenom','p_ddn','p_age','p_email','p_tel','p_ville','p_main','p_raison',
-     'p_code','p_enceinte','p_situation','p_enfants','p_profession','p_travail',
+     'p_code','p_enceinte','p_situation','p_enfants','p_profession','p_profession_depuis','p_travail',
      'p_pere','p_mere','p_fratrie','p_enfants_rel','p_loisirs','p_evenements'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) data[id] = el.value;
@@ -5154,7 +5159,7 @@ function sauvegarderBrouillon() {
 function restaurerBrouillon(data) {
   try {
     ['p_nom','p_prenom','p_ddn','p_age','p_email','p_tel','p_ville','p_main','p_raison',
-     'p_code','p_enceinte','p_situation','p_enfants','p_profession','p_travail',
+     'p_code','p_enceinte','p_situation','p_enfants','p_profession','p_profession_depuis','p_travail',
      'p_pere','p_mere','p_fratrie','p_enfants_rel','p_loisirs','p_evenements'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el && data[id] !== undefined) el.value = data[id];
