@@ -348,13 +348,13 @@
   }
 
   .freq-tooltip {
-    font-size: 13px;
+    font-size: 17px;
     font-weight: 600;
     color: var(--accent);
     font-style: italic;
     text-align: center;
-    margin-top: 2px;
-    min-height: 17px;
+    margin-top: 4px;
+    min-height: 22px;
   }
 
   @media (min-width: 700px) {
@@ -1015,6 +1015,11 @@
         <textarea rows="4" placeholder="Décrivez…" id="p_fratrie"></textarea>
       </div>
       <div class="info-field full-width">
+        <label>Relation avec votre conjoint(e)</label>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · profession · lieu de résidence · nature de la relation (complice, distante, cordiale…)</div>
+        <textarea rows="3" placeholder="Décrivez…" id="p_conjoint"></textarea>
+      </div>
+      <div class="info-field full-width">
         <label>Relation avec vos enfants</label>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · vivent-ils avec vous ? · nature de la relation</div>
         <textarea rows="4" placeholder="Décrivez…" id="p_rel_enfants"></textarea>
@@ -1367,6 +1372,7 @@ function restoreFromText(text) {
     'Profession': 'p_profession', 'Profession depuis': 'p_profession_depuis', 'Travail': 'p_travail',
     'Situation familiale': 'p_situation', "Nombre d'enfants": 'p_enfants',
     'Relation père': 'p_pere', 'Relation mère': 'p_mere', 'Fratrie': 'p_fratrie',
+    'Relation conjoint': 'p_conjoint',
     'Relation enfants': 'p_rel_enfants', 'Loisirs': 'p_loisirs', 'Événements': 'p_evenements'
     // 'Age' volontairement omis : recalculé via calcAgeSel() à partir de la date de naissance
   };
@@ -3969,7 +3975,7 @@ function collectAllAnswers() {
     if (el && el.value) lines.push(label + ' : ' + el.value);
   });
 
-  var textareas = ['p_pere','p_mere','p_fratrie','p_rel_enfants','p_loisirs','p_evenements'];
+  var textareas = ['p_pere','p_mere','p_fratrie','p_conjoint','p_rel_enfants','p_loisirs','p_evenements'];
   textareas.forEach(id => {
     var el = document.getElementById(id);
     if (el && el.value) {
@@ -4241,6 +4247,7 @@ function construireBodyReponses() {
   msg += 'Relation père : ' + _champ1('p_pere') + '\n';
   msg += 'Relation mère : ' + _champ1('p_mere') + '\n';
   msg += 'Fratrie : ' + _champ1('p_fratrie') + '\n';
+  msg += 'Relation conjoint : ' + _champ1('p_conjoint') + '\n';
   msg += 'Relation enfants : ' + _champ1('p_rel_enfants') + '\n';
   msg += 'Loisirs : ' + _champ1('p_loisirs') + '\n';
   msg += 'Événements : ' + _champ1('p_evenements') + '\n';
@@ -4914,6 +4921,9 @@ function buildViergeHtml() {
   body += '<div class="lbl">Fr&egrave;res et s&oelig;urs (dans l&rsquo;ordre chronologique)</div>';
   body += '<p class="note">Pr&eacute;nom &middot; &acirc;ge &middot; profession &middot; lieu de r&eacute;sidence &middot; nature de la relation</p>';
   body += '<div class="ta-bl large"></div>';
+  body += '<div class="lbl">Relation avec votre conjoint(e)</div>';
+  body += '<p class="note">Pr&eacute;nom &middot; &acirc;ge &middot; profession &middot; lieu de r&eacute;sidence &middot; nature de la relation</p>';
+  body += '<div class="ta-bl"></div>';
   body += '<div class="lbl">Relation avec vos enfants</div>';
   body += '<p class="note">Pr&eacute;nom &middot; &acirc;ge &middot; vivent-ils avec vous ? &middot; nature de la relation</p>';
   body += '<div class="ta-bl"></div>';
@@ -4986,7 +4996,7 @@ function buildPrintHtml(vierge) {
   ctx_fields.forEach(function(f){ if(f[1]) body += '<div class="f"><span class="fl">'+f[0]+' :</span><span class="fv">'+f[1]+'</span></div>'; });
 
   body += '<div class="ct">Relations familiales</div>';
-  var rel_fields = [['P&egrave;re',g('p_pere')],['M&egrave;re',g('p_mere')],['Fr&egrave;res/S&oelig;urs',g('p_fratrie')],['Enfants',g('p_rel_enfants')],['Loisirs',g('p_loisirs')],['&Eacute;v&eacute;nements importants',g('p_evenements')]];
+  var rel_fields = [['P&egrave;re',g('p_pere')],['M&egrave;re',g('p_mere')],['Fr&egrave;res/S&oelig;urs',g('p_fratrie')],['Conjoint(e)',g('p_conjoint')],['Enfants',g('p_rel_enfants')],['Loisirs',g('p_loisirs')],['&Eacute;v&eacute;nements importants',g('p_evenements')]];
   rel_fields.forEach(function(f){ if(f[1]) body += '<div class="f"><span class="fl">'+f[0]+' :</span><br><div class="ta">'+f[1]+'</div></div>'; });
 
   // ── Questions numérotées ──
