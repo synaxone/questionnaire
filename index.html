@@ -2212,10 +2212,23 @@ function buildQuestionCard(q) {
         </div>
         ${noteHtml}
         <div class="yesno-group" style="margin-bottom:8px">
-          <button class="yesno-btn" onclick="selectYesNo(this, 'oui', 'yn_${id}')">Oui</button>
-          <button class="yesno-btn" onclick="selectYesNo(this, 'non', 'yn_${id}')">Non</button>
+          <button class="yesno-btn" onclick="selectYesNo(this, 'oui', 'yn_${id}')${q.alsoIntensity ? `;document.getElementById('intensity_detail_${id}').style.display='block'` : ''}">Oui</button>
+          <button class="yesno-btn" onclick="selectYesNo(this, 'non', 'yn_${id}')${q.alsoIntensity ? `;document.getElementById('intensity_detail_${id}').style.display='none'` : ''}">Non</button>
         </div>
         <input type="hidden" id="yn_${id}">
+        ${q.alsoIntensity ? `<div id="intensity_detail_${id}" style="display:none;margin-bottom:8px">
+          <div class="response-group">
+            <label>0 → 10</label>
+            <div class="intensity-display">
+              <span class="intensity-val" id="val_${id}">—</span>
+              <div style="flex:1">
+                <input type="range" min="0" max="10" step="1" value="0" oninput="updateIntensity('${id}', this.value)">
+                <div class="range-labels"><span>0 · léger</span><span>5</span><span>10 · sévère</span></div>
+                <div class="freq-tooltip" id="freq_${id}"></div>
+              </div>
+            </div>
+          </div>
+        </div>` : ''}
         <div class="response-grid" style="grid-template-columns:${q.noDate ? '1fr' : '1fr 1fr'}">
           <div class="response-group">
             <label>Commentaires</label>
@@ -2784,6 +2797,17 @@ function buildQuestionCard(q) {
         </div>
         <input type="hidden" id="yn_${id}">
         <div id="dep_detail_${id}" style="display:none;padding:12px;background:var(--accent-light);border-radius:8px">
+          <div class="response-group" style="margin-bottom:10px">
+            <label>0 → 10</label>
+            <div class="intensity-display">
+              <span class="intensity-val" id="val_${id}">—</span>
+              <div style="flex:1">
+                <input type="range" min="0" max="10" step="1" value="0" oninput="updateIntensity('${id}', this.value)">
+                <div class="range-labels"><span>0 · léger</span><span>5</span><span>10 · sévère</span></div>
+                <div class="freq-tooltip" id="freq_${id}"></div>
+              </div>
+            </div>
+          </div>
           <div class="response-group" style="margin-bottom:10px">
             <label>Quand ? (période, durée…)</label>
             <textarea class="field-input" placeholder="ex : depuis 2 ans, épisode en 2020…" rows="2" id="dep_${id}" style="background:white;width:100%" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
@@ -3731,7 +3755,7 @@ var emotionnelQuestions = [
   { num: 104, text: "Avez-vous des pensées négatives obsessionnelles ?", rangeLabels: ["0 · jamais", "5", "10 · en permanence"], note: "Ce sont des pensées négatives qui reviennent en permanence : se dire qu'on est nul(le), que tout va mal, anticiper le pire de façon systématique, ruminer des erreurs passées." },
   { num: 105, text: "Avez-vous souvent des souvenirs de traumatismes ? (images, sensations…)", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
   { num: 106, text: "Êtes-vous dépressif(ve) ou avez-vous été diagnostiqué(e) en dépression ?", special: "depression_detail", note: "La dépression se caractérise par une tristesse persistante, une perte d'intérêt et d'énergie durant plusieurs semaines, accompagnée parfois de troubles du sommeil, de l'appétit, de la concentration et d'idées sombres.", pContexts: ["Pour effet antidépresseur fort et énergisant"] },
-  { num: 107, text: "Êtes-vous actuellement ou avez-vous été diagnostiqué(e) en burn out ?", noIntensity: true, note: "Le burn out est un épuisement professionnel intense — physique, émotionnel et mental — lié à un stress chronique, souvent au travail. Il se traduit par un sentiment de vide, de perte de sens, d'incapacité à faire face.", pContexts: ["Pour effet antidépresseur fort et énergisant"] },
+  { num: 107, text: "Êtes-vous actuellement ou avez-vous été diagnostiqué(e) en burn out ?", noIntensity: true, alsoIntensity: true, note: "Le burn out est un épuisement professionnel intense — physique, émotionnel et mental — lié à un stress chronique, souvent au travail. Il se traduit par un sentiment de vide, de perte de sens, d'incapacité à faire face.", pContexts: ["Pour effet antidépresseur fort et énergisant"] },
   { num: 108, text: "Pensez-vous qu'à certains moments vous n'êtes pas dans la réalité ?", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
   { num: 109, text: "Avez-vous eu dans le passé des épisodes dissociatifs ?", noIntensity: true, note: "La dissociation est une perturbation de la conscience, de la mémoire, de l'identité ou des émotions. Elle peut se manifester par : sentiment de se voir de l'extérieur (dépersonnalisation), impression de vivre dans un rêve ou derrière une vitre (déréalisation), vide mental soudain, perte de mémoire d'événements récents, engourdissement émotionnel, sensation que certaines parties du corps sont étrangères ou disproportionnées, changements brusques d'humeur sans raison apparente, ou impression d'être 'ailleurs' pendant une conversation. Souvent liée à un stress intense ou à un traumatisme." },
   { num: 110, text: "Avez-vous parfois des hallucinations ?", rangeLabels: ["0 · jamais", "5", "10 · souvent"] },
