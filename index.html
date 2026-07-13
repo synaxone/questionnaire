@@ -1386,9 +1386,20 @@ document.addEventListener('input', function(e) {
 // placements de capteurs — sans rapport, ne pas mélanger).
 function injecterCheckboxSuiviBilan() {
   document.querySelectorAll('.practitioner-annotation').forEach(function(el) {
-    if (el.querySelector('.suivi-bilan-check')) return;
     var qid = el.id.replace(/^annot_/, '');
     if (!qid) return;
+
+    // CORRECTIF DE PERTE DE DONNÉES (13/07/2026) : les textarea d'annotation praticien
+    // n'ont jamais eu d'id — sauvegarderBrouillon()/restaurerBrouillon() (localStorage,
+    // toutes les 30s) ne sauvegardent que les champs identifiés par un id, donc ces
+    // annotations étaient rédigées mais jamais protégées par l'autosave : une fermeture
+    // ou un rechargement de la page les effaçait silencieusement. Remonté par Camille
+    // (Q170b). Id assigné ici plutôt que dans les ~40 templates inline, pour éviter la
+    // dérive déjà connue entre copies du fichier.
+    var ta = el.querySelector('textarea');
+    if (ta && !ta.id) ta.id = 'prat_annot_' + qid;
+
+    if (el.querySelector('.suivi-bilan-check')) return;
     var label = document.createElement('label');
     label.className = 'suivi-bilan-check';
     label.style.cssText = 'display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;cursor:pointer;color:var(--practitioner)';
@@ -5297,6 +5308,16 @@ function buildPrintHtml(vierge) {
 // ── SAUVEGARDE AUTOMATIQUE (localStorage) ──
 var SAVE_KEY = 'synaxone_nfb_draft';
 
+// Listes dynamiques "+ Ajouter…" sans id propre sur leurs lignes — voir le correctif
+// de perte de données du 13/07/2026 dans sauvegarderBrouillon()/restaurerBrouillon().
+var DYN_LIST_PREFIXES = ['tl_items_', 'medoc_list_', 'meno_items_', 'pm_items_'];
+var DYN_LIST_ADDERS = {
+  'tl_items_': function(qid) { addTraumaItem(qid, ''); },
+  'medoc_list_': function(qid) { addMedocItem(qid); },
+  'meno_items_': function(qid) { addMenoItem(qid); },
+  'pm_items_': function(qid) { addPlacementManuelItem(qid); }
+};
+
 function sauvegarderBrouillon() {
   try {
     var data = {};
@@ -5342,6 +5363,31 @@ function sauvegarderBrouillon() {
     document.querySelectorAll('input[type=radio]:checked').forEach(function(el) {
       if (el.name) data['radio_' + el.name] = el.value;
     });
+
+    // CORRECTIF DE PERTE DE DONNÉES (13/07/2026) : les lignes des listes dynamiques
+    // "+ Ajouter…" (traumatismes tl_items_, médicaments medoc_list_, symptômes
+    // ménopause meno_items_, emplacements manuels praticien pm_items_) n'ont jamais
+    // d'id propre — déjà connu et corrigé pour l'export final (construireBodyReponses,
+    // 08/07/2026 puis 12/07/2026), mais jamais pour l'autosave toutes les 30s : une
+    // fermeture/rechargement avant l'export effaçait silencieusement ces lignes.
+    // Remonté par Camille le 13/07/2026 (Q170b, emplacements manuels annotés perdus).
+    // Sérialisation générique par carte : peu importe la composition exacte des champs
+    // de chaque ligne (select+texte, texte+texte, texte+curseur…), on capture la valeur
+    // de chaque champ éditable dans l'ordre du DOM.
+    document.querySelectorAll('.question-card').forEach(function(card) {
+      var qidNum = card.id.replace(/^qcard_/, '');
+      if (!qidNum) return;
+      DYN_LIST_PREFIXES.forEach(function(prefix) {
+        var container = document.getElementById(prefix + qidNum);
+        if (!container) return;
+        var lignes = [];
+        container.querySelectorAll(':scope > div').forEach(function(row) {
+          lignes.push(Array.from(row.querySelectorAll('input, select, textarea')).map(function(el) { return el.value; }));
+        });
+        if (lignes.length) data['__dyn__' + prefix + qidNum] = lignes;
+      });
+    });
+
     data['_section'] = currentSection;
     data['_ts'] = new Date().toISOString();
     localStorage.setItem(SAVE_KEY, JSON.stringify(data));
@@ -5414,6 +5460,29 @@ function restaurerBrouillon(data) {
         var radio = document.querySelector('input[type=radio][name="' + name + '"][value="' + data[k] + '"]');
         if (radio) { radio.checked = true; radio.dispatchEvent(new Event('change')); }
       }
+    });
+    // Listes dynamiques sans id (voir sauvegarderBrouillon ci-dessus) — recrée une
+    // ligne par entrée sauvegardée via la fonction "+ Ajouter…" correspondante, puis
+    // réinjecte les valeurs dans l'ordre du DOM.
+    DYN_LIST_PREFIXES.forEach(function(prefix) {
+      Object.keys(data).forEach(function(k) {
+        if (k.indexOf('__dyn__' + prefix) !== 0) return;
+        var qidNum = k.substring(('__dyn__' + prefix).length);
+        var container = document.getElementById(prefix + qidNum);
+        var adder = DYN_LIST_ADDERS[prefix];
+        if (!container || !adder) return;
+        data[k].forEach(function(valeurs) {
+          adder(qidNum);
+          var row = container.lastElementChild;
+          if (!row) return;
+          var champs = row.querySelectorAll('input, select, textarea');
+          champs.forEach(function(el, i) {
+            if (valeurs[i] === undefined) return;
+            el.value = valeurs[i];
+            if (el.tagName === 'TEXTAREA') { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+          });
+        });
+      });
     });
     if (data['_section'] !== undefined) goToSection(data['_section']);
   } catch(e) {}
