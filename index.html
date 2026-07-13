@@ -443,9 +443,36 @@
 
   .practitioner-annotation {
     display: none;
+    position: relative;
     border-top: 1px dashed var(--border);
     padding: 10px 16px;
     background: var(--practitioner-light);
+  }
+
+  /* Case "à suivre" en haut à droite du bloc praticien (13/07/2026, demande Camille :
+     avant, la case était en bas, invisible sans faire défiler toute la carte). */
+  .suivi-bilan-check {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    margin: 0 !important;
+    background: white;
+    padding: 3px 7px;
+    border-radius: 5px;
+    border: 1px solid #d4b8dc;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 480px) {
+    .suivi-bilan-check {
+      position: static;
+      display: flex;
+      margin-top: 8px !important;
+      white-space: normal;
+      background: none;
+      border: none;
+      padding: 0;
+    }
   }
 
   .practitioner-annotation.visible {
@@ -980,7 +1007,7 @@
       <div class="info-field full-width">
         <label>Autres précisions</label>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Depuis quand ? Avez-vous eu d'autres métiers auparavant ? Reconversion ? Contexte particulier au travail…</div>
-        <textarea rows="3" placeholder="Précisions complémentaires…" id="p_pro_libre" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <textarea rows="3" placeholder="Précisions complémentaires…" id="p_pro_libre" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="gererPucesAuto(event)" onfocus="amorcerPuce(event)"></textarea>
       </div>
     </div>
   </div>
@@ -1007,7 +1034,7 @@
       <div class="info-field full-width">
         <label>Autres précisions</label>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Depuis quand ? Famille recomposée ? Contexte particulier…</div>
-        <textarea rows="3" placeholder="Précisions complémentaires…" id="p_famille_libre" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <textarea rows="3" placeholder="Précisions complémentaires…" id="p_famille_libre" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="gererPucesAuto(event)" onfocus="amorcerPuce(event)"></textarea>
       </div>
     </div>
   </div>
@@ -1018,35 +1045,35 @@
       <div class="info-field full-width">
         <label>Votre père</label>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · profession · lieu de résidence · nature de la relation (complice, distante, cordiale…)</div>
-        <textarea rows="3" placeholder="Décrivez…" id="p_pere" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <textarea rows="3" placeholder="Décrivez…" id="p_pere" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="gererPucesAuto(event)" onfocus="amorcerPuce(event)"></textarea>
       </div>
       <div class="info-field full-width">
         <label>Votre mère</label>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · profession · lieu de résidence · nature de la relation (complice, distante, cordiale…)</div>
-        <textarea rows="3" placeholder="Décrivez…" id="p_mere" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <textarea rows="3" placeholder="Décrivez…" id="p_mere" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="gererPucesAuto(event)" onfocus="amorcerPuce(event)"></textarea>
       </div>
       <div class="info-field full-width">
         <label>Frères et sœurs (dans l&rsquo;ordre chronologique)</label>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · profession · lieu de résidence · nature de la relation (complice, distante, cordiale…)</div>
-        <textarea rows="4" placeholder="Décrivez…" id="p_fratrie" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <textarea rows="4" placeholder="Décrivez…" id="p_fratrie" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="gererPucesAuto(event)" onfocus="amorcerPuce(event)"></textarea>
       </div>
       <div class="info-field full-width">
         <label>Votre conjoint(e)</label>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · profession · lieu de résidence · nature de la relation (complice, distante, cordiale…) · durée de la relation</div>
-        <textarea rows="3" placeholder="Décrivez…" id="p_conjoint" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <textarea rows="3" placeholder="Décrivez…" id="p_conjoint" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="gererPucesAuto(event)" onfocus="amorcerPuce(event)"></textarea>
       </div>
       <div class="info-field full-width">
         <label>Vos enfants</label>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · vivent-ils avec vous ? · nature de la relation</div>
-        <textarea rows="4" placeholder="Décrivez…" id="p_rel_enfants" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <textarea rows="4" placeholder="Décrivez…" id="p_rel_enfants" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="gererPucesAuto(event)" onfocus="amorcerPuce(event)"></textarea>
       </div>
       <div class="info-field full-width">
         <label>Loisirs et passions (actuels et passés)</label>
-        <textarea rows="3" placeholder="Sports, arts, musique, voyages…" id="p_loisirs" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <textarea rows="3" placeholder="Sports, arts, musique, voyages…" id="p_loisirs" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="gererPucesAuto(event)" onfocus="amorcerPuce(event)"></textarea>
       </div>
       <div class="info-field full-width" style="border-bottom:none">
         <label>Événements importants de votre vie (chronologiquement, heureux ou difficiles)</label>
-        <textarea rows="5" placeholder="Si vous êtes d'accord, décrivez quelques événements marquants de votre vie…" id="p_evenements" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <textarea rows="5" placeholder="Si vous êtes d'accord, décrivez quelques événements marquants de votre vie…" id="p_evenements" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="gererPucesAuto(event)" onfocus="amorcerPuce(event)"></textarea>
       </div>
     </div>
   </div>
@@ -1338,6 +1365,40 @@ function formatDDN(input) {
     formatted = digits.slice(0, 2) + '/' + digits.slice(2);
   }
   input.value = formatted;
+}
+
+// ===== PUCES AUTOMATIQUES DANS LES ZONES DE TEXTE "À LISTER" (13/07/2026) =====
+// Page "Informations" : plusieurs zones de texte demandent d'énumérer plusieurs éléments
+// (loisirs, événements, fratrie, enfants…). Entrée insère une puce "• " en début de ligne
+// suivante, comme dans un traitement de texte. Reste du texte brut (juste le caractère
+// "• "), donc aucun impact sur l'export/le rechargement existants (restoreFromText).
+function gererPucesAuto(e) {
+  if (e.key !== 'Enter' || e.shiftKey) return;
+  var ta = e.target;
+  var start = ta.selectionStart, end = ta.selectionEnd;
+  var value = ta.value;
+  var lineStart = value.lastIndexOf('\n', start - 1) + 1;
+  var currentLine = value.substring(lineStart, start);
+  e.preventDefault();
+  var pos;
+  if (/^•\s*$/.test(currentLine)) {
+    // Ligne vide avec puce seule : Entrée sort de la liste (retire la puce vide).
+    ta.value = value.substring(0, lineStart) + value.substring(end);
+    pos = lineStart;
+  } else {
+    var insertion = '\n• ';
+    ta.value = value.substring(0, start) + insertion + value.substring(end);
+    pos = start + insertion.length;
+  }
+  ta.selectionStart = ta.selectionEnd = pos;
+  ta.style.height = 'auto';
+  ta.style.height = ta.scrollHeight + 'px';
+}
+
+// Amorce la première puce dès que le champ, vide, reçoit le focus.
+function amorcerPuce(e) {
+  var ta = e.target;
+  if (!ta.value) { ta.value = '• '; ta.selectionStart = ta.selectionEnd = ta.value.length; }
 }
 
 // ===== CALCUL AUTOMATIQUE DE L'ÂGE =====
@@ -1678,7 +1739,7 @@ var sommeilQuestions = [
   { num: 13, text: "Avez-vous des apnées du sommeil (arrêts respiratoires) ?", special: "q13_apnee" },
   { num: 14, text: "Ronflez-vous ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · toutes les nuits"], range2: ["0 · léger", "5", "10 · très fort"] },
   { num: 15, text: "Parlez-vous pendant votre sommeil ?", rangeLabels: ["0 · jamais", "5", "10 · toutes les nuits"] },
-  { num: 16, text: "Grincez-vous des dents la nuit ? (bruxisme)", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · toutes les nuits"], range2: ["0 · léger", "5", "10 · très intense"] },
+  { num: 16, text: "Grincez-vous ou serrez-vous les dents ? (bruxisme, la nuit ou la journée)", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · toutes les nuits"], range2: ["0 · léger", "5", "10 · très intense"] },
   { num: 17, text: "Êtes-vous somnambule ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · toutes les nuits"], range2: ["0 · léger", "5", "10 · très intense"] },
   { num: 18, text: "Avez-vous des problèmes d'énurésie ? (fuite d'urine la nuit, souvent liée au stress ou à l'anxiété)", pContexts: ["Enfant de plus de 8 ans"] },
   { num: 19, text: "Avez-vous d'autres problèmes de sommeil que ceux énoncés ? (précisez)" },
@@ -1774,6 +1835,17 @@ function updateAnswerHighlights() {
     // Check checkboxes
     card.querySelectorAll('input[type=checkbox]:not([id^=pctx_]):not([id^=suivi10_])').forEach(cb => {
       if (cb.checked) hasAnswer = true;
+    });
+    // Check texte libre / nombre / date (commentaires, "depuis quand", listes ajoutées
+    // dynamiquement…) — sans ça, une question rechargée avec SEULEMENT une réponse texte
+    // (rebasculée depuis un fichier partiellement rempli via restoreFromText) n'affichait
+    // jamais le trait de couleur côté praticien, alors que la donnée était bien là
+    // (remonté par Camille le 13/07/2026). Exclut les notes du praticien lui-même
+    // (.practitioner-annotation) et les champs de recherche.
+    card.querySelectorAll('input[type=text], input[type=number], input[type=date], textarea').forEach(inp => {
+      if (inp.closest('.practitioner-annotation')) return;
+      if (/search|recherche/i.test(inp.id || '')) return;
+      if (inp.value && String(inp.value).trim()) hasAnswer = true;
     });
     if (hasAnswer) card.classList.add('has-answer');
     else card.classList.remove('has-answer');
@@ -2040,6 +2112,7 @@ function buildQuestionCard(q) {
                 <input type="range" min="0" max="10" step="1" value="0"
                   oninput="updateIntensity('${id}_${i}', this.value)">
                 <div class="range-labels"><span>0 · pas du tout</span><span>5</span><span>10 · énormément</span></div>
+                <div class="freq-tooltip" id="freq_${id}_${i}"></div>
               </div>
             </div>
           </div>
@@ -2057,6 +2130,7 @@ function buildQuestionCard(q) {
                 <input type="range" min="0" max="10" step="1" value="0"
                   oninput="updateIntensity('${id}_autre', this.value)">
                 <div class="range-labels"><span>0 · pas du tout</span><span>5</span><span>10 · énormément</span></div>
+                <div class="freq-tooltip" id="freq_${id}_autre"></div>
               </div>
             </div>
           </div>
@@ -2102,6 +2176,7 @@ function buildQuestionCard(q) {
                   <span>${q.range1 ? q.range1[1] : '5'}</span>
                   <span>${q.range1 ? q.range1[2] : '10 · max'}</span>
                 </div>
+                <div class="freq-tooltip" id="freq_${id}_a"></div>
               </div>
             </div>
           </div>
@@ -2117,6 +2192,7 @@ function buildQuestionCard(q) {
                   <span>${q.range2 ? q.range2[1] : '5'}</span>
                   <span>${q.range2 ? q.range2[2] : '10 · toujours'}</span>
                 </div>
+                <div class="freq-tooltip" id="freq_${id}_b"></div>
               </div>
             </div>
           </div>
@@ -2210,6 +2286,7 @@ function buildQuestionCard(q) {
               <input type="range" min="0" max="10" step="1" value="0"
                 oninput="updateIntensity('${id}_ctx${i}', this.value)">
               <div class="range-labels"><span>0 · pas du tout</span><span>5</span><span>10 · énormément</span></div>
+              <div class="freq-tooltip" id="freq_${id}_ctx${i}"></div>
             </div>
           </div>
         </div>`).join('')}
@@ -2256,6 +2333,7 @@ function buildQuestionCard(q) {
               <div style="flex:1">
                 <input type="range" min="0" max="10" step="1" value="0" oninput="updateIntensity('${id}', this.value)" id="range_${id}">
                 <div class="range-labels"><span>0 · pas du tout</span><span>5</span><span>10 · très</span></div>
+                <div class="freq-tooltip" id="freq_${id}"></div>
               </div>
             </div>
           </div>
@@ -2394,6 +2472,7 @@ function buildQuestionCard(q) {
               <div style="flex:1">
                 <input type="range" min="0" max="10" step="1" value="0" oninput="updateIntensity('${id}_${i}', this.value)">
                 <div class="range-labels"><span>0 · jamais</span><span>5 · régulièrement</span><span>10 · toutes les nuits</span></div>
+                <div class="freq-tooltip" id="freq_${id}_${i}"></div>
               </div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
@@ -2628,6 +2707,7 @@ function buildQuestionCard(q) {
               <div style="flex:1">
                 <input type="range" min="0" max="10" step="1" value="0" oninput="updateIntensity('${id}_${i}',this.value)">
                 <div class="range-labels"><span>0 · très peu</span><span>5</span><span>10 · très</span></div>
+                <div class="freq-tooltip" id="freq_${id}_${i}"></div>
               </div>
             </div>
           </div>
