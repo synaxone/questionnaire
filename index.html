@@ -951,7 +951,7 @@
     <div class="info-grid">
       <div class="info-field full-width" style="border-bottom:none">
         <label>Merci de décrire la raison de votre venue — vos états émotionnels, vos problèmes de santé actuels, vos problèmes cognitifs (apprentissage, mémoire…), si vous avez une maladie diagnostiquée.</label>
-        <textarea rows="5" placeholder="Décrivez ici…" id="p_raison"></textarea>
+        <textarea rows="5" placeholder="Décrivez ici…" id="p_raison" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
       </div>
     </div>
   </div>
@@ -977,6 +977,11 @@
           <option>Retraité(e)</option>
         </select>
       </div>
+      <div class="info-field full-width">
+        <label>Autres précisions</label>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Depuis quand ? Avez-vous eu d'autres métiers auparavant ? Reconversion ? Contexte particulier au travail…</div>
+        <textarea rows="3" placeholder="Précisions complémentaires…" id="p_pro_libre" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      </div>
     </div>
   </div>
 
@@ -999,6 +1004,11 @@
         <label>Nombre d'enfants</label>
         <input type="number" min="0" step="1" id="p_enfants">
       </div>
+      <div class="info-field full-width">
+        <label>Autres précisions</label>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Depuis quand ? Famille recomposée ? Contexte particulier…</div>
+        <textarea rows="3" placeholder="Précisions complémentaires…" id="p_famille_libre" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      </div>
     </div>
   </div>
 
@@ -1008,35 +1018,35 @@
       <div class="info-field full-width">
         <label>Votre père</label>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · profession · lieu de résidence · nature de la relation (complice, distante, cordiale…)</div>
-        <textarea rows="3" placeholder="Décrivez…" id="p_pere"></textarea>
+        <textarea rows="3" placeholder="Décrivez…" id="p_pere" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
       </div>
       <div class="info-field full-width">
         <label>Votre mère</label>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · profession · lieu de résidence · nature de la relation (complice, distante, cordiale…)</div>
-        <textarea rows="3" placeholder="Décrivez…" id="p_mere"></textarea>
+        <textarea rows="3" placeholder="Décrivez…" id="p_mere" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
       </div>
       <div class="info-field full-width">
         <label>Frères et sœurs (dans l&rsquo;ordre chronologique)</label>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · profession · lieu de résidence · nature de la relation (complice, distante, cordiale…)</div>
-        <textarea rows="4" placeholder="Décrivez…" id="p_fratrie"></textarea>
+        <textarea rows="4" placeholder="Décrivez…" id="p_fratrie" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
       </div>
       <div class="info-field full-width">
         <label>Votre conjoint(e)</label>
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · profession · lieu de résidence · nature de la relation (complice, distante, cordiale…)</div>
-        <textarea rows="3" placeholder="Décrivez…" id="p_conjoint"></textarea>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · profession · lieu de résidence · nature de la relation (complice, distante, cordiale…) · durée de la relation</div>
+        <textarea rows="3" placeholder="Décrivez…" id="p_conjoint" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
       </div>
       <div class="info-field full-width">
         <label>Vos enfants</label>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Prénom · âge · vivent-ils avec vous ? · nature de la relation</div>
-        <textarea rows="4" placeholder="Décrivez…" id="p_rel_enfants"></textarea>
+        <textarea rows="4" placeholder="Décrivez…" id="p_rel_enfants" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
       </div>
       <div class="info-field full-width">
         <label>Loisirs et passions (actuels et passés)</label>
-        <textarea rows="3" placeholder="Sports, arts, musique, voyages…" id="p_loisirs"></textarea>
+        <textarea rows="3" placeholder="Sports, arts, musique, voyages…" id="p_loisirs" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
       </div>
       <div class="info-field full-width" style="border-bottom:none">
         <label>Événements importants de votre vie (chronologiquement, heureux ou difficiles)</label>
-        <textarea rows="5" placeholder="Si vous êtes d'accord, décrivez quelques événements marquants de votre vie…" id="p_evenements"></textarea>
+        <textarea rows="5" placeholder="Si vous êtes d'accord, décrivez quelques événements marquants de votre vie…" id="p_evenements" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
       </div>
     </div>
   </div>
@@ -1425,6 +1435,7 @@ function restoreFromText(text) {
     'Enceinte': 'p_enceinte', 'Source': 'p_source',
     'Profession': 'p_profession', 'Profession depuis': 'p_profession_depuis', 'Travail': 'p_travail',
     'Situation familiale': 'p_situation', "Nombre d'enfants": 'p_enfants',
+    'Profession libre': 'p_pro_libre', 'Famille libre': 'p_famille_libre',
     'Relation père': 'p_pere', 'Relation mère': 'p_mere', 'Fratrie': 'p_fratrie',
     'Relation conjoint': 'p_conjoint',
     'Relation enfants': 'p_rel_enfants', 'Loisirs': 'p_loisirs', 'Événements': 'p_evenements'
@@ -1624,7 +1635,11 @@ function restoreFromText(text) {
     var mComp = label2.match(/^Complément\[(.+)\]$/);
     if (mComp) {
       var elComp = document.getElementById(mComp[1]);
-      if (elComp) { elComp.value = value2.replace(/ ⏎ /g, '\n'); count++; }
+      if (elComp) {
+        elComp.value = value2.replace(/ ⏎ /g, '\n');
+        if (elComp.tagName === 'TEXTAREA') { elComp.style.height = 'auto'; elComp.style.height = elComp.scrollHeight + 'px'; }
+        count++;
+      }
       return;
     }
 
@@ -1635,6 +1650,7 @@ function restoreFromText(text) {
         // Redécode les retours à la ligne encodés « ⏎ » (zones de texte du
         // contexte de vie / relations). Sans effet sur les champs mono-ligne.
         el.value = value2.replace(/ ⏎ /g, '\n');
+        if (el.tagName === 'TEXTAREA') { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
         count++;
       }
     }
@@ -4108,7 +4124,7 @@ function collectAllAnswers() {
     if (el && el.value) lines.push(label + ' : ' + el.value);
   });
 
-  var textareas = ['p_pere','p_mere','p_fratrie','p_conjoint','p_rel_enfants','p_loisirs','p_evenements'];
+  var textareas = ['p_pere','p_mere','p_fratrie','p_conjoint','p_rel_enfants','p_loisirs','p_evenements','p_pro_libre','p_famille_libre'];
   textareas.forEach(id => {
     var el = document.getElementById(id);
     if (el && el.value) {
@@ -4387,8 +4403,10 @@ function construireBodyReponses() {
   msg += 'Profession : ' + _champ1('p_profession') + '\n';
   msg += 'Profession depuis : ' + _champ1('p_profession_depuis') + '\n';
   msg += 'Travail : ' + _champ1('p_travail') + '\n';
+  msg += 'Profession libre : ' + _champ1('p_pro_libre') + '\n';
   msg += 'Situation familiale : ' + _champ1('p_situation') + '\n';
   msg += "Nombre d'enfants : " + _champ1('p_enfants') + '\n';
+  msg += 'Famille libre : ' + _champ1('p_famille_libre') + '\n';
   msg += 'Relation père : ' + _champ1('p_pere') + '\n';
   msg += 'Relation mère : ' + _champ1('p_mere') + '\n';
   msg += 'Fratrie : ' + _champ1('p_fratrie') + '\n';
@@ -5178,11 +5196,11 @@ function buildPrintHtml(vierge) {
   if(g('p_raison')) body += '<div class="ta">'+g('p_raison')+'</div>';
 
   body += '<div class="ct">Situation professionnelle</div>';
-  var trav_fields = [['Profession',g('p_profession')],['Depuis quand',g('p_profession_depuis')],['Travail',g('p_travail')]];
+  var trav_fields = [['Profession',g('p_profession')],['Depuis quand',g('p_profession_depuis')],['Travail',g('p_travail')],['Autres précisions',g('p_pro_libre')]];
   trav_fields.forEach(function(f){ if(f[1]) body += '<div class="f"><span class="fl">'+f[0]+' :</span><span class="fv">'+f[1]+'</span></div>'; });
 
   body += '<div class="ct">Situation familiale</div>';
-  var fam_fields = [['Situation familiale',g('p_situation')],['Nombre d&#39;enfants',g('p_enfants')]];
+  var fam_fields = [['Situation familiale',g('p_situation')],['Nombre d&#39;enfants',g('p_enfants')],['Autres précisions',g('p_famille_libre')]];
   fam_fields.forEach(function(f){ if(f[1]) body += '<div class="f"><span class="fl">'+f[0]+' :</span><span class="fv">'+f[1]+'</span></div>'; });
 
   body += '<div class="ct">Relations familiales</div>';
@@ -5439,7 +5457,11 @@ function restaurerBrouillon(data) {
     });
     // Textareas
     document.querySelectorAll('textarea').forEach(function(el) {
-      if (el.id && data[el.id] !== undefined) el.value = data[el.id];
+      if (el.id && data[el.id] !== undefined) {
+        el.value = data[el.id];
+        el.style.height = 'auto';
+        el.style.height = el.scrollHeight + 'px';
+      }
     });
     // Yesno (yn_) — simuler le clic sur le bon bouton
     document.querySelectorAll('input[type=hidden][id^=yn_]').forEach(function(el) {
