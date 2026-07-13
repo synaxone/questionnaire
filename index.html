@@ -1615,18 +1615,29 @@ function restoreFromText(text) {
         if (card2 && valStr) {
           var target = valStr.trim().toLowerCase();
           var checkboxes = card2.querySelectorAll('input[type=checkbox]');
+          // CORRECTIF DE PERTE DE DONNÉES (13/07/2026, remonté par Camille sur Q90) :
+          // une comparaison floue en une seule passe pouvait matcher la MAUVAISE case
+          // quand un libellé est une sous-chaîne d'un autre (ex. "Autre" ⊂ "Du regard
+          // des autres") — la case "Autre" ne se cochait jamais, et son curseur
+          // récupérait par erreur la valeur d'une autre case. Priorité stricte à
+          // l'égalité exacte ; le repli approximatif ne s'applique que si aucune case
+          // ne correspond exactement à aucune ligne (jamais vu en pratique, gardé par
+          // prudence pour d'anciens formats de texte légèrement différents).
+          var cbExact = null, cbFuzzy = null;
           for (var ci = 0; ci < checkboxes.length; ci++) {
             var cb = checkboxes[ci];
-            var lblTxt = cb.parentElement ? cb.parentElement.textContent.trim().toLowerCase() : '';
-            if (lblTxt === target || lblTxt.indexOf(target) !== -1 || target.indexOf(lblTxt) !== -1) {
-              if (!cb.checked) {
-                cb.checked = true;
-                if (cb.onchange) cb.onchange();
-                cb.dispatchEvent(new Event('change'));
-              }
-              count++;
-              break;
+            var lblTxt = cb.parentElement ? cb.parentElement.textContent.trim().toLowerCase().replace(/\s+/g, ' ') : '';
+            if (lblTxt === target) { cbExact = cb; break; }
+            if (!cbFuzzy && (lblTxt.indexOf(target) !== -1 || target.indexOf(lblTxt) !== -1)) cbFuzzy = cb;
+          }
+          var cbMatch = cbExact || cbFuzzy;
+          if (cbMatch) {
+            if (!cbMatch.checked) {
+              cbMatch.checked = true;
+              if (cbMatch.onchange) cbMatch.onchange();
+              cbMatch.dispatchEvent(new Event('change'));
             }
+            count++;
           }
         }
         return;
@@ -1717,6 +1728,56 @@ function restoreFromText(text) {
         return;
       }
 
+      // CORRECTIF DE PERTE DE DONNÉES (13/07/2026, en creusant Q20/21/30) : les
+      // addictions (Q69) sont exportées en une seule ligne combinée
+      // "Q69 [addiction] : <label> — <qté> — depuis <date> — intensité <n>/10", mais
+      // restoreFromText() n'avait AUCUN handler pour le tag "addiction" — la case à
+      // cocher, la quantité, la date et surtout le curseur d'intensité (qui n'a même
+      // pas de filet de sécurité générique, réservé aux champs texte) étaient
+      // silencieusement perdus à chaque réouverture.
+      if (tag === 'addiction') {
+        var cardAd = document.getElementById('qcard_' + qid);
+        if (cardAd) {
+          var partsAd = valStr.split(' — ');
+          var labelAd = partsAd[0];
+          var checkboxesAd = cardAd.querySelectorAll('input[type=checkbox][id^=chkadd_]');
+          var targetAd = labelAd.trim().toLowerCase();
+          var cbAd = null;
+          for (var ai = 0; ai < checkboxesAd.length; ai++) {
+            var lbltxtAd = checkboxesAd[ai].parentElement ? checkboxesAd[ai].parentElement.textContent.trim().toLowerCase() : '';
+            if (lbltxtAd === targetAd) { cbAd = checkboxesAd[ai]; break; }
+          }
+          // Repli : libellé non reconnu (cas "Autre" — le libellé exporté est alors le
+          // texte personnalisé tapé par le patient, jamais "Autre" littéralement) → la
+          // case "Autre" se repère par son propre champ addautre_.
+          if (!cbAd) {
+            for (var ai2 = 0; ai2 < checkboxesAd.length; ai2++) {
+              var idxAd2 = checkboxesAd[ai2].id.replace('chkadd_', '');
+              if (document.getElementById('addautre_' + qid + '_' + idxAd2) && !checkboxesAd[ai2].checked) { cbAd = checkboxesAd[ai2]; break; }
+            }
+          }
+          if (cbAd) {
+            var idxFinalAd = cbAd.id.replace('chkadd_', '');
+            if (!cbAd.checked) { cbAd.checked = true; if (cbAd.onchange) cbAd.onchange(); cbAd.dispatchEvent(new Event('change')); }
+            var autreElAd = document.getElementById('addautre_' + qid + '_' + idxFinalAd);
+            if (autreElAd && targetAd !== 'autre') autreElAd.value = labelAd;
+            var qtyElAd = document.getElementById('addqty_' + qid + '_' + idxFinalAd);
+            var depElAd = document.getElementById('adddep_' + qid + '_' + idxFinalAd);
+            var intElAd = document.getElementById('addint_' + qid + '_' + idxFinalAd);
+            for (var piAd = 1; piAd < partsAd.length; piAd++) {
+              var pAd = partsAd[piAd];
+              var mIntAd = pAd.match(/^intensité (\d+)\/10$/);
+              var mDepAd = pAd.match(/^depuis (.+)$/);
+              if (mIntAd) { if (intElAd) { intElAd.value = mIntAd[1]; intElAd.dispatchEvent(new Event('input')); } }
+              else if (mDepAd) { if (depElAd) depElAd.value = mDepAd[1]; }
+              else if (qtyElAd) qtyElAd.value = pAd;
+            }
+            count++;
+          }
+        }
+        return;
+      }
+
       // Curseur(s) (valeur du type "x/10")
       var noteMatch = valStr.match(/^(\d+(?:\.\d+)?)\/10$/);
       if (noteMatch) {
@@ -1729,6 +1790,7 @@ function restoreFromText(text) {
           count++;
         } else if (tag) {
           // Curseur double : trouver _a ou _b selon le libellé (Fréquence/Intensité…)
+          var trouveDouble = false;
           ['a', 'b'].forEach(function(suffix) {
             var inp = document.getElementById('range_' + qid + '_' + suffix);
             if (!inp) return;
@@ -1739,8 +1801,44 @@ function restoreFromText(text) {
               inp.value = val;
               updateIntensity(qid + '_' + suffix, val);
               count++;
+              trouveDouble = true;
             }
           });
+          // CORRECTIF DE PERTE DE DONNÉES (13/07/2026, remonté par Camille sur Q20/21/30) :
+          // les questions "domaines_cursor"/"domaines_attention" (case à cocher par
+          // contexte, chacune révélant SON PROPRE curseur — Q20, Q21, Q30 et bien
+          // d'autres) n'ont ni id "range_<qid>" ni suffixe _a/_b : la case à cocher se
+          // recochait bien (via [coché] plus haut) mais le curseur restait à 0, sans
+          // aucune ligne de code pour le retrouver. Repli générique : le curseur est
+          // toujours le frère du <label> contenant la case dont le texte correspond au
+          // tag (même comparaison que pour [coché] plus haut), dans le même bloc div.
+          if (!trouveDouble) {
+            var cardDc = document.getElementById('qcard_' + qid);
+            if (cardDc) {
+              var targetDc = tag.trim().toLowerCase();
+              var checkboxesDc = cardDc.querySelectorAll('input[type=checkbox]');
+              // Priorité à l'égalité exacte avant tout repli approximatif — voir le
+              // commentaire détaillé sur le même correctif dans le bloc [coché]
+              // ci-dessus (bug Q90 : "Autre" ⊂ "Du regard des autres").
+              var cbDcExact = null, cbDcFuzzy = null;
+              for (var cdi = 0; cdi < checkboxesDc.length; cdi++) {
+                var cbDc = checkboxesDc[cdi];
+                var lblDc = cbDc.parentElement ? cbDc.parentElement.textContent.trim().toLowerCase().replace(/\s+/g, ' ') : '';
+                if (lblDc === targetDc) { cbDcExact = cbDc; break; }
+                if (!cbDcFuzzy && (lblDc.indexOf(targetDc) !== -1 || targetDc.indexOf(lblDc) !== -1)) cbDcFuzzy = cbDc;
+              }
+              var cbDcMatch = cbDcExact || cbDcFuzzy;
+              if (cbDcMatch) {
+                var wrapperDc = cbDcMatch.closest('label') ? cbDcMatch.closest('label').parentElement : null;
+                var inpDc = wrapperDc ? wrapperDc.querySelector('input[type=range]') : null;
+                if (inpDc) {
+                  inpDc.value = val;
+                  inpDc.dispatchEvent(new Event('input'));
+                  count++;
+                }
+              }
+            }
+          }
         }
         return;
       }
@@ -4662,6 +4760,24 @@ function construireBodyReponses() {
           var autreText = document.getElementById('autre_text_' + qidNum);
           if (autreText && autreText.value) rlbl = 'Autre — ' + autreText.value;
         }
+      }
+      // CORRECTIF DE PERTE DE DONNÉES (13/07/2026, remonté par Camille sur Q20/21/30
+      // — étendu en creusant à Q28/Q67/Q68/Q97 et sans doute d'autres) : le repli
+      // ci-dessus ne marche QUE si le conteneur du curseur a un id commençant par
+      // "slider_" — beaucoup de "special" (q68_crises, q28_multi, q97_empathie…) ont
+      // un conteneur nommé différemment (slider68_, item28_…), donc n'obtenaient
+      // AUCUN libellé de repli : impossible ensuite de savoir, à la réouverture,
+      // à QUEL item (Colère/Rage/Violence…) appartenait quelle valeur. Repli
+      // générique et structurel : peu importe le nom du conteneur, tant qu'il est le
+      // frère direct d'un <label> contenant la case à cocher associée — même relation
+      // que celle utilisée par restoreFromText() pour retrouver ce curseur.
+      if (!rlbl) {
+        var wrapperGen = inp.closest('div');
+        while (wrapperGen && wrapperGen !== card && !(wrapperGen.previousElementSibling && wrapperGen.previousElementSibling.tagName === 'LABEL')) {
+          wrapperGen = wrapperGen.parentElement;
+        }
+        var labelGen = (wrapperGen && wrapperGen !== card && wrapperGen.previousElementSibling && wrapperGen.previousElementSibling.tagName === 'LABEL') ? wrapperGen.previousElementSibling : null;
+        if (labelGen) rlbl = labelGen.textContent.trim().replace(/\s+/g, ' ');
       }
       cardLines.push(qid + ' — ' + (ql ? ql.textContent.substring(0,60) : '') + (rlbl ? ' [' + rlbl + ']' : '') + ' : ' + v + '/10');
     });
