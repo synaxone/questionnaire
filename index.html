@@ -3710,6 +3710,7 @@ function addTraumaItem(qid, ph) {
   div.innerHTML = '<textarea class="field-input" placeholder="' + ph + '" rows="2" style="width:100%;margin-bottom:8px" oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'"></textarea>'
     + '<input class="field-input" type="text" placeholder="Date ou période (ex : 2010, vers 15 ans…)" style="width:100%">';
   container.appendChild(div);
+  garantirIdsTousLesChamps();
 }
 
 // Emplacements manuels sur les questions "texte libre" (Q58/58b/112/170b/175/182) —
@@ -3731,6 +3732,7 @@ function addPlacementManuelItem(qid) {
   div.innerHTML = '<select class="field-input" style="background:white">' + options + '</select>'
     + '<input class="field-input" type="text" placeholder="Annotation (ex : Fibromyalgie diagnostiquée…)" style="background:white">';
   container.appendChild(div);
+  garantirIdsTousLesChamps();
 }
 
 function addMedocItem(qid) {
@@ -3741,6 +3743,7 @@ function addMedocItem(qid) {
   div.innerHTML = '<input class="field-input" type="text" placeholder="Nom du médicament…" style="background:white">'
     + '<input class="field-input" type="text" placeholder="Depuis quand ?" style="background:white">';
   container.appendChild(div);
+  garantirIdsTousLesChamps();
 }
 
 function addMenoItem(qid) {
@@ -3754,6 +3757,7 @@ function addMenoItem(qid) {
     + '<div class="range-labels"><span>0 · pas du tout</span><span>5</span><span>10 · vraiment beaucoup</span></div>'
     + '<div class="freq-tooltip" id="freq_meno_' + qid + '_' + idx + '"></div></div></div>';
   container.appendChild(div);
+  garantirIdsTousLesChamps();
 }
 
 function toggle97(qid, idx) {
@@ -4066,6 +4070,7 @@ function buildFamiliauxQuestions() {
 
 buildFamiliauxQuestions();
 injecterCheckboxSuiviBilan();
+garantirIdsTousLesChamps();
 
 
 // ===== COLLECTE ET ENVOI DES RÉPONSES =====
@@ -5336,6 +5341,31 @@ var DYN_LIST_ADDERS = {
   'pm_items_': function(qid) { addPlacementManuelItem(qid); }
 };
 
+// ══════════════════════════════════════════════════════
+// GARDE-FOU STRUCTUREL CONTRE LA PERTE DE DONNÉES (14/07/2026)
+// ══════════════════════════════════════════════════════
+// Deux pertes de données coup sur coup (annotations praticien le 13/07, listes
+// dynamiques le même jour) ont eu la même cause : sauvegarderBrouillon() ne protège
+// que les champs identifiés par un id, et rien ne garantissait qu'un champ en ait un —
+// à chaque nouveau widget ajouté au questionnaire, il fallait *penser* à lui donner un
+// id ET à l'ajouter à l'autosave. Un oubli = perte silencieuse, invisible tant que
+// personne ne perd réellement des données.
+//
+// Plutôt qu'un énième correctif ciblé, ceci élimine la cause structurelle : après
+// construction de la page ET après chaque "+ Ajouter…", TOUT champ de saisie
+// (input/select/textarea) sans id en reçoit un automatiquement. sauvegarderBrouillon()
+// ne scanne que "les éléments avec un id" — désormais TOUJOURS vrai pour TOUT champ,
+// présent ou futur, sans qu'aucun développeur n'ait à s'en souvenir.
+var _autoIdCompteur = 0;
+function garantirIdsTousLesChamps() {
+  document.querySelectorAll('input, select, textarea').forEach(function(el) {
+    if (!el.id) {
+      _autoIdCompteur++;
+      el.id = '__autoid_' + _autoIdCompteur;
+    }
+  });
+}
+
 function sauvegarderBrouillon() {
   try {
     var data = {};
@@ -5364,6 +5394,11 @@ function sauvegarderBrouillon() {
     // Inputs text/number avec id (addqty_, adddep_, yn_, etc.)
     document.querySelectorAll('input[type=text][id], input[type=number][id]').forEach(function(el) {
       if (el.value && el.id !== 'praticien_email' && el.id.indexOf('p_') !== 0) data[el.id] = el.value;
+    });
+    // Select (jamais couverts génériquement avant le 14/07/2026 — seuls les selects
+    // d'identité, dans la liste fixe plus haut, l'étaient).
+    document.querySelectorAll('select[id]').forEach(function(el) {
+      if (el.value && el.id.indexOf('p_') !== 0) data[el.id] = el.value;
     });
     // Checkboxes (seulement si cochées)
     document.querySelectorAll('input[type=checkbox]').forEach(function(el) {
@@ -5452,6 +5487,12 @@ function restaurerBrouillon(data) {
     // 4. Inputs text/number avec id (addqty_, adddep_, etc.) — après les checkboxes qui affichent les divs
     document.querySelectorAll('input[type=text][id], input[type=number][id]').forEach(function(el) {
       if (el.id !== 'praticien_email' && el.id.indexOf('p_') !== 0 && data[el.id] !== undefined) {
+        el.value = data[el.id];
+      }
+    });
+    // Select
+    document.querySelectorAll('select[id]').forEach(function(el) {
+      if (el.id.indexOf('p_') !== 0 && data[el.id] !== undefined) {
         el.value = data[el.id];
       }
     });
