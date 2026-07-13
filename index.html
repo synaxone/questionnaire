@@ -1463,7 +1463,11 @@ function restoreFromText(text) {
       var spaceIdx = line.indexOf(' ');
       if (spaceIdx === -1) return;
       var qid = line.substring(1, spaceIdx);
-      if (!/^\d+$/.test(qid)) return;
+      // Qnum à suffixe lettré (31b, 58b, 170b…) : accepter une lettre finale, pas
+      // seulement un nombre pur, sinon les annotations/cases praticien de ces
+      // questions ne se rechargent jamais via "recharger réponses" (bug préexistant,
+      // remarqué le 13/07/2026 en testant la case "à suivre au bilan des 10 séances").
+      if (!/^\d+[a-z]?$/.test(qid)) return;
 
       var rest = line.substring(spaceIdx + 1).replace(/^[–—-] /, '');
       // Séparateur label/valeur : couper au " : " qui suit le tag [..] (la valeur
