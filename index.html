@@ -1360,6 +1360,23 @@ function calcAgeSel() {
   ageEl.value = age + ' ans';
 }
 
+// ===== AUTO-AGRANDISSEMENT DES ANNOTATIONS PRATICIEN =====
+// Les annotations peuvent être longues (contexte clinique) : la case doit se
+// déplier pour tout montrer, jamais rester à hauteur fixe avec un scroll interne.
+function resizeAnnotationTextarea(ta) {
+  if (!ta) return;
+  ta.style.height = 'auto';
+  ta.style.height = ta.scrollHeight + 'px';
+}
+function resizeAllAnnotationTextareas() {
+  document.querySelectorAll('.practitioner-annotation textarea').forEach(resizeAnnotationTextarea);
+}
+document.addEventListener('input', function(e) {
+  if (e.target && e.target.matches && e.target.matches('.practitioner-annotation textarea')) {
+    resizeAnnotationTextarea(e.target);
+  }
+});
+
 // ===== RECHARGER LES RÉPONSES D'UN QUESTIONNAIRE DÉJÀ REÇU (mode praticien) =====
 function restoreFromText(text) {
   var statusEl = document.getElementById('reload_status');
@@ -1492,7 +1509,7 @@ function restoreFromText(text) {
       if (tag && tag.indexOf('annotation') !== -1) {
         var card3 = document.getElementById('qcard_' + qid);
         var annotTa = card3 ? card3.querySelector('.practitioner-annotation textarea') : null;
-        if (annotTa) { annotTa.value = valStr; count++; }
+        if (annotTa) { annotTa.value = valStr; resizeAnnotationTextarea(annotTa); count++; }
         return;
       }
 
@@ -1735,6 +1752,7 @@ function activatePraticienMode() {
   document.querySelectorAll('.practitioner-annotation').forEach(el => {
     el.classList.add('visible');
   });
+  resizeAllAnnotationTextareas();
   updateAnswerHighlights();
 }
 
