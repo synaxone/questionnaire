@@ -4713,8 +4713,14 @@ function construireBodyReponses() {
     // commentaires par choix com8_8_x…). Les lignes sémantiques ci-dessus
     // restent pour le calcul du plan ; ce filet garantit un RECHARGEMENT fidèle
     // à 100 % par id, indépendamment du format. Aucune saisie ne peut être perdue.
+    // Exclut les annotations praticien (.practitioner-annotation) : déjà exportées ET
+    // rechargées via leur propre tag [annotation praticien] (voir plus bas / restoreFromText)
+    // depuis qu'elles ont un id (13/07/2026) — sans cette exclusion, chaque note du
+    // praticien apparaissait deux fois dans le texte exporté (doublon inoffensif mais
+    // confus, trouvé le 14/07/2026 via verification/check-questionnaire-integrite.js).
     card.querySelectorAll('input[type=text], input[type=number], textarea').forEach(function(el) {
       if (!el.id) return;
+      if (el.closest('.practitioner-annotation')) return;
       if (!el.value || !String(el.value).trim()) return;
       if (/search|recherche/i.test(el.id)) return;
       extras.push({ id: el.id, val: el.value });
