@@ -3450,8 +3450,13 @@ function buildQuestionCard(q) {
           <span class="q-num">Q${id}</span>
           <span class="q-text">${q.text}</span>
         </div>
+        ${noteHtml}
         <div id="medoc_list_${id}"></div>
         <button onclick="addMedocItem('${id}')" style="margin-top:8px;padding:6px 14px;border:1px dashed var(--accent);background:transparent;border-radius:6px;color:var(--accent);cursor:pointer;font-size:12px">+ Ajouter un médicament</button>
+        <div class="response-group" style="margin-top:10px">
+          <label>Précisions (dosage, raison, effets…)</label>
+          <textarea class="field-input" placeholder="Précisez si besoin…" id="medoclibre_${id}" rows="2" style="width:100%" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        </div>
       </div>
       <div class="practitioner-annotation" id="annot_${id}"><label>Annotation praticien</label><textarea placeholder="Notes…"></textarea><label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;cursor:pointer;color:var(--practitioner)"><input type="checkbox" id="pctx_${id}_trauma" style="accent-color:var(--practitioner)"> Trauma</label></div>
     </div>`;
@@ -3923,7 +3928,7 @@ buildTraumaQuestions();
 // ===== MÉDICATION ET THÉRAPIES (Q185-Q189) =====
 var medicQuestions = [
   { num: "titre_medic", special: "titre", text: "Médications" },
-  { num: 185, text: "Médicaments actuels", special: "q187_medoc" },
+  { num: 185, text: "Médicaments actuels", special: "q187_medoc", note: "Pour adapter au mieux le protocole de neurofeedback et analyser correctement votre activité cérébrale, j'aurais besoin de savoir si vous prenez actuellement des médicaments ou des suppléments. Certains traitements modifient les signaux électriques du cerveau, et cette information m'est essentielle pour en avoir une bonne lecture. Que les médicaments soient occasionnels, passés ou actuels, ils vont me donner des informations pertinentes pour votre suivi." },
   { num: 186, text: "Médicaments passés (anciens traitements)", special: "q187_medoc" },
   { num: "titre_therapies", special: "titre", text: "Thérapies suivies" },
   { num: 187, text: "Avez-vous suivi ou suivez-vous actuellement différentes thérapies ? Si oui, lesquelles ?", special: "q_trauma_list", placeholder: "ex : psychothérapie, TCC, EMDR, hypnose, psychanalyse… Précisez, datez, et indiquez si en cours." },
@@ -4457,6 +4462,14 @@ function construireBodyReponses() {
         var depuis = mInputs[1] && mInputs[1].value ? mInputs[1].value.trim() : '';
         if (nom || depuis) medocParts.push(nom + (depuis ? ' (depuis ' + depuis + ')' : ''));
       });
+      // Précisions libres (dosage, raison, effets…) fusionnées dans la même ligne
+      // [libre] que la liste de médicaments — un second tag [libre] sur le même qid
+      // écraserait silencieusement le premier au parsing (plan-logic.js assigne,
+      // sans cumuler), donc tout doit sortir en une seule ligne par question.
+      var medocLibreEl = document.getElementById('medoclibre_' + qidNum);
+      if (medocLibreEl && medocLibreEl.value && medocLibreEl.value.trim()) {
+        medocParts.push(medocLibreEl.value.trim().replace(/\r?\n/g, ' ⏎ '));
+      }
       if (medocParts.length) msg += qid + ' [libre] : ' + medocParts.join(' ⏎ ') + '\n';
     }
     // Idem pour les précisions par sous-item de Q28 ("Avez-vous des difficultés à…") :
