@@ -2612,7 +2612,14 @@ function buildQuestionCard(q) {
     </div>`;
   }
 
-  // Special: yesno then cursor if oui (Q42)
+  // Special: yesno then cursor if oui (Q4, Q42, Q74, Q119)
+  // CORRECTIF DE PERTE DE DONNÉES (13/07/2026, remonté par Camille sur Q119) : le
+  // curseur n'avait pas d'id explicite ("range_<qid>", contrairement aux curseurs
+  // simples ordinaires) — sauvegardé quand même dans le brouillon localStorage via un
+  // auto-id générique, mais restoreFromText() (rouvrir un questionnaire déjà reçu,
+  // "Compléter avec le client") cherche précisément `range_<qid>` et ne le trouvait
+  // jamais : la réponse au curseur disparaissait silencieusement à la réouverture,
+  // pour les 4 questions de ce type. Id ajouté, comme tous les autres curseurs simples.
   if (q.special === 'yesno_then_cursor') {
     var rl42 = q.rangeLabels || ["0 · pas du tout","5","10 · vraiment beaucoup"];
     var comPh42 = q.commentPlaceholder || "Précisez…";
@@ -2631,7 +2638,7 @@ function buildQuestionCard(q) {
           <div class="intensity-display" style="margin-bottom:8px">
             <span class="intensity-val" id="val_${id}">—</span>
             <div style="flex:1">
-              <input type="range" min="0" max="10" step="1" value="0" oninput="updateIntensity('${id}',this.value)">
+              <input type="range" min="0" max="10" step="1" value="0" oninput="updateIntensity('${id}',this.value)" id="range_${id}">
               <div class="range-labels"><span>${rl42[0]}</span><span>${rl42[1]}</span><span>${rl42[2]}</span></div>
               ${q.noTooltip ? '' : `<div class="freq-tooltip" id="freq_${id}"></div>`}
             </div>
