@@ -1785,9 +1785,25 @@ var intensLabels = ['pas du tout','très légèrement','légèrement','un peu','
 var diffLabels = ['aucune difficulté','presque aucune','très peu','légère difficulté','quelques difficultés','difficulté modérée','assez difficile','difficile','très difficile','très grande difficulté','impossible'];
 
 function getLabelSet(rangeMin, rangeMax, id) {
-  // Detect label type from the range labels rendered near this slider
-  var card = document.getElementById('qcard_' + id) || document.body;
-  var labels = card ? card.querySelectorAll('.range-labels span') : [];
+  // Détecte le type d'indication (fréquence/intensité/difficulté) à partir du bloc
+  // .range-labels du curseur PRÉCIS en cours de déplacement — pas juste le premier
+  // curseur trouvé dans la carte (bug remonté par Camille le 13/07/2026 sur Q114 : sur
+  // une carte à 2 curseurs (ou plus), tous les curseurs affichaient l'indication du
+  // PREMIER curseur de la carte, car l'ancienne version cherchait dans toute la carte
+  // au lieu du curseur concerné). .range-labels est toujours le frère précédent
+  // immédiat du tooltip #freq_<id> dans le même bloc, quel que soit le type de
+  // question — voir tous les templates de buildQuestionCard.
+  var tip = document.getElementById('freq_' + id);
+  var rangeLabelsEl = tip ? tip.previousElementSibling : null;
+  var labels;
+  if (rangeLabelsEl && rangeLabelsEl.classList.contains('range-labels')) {
+    labels = rangeLabelsEl.querySelectorAll('span');
+  } else {
+    // Repli : ancien comportement (1er bloc de la carte), au cas où la structure
+    // attendue ne serait pas trouvée pour un type de question non prévu ci-dessus.
+    var card = document.getElementById('qcard_' + String(id).split('_')[0]) || document.body;
+    labels = card ? card.querySelectorAll('.range-labels span') : [];
+  }
   var label0 = labels[0] ? labels[0].textContent : '';
   if (label0.includes('jamais') || label0.includes('rarement')) return freqLabels;
   if (label0.includes('difficulté') || label0.includes('aucune')) return diffLabels;
@@ -1803,7 +1819,7 @@ function updateIntensity(num, val) {
     el.style.color = numVal >= 7 ? '#c0392b' : numVal >= 4 ? '#e67e22' : 'var(--accent)';
     var tip = document.getElementById(`freq_${num}`);
     if (tip) {
-      var labels = getLabelSet(0, 10, String(num).split('_')[0]);
+      var labels = getLabelSet(0, 10, num);
       tip.textContent = labels[numVal] ? '→ ' + labels[numVal] : '';
     }
   } else {
@@ -5669,6 +5685,18 @@ function effacerBrouillon() {
 
 // Sauvegarde toutes les 30 secondes
 setInterval(sauvegarderBrouillon, 30000);
+
+// CORRECTIF DE PERTE DE DONNÉES (13/07/2026) : la seule sauvegarde périodique (30s)
+// laissait une fenêtre où fermer l'onglet juste après avoir répondu (avant le prochain
+// tic) perdait la réponse — remonté par Camille sur Q114, mais touchait tout le
+// questionnaire. 'visibilitychange'/'pagehide' se déclenchent de façon fiable dès que
+// l'onglet est masqué ou fermé (y compris navigateurs mobiles, contrairement à
+// 'beforeunload' souvent ignoré) — sauvegarde immédiate à ce moment-là, en plus du tic
+// périodique qui reste utile en cas de crash du navigateur.
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'hidden') sauvegarderBrouillon();
+});
+window.addEventListener('pagehide', sauvegarderBrouillon);
 
 // Vérification du brouillon — appelée après validation du mot de passe
 function verifierBrouillon() {
