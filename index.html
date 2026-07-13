@@ -1377,6 +1377,26 @@ document.addEventListener('input', function(e) {
   }
 });
 
+// ===== CASE "À SUIVRE AU BILAN DES 10 SÉANCES" (13/07/2026) =====
+// Injectée en JS dans chaque bloc .practitioner-annotation (~40 endroits dans le
+// questionnaire) plutôt que dans chaque template inline, pour éviter la dérive déjà
+// connue entre les 3 copies du fichier. Appelée une fois toutes les cartes construites
+// (voir l'appel juste après buildFamiliauxQuestions()). Id dédié suivi10_<qid>, PAS le
+// préfixe pctx_ (qui alimente le mécanisme [praticien]/traumaSet utilisé pour les
+// placements de capteurs — sans rapport, ne pas mélanger).
+function injecterCheckboxSuiviBilan() {
+  document.querySelectorAll('.practitioner-annotation').forEach(function(el) {
+    if (el.querySelector('.suivi-bilan-check')) return;
+    var qid = el.id.replace(/^annot_/, '');
+    if (!qid) return;
+    var label = document.createElement('label');
+    label.className = 'suivi-bilan-check';
+    label.style.cssText = 'display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;cursor:pointer;color:var(--practitioner)';
+    label.innerHTML = '<input type="checkbox" id="suivi10_' + qid + '" style="accent-color:var(--practitioner)"> 📋 À suivre au bilan des 10 séances';
+    el.appendChild(label);
+  });
+}
+
 // ===== RECHARGER LES RÉPONSES D'UN QUESTIONNAIRE DÉJÀ REÇU (mode praticien) =====
 function restoreFromText(text) {
   var statusEl = document.getElementById('reload_status');
@@ -1510,6 +1530,13 @@ function restoreFromText(text) {
         var card3 = document.getElementById('qcard_' + qid);
         var annotTa = card3 ? card3.querySelector('.practitioner-annotation textarea') : null;
         if (annotTa) { annotTa.value = valStr; resizeAnnotationTextarea(annotTa); count++; }
+        return;
+      }
+
+      // Case "à suivre au bilan des 10 séances"
+      if (tag === 'suivi_bilan') {
+        var suiviCb = document.getElementById('suivi10_' + qid);
+        if (suiviCb) { suiviCb.checked = true; count++; }
         return;
       }
 
@@ -1714,7 +1741,7 @@ function updateAnswerHighlights() {
       if (inp.value) hasAnswer = true;
     });
     // Check checkboxes
-    card.querySelectorAll('input[type=checkbox]:not([id^=pctx_])').forEach(cb => {
+    card.querySelectorAll('input[type=checkbox]:not([id^=pctx_]):not([id^=suivi10_])').forEach(cb => {
       if (cb.checked) hasAnswer = true;
     });
     if (hasAnswer) card.classList.add('has-answer');
@@ -4007,6 +4034,7 @@ function buildFamiliauxQuestions() {
 }
 
 buildFamiliauxQuestions();
+injecterCheckboxSuiviBilan();
 
 
 // ===== COLLECTE ET ENVOI DES RÉPONSES =====
@@ -4146,6 +4174,18 @@ function collectAllAnswers() {
       if (card) {
         var qnum = card.querySelector('.q-num');
         if (qnum) pratLines.push(qnum.textContent + ' [annotation] : ' + ta.value.trim());
+      }
+    }
+  });
+
+  // Collect "à suivre au bilan des 10 séances" checkboxes
+  document.querySelectorAll('input[id^=suivi10_]').forEach(cb => {
+    if (cb.checked) {
+      var card = cb.closest('.question-card');
+      if (card) {
+        var qnum = card.querySelector('.q-num');
+        var qtext = card.querySelector('.q-text');
+        if (qnum) pratLines.push(qnum.textContent + ' [suivi_bilan] : ' + (qtext ? qtext.textContent.trim() : 'oui'));
       }
     }
   });
@@ -4412,8 +4452,8 @@ function construireBodyReponses() {
       if (inp.value) cardLines.push(qid + ' — ' + (ql ? ql.textContent.substring(0,60) : '') + ' : ' + inp.value);
     });
 
-    // Checkboxes (exclure pctx_ et chkadd_ déjà traités séparément)
-    card.querySelectorAll('input[type=checkbox]:not([id^=pctx_]):not([id^=chkadd_])').forEach(function(cb) {
+    // Checkboxes (exclure pctx_, suivi10_ et chkadd_ déjà traités séparément)
+    card.querySelectorAll('input[type=checkbox]:not([id^=pctx_]):not([id^=chkadd_]):not([id^=suivi10_])').forEach(function(cb) {
       if (cb.checked) {
         var lbl = cb.closest('label');
         var lblText = lbl ? lbl.textContent.trim() : '';
@@ -4581,6 +4621,16 @@ function construireBodyReponses() {
     var qt = card.querySelector('.q-num');
     var lbl = cb.parentElement ? cb.parentElement.textContent.trim() : '';
     if (qt && lbl) msg += qt.textContent + ' [praticien] : ' + lbl + '\n';
+  });
+
+  // Add "à suivre au bilan des 10 séances" checkboxes
+  document.querySelectorAll('input[id^=suivi10_]').forEach(function(cb) {
+    if (!cb.checked) return;
+    var card = cb.closest('.question-card');
+    if (!card) return;
+    var qt = card.querySelector('.q-num');
+    var qtxt = card.querySelector('.q-text');
+    if (qt) msg += qt.textContent + ' [suivi_bilan] : ' + (qtxt ? qtxt.textContent.trim() : 'oui') + '\n';
   });
 
   // Add emplacements manuels ("+ Ajouter un emplacement", Q58/58b/112/170b/175/182) —
@@ -5142,7 +5192,7 @@ function buildPrintHtml(vierge) {
       // "Libellé — détail1, détail2" pour garder le lien entre la réponse et sa précision
       // (concerne Q20, Q28, Q47, Q54-56, Q68, Q69…).
       var consumed = [];
-      card.querySelectorAll('input[type=checkbox]:not([id^=pctx_])').forEach(function(cb) {
+      card.querySelectorAll('input[type=checkbox]:not([id^=pctx_]):not([id^=suivi10_])').forEach(function(cb) {
         var wrapper = cb.closest('div');
         if (!wrapper) return;
         var detailInputs = [];
@@ -5195,7 +5245,7 @@ function buildPrintHtml(vierge) {
           lines.push((lbl ? lbl + ': ' : '') + inp.value);
         }
       });
-      card.querySelectorAll('input[type=checkbox]:not([id^=pctx_])').forEach(function(cb) {
+      card.querySelectorAll('input[type=checkbox]:not([id^=pctx_]):not([id^=suivi10_])').forEach(function(cb) {
         if (isConsumed(cb)) return;
         if (cb.checked) { var lbl = cb.closest('label'); if (lbl) lines.push(shortLabel(lbl.textContent.trim())); }
       });
@@ -5215,7 +5265,9 @@ function buildPrintHtml(vierge) {
       card.querySelectorAll('input[id^=pctx_]').forEach(function(cb) {
         if (cb.checked) pctxChecked.push(cb);
       });
-      if (lines.length === 0 && commentsList.length === 0 && !(dep && dep.value) && !(annot && annot.value) && pctxChecked.length === 0) return;
+      var suiviChecked = card.querySelector('input[id^=suivi10_]');
+      suiviChecked = !!(suiviChecked && suiviChecked.checked);
+      if (lines.length === 0 && commentsList.length === 0 && !(dep && dep.value) && !(annot && annot.value) && pctxChecked.length === 0 && !suiviChecked) return;
       secContent += '<div class="q"><div class="qn">' + qnum.textContent + '</div>';
       if (qtext) secContent += '<div class="qt">' + qtext.textContent.trim() + '</div>';
       if (lines.length > 0) secContent += '<div class="qv">' + lines.join(' | ') + '</div>';
@@ -5225,6 +5277,7 @@ function buildPrintHtml(vierge) {
       pctxChecked.forEach(function(cb) {
         var lbl = cb.parentElement ? cb.parentElement.textContent.trim() : ''; if (lbl) secContent += '<div class="qp">' + lbl + '</div>';
       });
+      if (suiviChecked) secContent += '<div class="qp">📋 À suivre au bilan des 10 séances</div>';
       secContent += '</div>';
     });
     if (secContent) {
