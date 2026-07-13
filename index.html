@@ -4579,8 +4579,13 @@ function construireBodyReponses() {
       }
     });
 
-    // Select
+    // Select (exclure les selects d'emplacement manuel "+ Ajouter un emplacement", déjà
+    // exportés plus bas avec le tag [placement_manuel] — sans cette exclusion, le même
+    // select était exporté deux fois : une fois correctement tagué, une fois sous forme
+    // "Q58 : AT" sans tag, que le parseur ne sait pas classer et signale à tort comme
+    // "non reconnue". Bug trouvé le 14/07/2026 via verification/check-questionnaire-integrite.js.)
     card.querySelectorAll('select').forEach(function(sel) {
+      if (sel.closest('div[id^="pm_items_"]')) return;
       if (sel.value) {
         var rg = sel.closest('.response-group');
         var rlbl = rg ? (rg.querySelector('label') ? rg.querySelector('label').textContent.trim() : '') : '';
@@ -5436,8 +5441,17 @@ var DYN_LIST_ADDERS = {
 // (input/select/textarea) sans id en reçoit un automatiquement. sauvegarderBrouillon()
 // ne scanne que "les éléments avec un id" — désormais TOUJOURS vrai pour TOUT champ,
 // présent ou futur, sans qu'aucun développeur n'ait à s'en souvenir.
-var _autoIdCompteur = 0;
+var _autoIdCompteur;
 function garantirIdsTousLesChamps() {
+  // Bug trouvé le 14/07/2026 (script verification/check-brouillon-integrite.js) :
+  // garantirIdsTousLesChamps() est appelée juste après buildFamiliauxQuestions(), plus
+  // haut dans le script que la ligne "var _autoIdCompteur = ...". `var` est hoisté mais
+  // pas son affectation : au tout premier appel, _autoIdCompteur valait encore
+  // `undefined`, donc `undefined + 1` = NaN — et NaN reste NaN pour toujours ensuite
+  // (NaN + 1 = NaN). Résultat : 79 champs recevaient tous le même id "__autoid_NaN" et
+  // s'écrasaient mutuellement à la sauvegarde. Ce garde initialise le compteur au
+  // premier besoin réel, peu importe l'ordre d'exécution du script.
+  if (typeof _autoIdCompteur !== 'number' || Number.isNaN(_autoIdCompteur)) _autoIdCompteur = 0;
   document.querySelectorAll('input, select, textarea').forEach(function(el) {
     if (!el.id) {
       _autoIdCompteur++;
