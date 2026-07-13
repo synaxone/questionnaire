@@ -240,6 +240,7 @@
 
   /* QUESTION CARD */
   .question-card {
+    position: relative;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -449,9 +450,13 @@
     background: var(--practitioner-light);
   }
 
-  /* Case "à suivre" en haut à droite du bloc praticien (13/07/2026, demande Camille :
-     avant, la case était en bas, invisible sans faire défiler toute la carte). */
+  /* Case "à suivre" en haut à droite de LA CARTE ENTIÈRE, pas juste du bloc annotation
+     (13/07/2026 puis 14/07/2026, demande Camille : d'abord remontée en haut du bloc
+     praticien, mais ce bloc est en bas de carte donc toujours invisible sans scroller
+     pour les cartes longues — déplacée directement sur .question-card). Cachée hors
+     mode praticien : voir .practitioner-mode .suivi-bilan-check plus bas. */
   .suivi-bilan-check {
+    display: none;
     position: absolute;
     top: 8px;
     right: 12px;
@@ -461,17 +466,23 @@
     border-radius: 5px;
     border: 1px solid #d4b8dc;
     white-space: nowrap;
+    z-index: 2;
+  }
+
+  .practitioner-mode .suivi-bilan-check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
 
   @media (max-width: 480px) {
-    .suivi-bilan-check {
+    .practitioner-mode .suivi-bilan-check {
       position: static;
-      display: flex;
-      margin-top: 8px !important;
       white-space: normal;
       background: none;
       border: none;
       padding: 0;
+      margin-top: 8px !important;
     }
   }
 
@@ -1459,6 +1470,7 @@ function injecterCheckboxSuiviBilan() {
   document.querySelectorAll('.practitioner-annotation').forEach(function(el) {
     var qid = el.id.replace(/^annot_/, '');
     if (!qid) return;
+    var card = el.closest('.question-card') || el;
 
     // CORRECTIF DE PERTE DE DONNÉES (13/07/2026) : les textarea d'annotation praticien
     // n'ont jamais eu d'id — sauvegarderBrouillon()/restaurerBrouillon() (localStorage,
@@ -1470,12 +1482,12 @@ function injecterCheckboxSuiviBilan() {
     var ta = el.querySelector('textarea');
     if (ta && !ta.id) ta.id = 'prat_annot_' + qid;
 
-    if (el.querySelector('.suivi-bilan-check')) return;
+    if (card.querySelector('.suivi-bilan-check')) return;
     var label = document.createElement('label');
     label.className = 'suivi-bilan-check';
-    label.style.cssText = 'display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;cursor:pointer;color:var(--practitioner)';
+    label.style.cssText = 'font-size:12px;cursor:pointer;color:var(--practitioner)';
     label.innerHTML = '<input type="checkbox" id="suivi10_' + qid + '" style="accent-color:var(--practitioner)"> 📋 À suivre au bilan des 10 séances';
-    el.appendChild(label);
+    card.appendChild(label);
   });
 }
 
