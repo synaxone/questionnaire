@@ -1647,6 +1647,76 @@ function restoreFromText(text) {
         return;
       }
 
+      // CORRECTIF DE PERTE DE DONNÉES (13/07/2026, remonté par Camille sur Q170b et
+      // Q183/184) : les listes dynamiques "+ Ajouter…" (traumatismes tl_items_,
+      // médicaments medoc_list_, symptômes ménopause meno_items_, emplacements manuels
+      // praticien pm_items_) étaient bien EXPORTÉES (tags [libre]/[placement_manuel])
+      // mais jamais RECHARGÉES ici : sur une page fraîche il n'existe aucune ligne, et
+      // restoreFromText() ne savait pas en recréer — contrairement à
+      // restaurerBrouillon() (localStorage) qui, lui, le fait déjà via
+      // DYN_LIST_ADDERS. Reproduit la même recréation ici, pour le chemin "recharger
+      // réponses" / "Compléter avec le client".
+      if (tag === 'libre' && document.getElementById('tl_items_' + qid)) {
+        var tlContainer = document.getElementById('tl_items_' + qid);
+        valStr.split(' ⏎ ').forEach(function(part) {
+          addTraumaItem(qid, '');
+          var row = tlContainer.lastElementChild;
+          if (!row) return;
+          var mDate = part.match(/^(.*)\s\(([^()]*)\)$/);
+          var desc = row.querySelector('textarea');
+          var date = row.querySelector('input[type=text]');
+          if (desc) desc.value = mDate ? mDate[1].trim() : part.trim();
+          if (date && mDate) date.value = mDate[2].trim();
+        });
+        count++;
+        return;
+      }
+      if (tag === 'libre' && document.getElementById('meno_items_' + qid)) {
+        var menoContainer = document.getElementById('meno_items_' + qid);
+        valStr.split(' ⏎ ').forEach(function(part) {
+          addMenoItem(qid);
+          var row = menoContainer.lastElementChild;
+          var desc = row ? row.querySelector('input[type=text]') : null;
+          if (desc) desc.value = part.trim();
+        });
+        count++;
+        return;
+      }
+      if (tag === 'libre' && document.getElementById('medoc_list_' + qid)) {
+        var medocContainer = document.getElementById('medoc_list_' + qid);
+        valStr.split(' ⏎ ').forEach(function(part) {
+          addMedocItem(qid);
+          var row = medocContainer.lastElementChild;
+          if (!row) return;
+          var mInputs = row.querySelectorAll('input[type=text]');
+          var mDepuis = part.match(/^(.*)\s\(depuis ([^()]*)\)$/);
+          if (mInputs[0]) mInputs[0].value = mDepuis ? mDepuis[1].trim() : part.trim();
+          if (mInputs[1] && mDepuis) mInputs[1].value = mDepuis[2].trim();
+        });
+        count++;
+        return;
+      }
+      if (tag === 'placement_manuel') {
+        var pmContainer = document.getElementById('pm_items_' + qid);
+        if (pmContainer) {
+          valStr.split(' ⏎ ').forEach(function(part) {
+            var pipeIdx = part.indexOf('|');
+            if (pipeIdx === -1) return;
+            var zone = part.substring(0, pipeIdx).trim();
+            var annotation = part.substring(pipeIdx + 1).trim();
+            addPlacementManuelItem(qid);
+            var row = pmContainer.lastElementChild;
+            if (!row) return;
+            var sel = row.querySelector('select');
+            var inp = row.querySelector('input[type=text]');
+            if (sel) sel.value = zone;
+            if (inp) inp.value = annotation;
+          });
+          count++;
+        }
+        return;
+      }
+
       // Curseur(s) (valeur du type "x/10")
       var noteMatch = valStr.match(/^(\d+(?:\.\d+)?)\/10$/);
       if (noteMatch) {
@@ -1715,6 +1785,17 @@ function restoreFromText(text) {
     // (zones de texte captées par le filet de construireBodyReponses).
     var mComp = label2.match(/^Complément\[(.+)\]$/);
     if (mComp) {
+      // CORRECTIF DE PERTE/CORRUPTION DE DONNÉES (13/07/2026) : un id "__autoid_N" n'a
+      // de sens QUE dans la page où il a été assigné — il n'est PAS portable vers une
+      // page fraîche différente (l'ordre/nombre d'éléments sans id peut diverger, par
+      // ex. dès qu'un "+ Ajouter" a été utilisé quelque part avant ce champ). Le
+      // rejouer ici risquait d'écraser un champ totalement différent qui, par pure
+      // coïncidence, aurait reçu le même numéro d'auto-id sur la page de destination —
+      // trouvé en creusant le bug des listes dynamiques (Q170b/183/184/185/186) : une
+      // ligne "Complément[__autoid_92]" prévue pour un champ de Q183 corrompait
+      // silencieusement un champ de Q185 sur la page rechargée. Un id auto-généré non
+      // restauré (ligne ignorée) est strictement préférable à un champ corrompu.
+      if (mComp[1].indexOf('__autoid_') === 0) return;
       var elComp = document.getElementById(mComp[1]);
       if (elComp) {
         elComp.value = value2.replace(/ ⏎ /g, '\n');
