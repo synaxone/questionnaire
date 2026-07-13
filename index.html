@@ -1309,6 +1309,14 @@
       <div><strong>3.</strong> <strong>Joignez ce fichier</strong> à l'email (icône trombone 📎), puis envoyez. C'est tout !</div>
     </div>
 
+    <div style="margin-top:16px;padding:14px 16px;background:#fdf6ea;border:1px solid #d4a72c;border-radius:10px;font-size:13px;line-height:1.7;color:#6b4e00">
+      💡 <strong>Petit conseil :</strong> nous vous recommandons d'imprimer (ou d'enregistrer en PDF) une copie de votre questionnaire rempli pour vos propres archives, avant de fermer cette page.
+      <button type="button" onclick="imprimerQuestionnaire()"
+        style="display:block;width:100%;margin-top:10px;padding:12px;background:white;color:#6b4e00;border:2px solid #d4a72c;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer">
+        🖨️ Imprimer mon questionnaire rempli
+      </button>
+    </div>
+
     <p style="font-size:14px;text-align:center;margin:16px 0 0 0">Merci beaucoup, et à très bientôt 🌿</p>
   </div>
 
@@ -3593,6 +3601,12 @@ function buildQuestionCard(q) {
           <span class="q-num">Q${id}</span>
           <span class="q-text">${q.text}</span>
         </div>
+        <div class="yesno-group" style="margin-bottom:10px">
+          <button class="yesno-btn" onclick="selectYesNo(this,'oui','yn_${id}');document.getElementById('cursor_${id}').removeAttribute('hidden')">Oui</button>
+          <button class="yesno-btn" onclick="selectYesNo(this,'non','yn_${id}');document.getElementById('cursor_${id}').setAttribute('hidden','')">Non</button>
+        </div>
+        <input type="hidden" id="yn_${id}">
+        <div id="cursor_${id}" hidden>
         ${[{label:"Sans aura",desc:"douleur intense, pulsatile, souvent d'un seul côté, nausées, sensibilité à la lumière et au bruit"},{label:"Avec aura",desc:"précédées de signes visuels (éclairs, taches), engourdissements, troubles de la parole, durant 20-60 min avant la douleur"}].map((m,i) => `
         <div style="margin-bottom:10px;">
           <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg)">
@@ -3620,6 +3634,7 @@ function buildQuestionCard(q) {
         <div class="response-group" style="margin-top:4px">
           <label>Commentaires généraux</label>
           <textarea class="field-input" placeholder="Précisez…" id="com_${id}" rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        </div>
         </div>
       </div>
       <div class="practitioner-annotation" id="annot_${id}"><label>Annotation praticien</label><textarea placeholder="Notes…"></textarea><label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;cursor:pointer;color:var(--practitioner)"><input type="checkbox" id="pctx_${id}_trauma" style="accent-color:var(--practitioner)"> Trauma</label></div>
@@ -4014,14 +4029,14 @@ var physiqueQuestions = [
   { num: 121, text: "Avez-vous des troubles de l'équilibre ?", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], note: "Par exemple : instabilité à la marche, tendance à tituber, difficulté à rester debout les yeux fermés, sensation de flottement, mauvaise coordination des mouvements, chutes fréquentes." },
   { num: 122, text: "Avez-vous des tremblements ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · très souvent"], range2: ["0 · très légers", "5", "10 · très intenses"] },
   { num: 123, text: "Vous a-t-on diagnostiqué la maladie de Parkinson ?", noIntensity: true },
-  { num: 124, text: "Avez-vous une ou des allergies ?", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], commentPlaceholder: "Précisez lesquelles…" },
+  { num: 124, text: "Avez-vous une ou des allergies ?", special: "yesno_then_cursor", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], commentPlaceholder: "Précisez lesquelles…" },
   { num: 125, text: "Avez-vous de l'asthme ?", noIntensity: true },
   { num: 126, text: "Avez-vous le syndrome de l'intestin irritable ?", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], note: "Le syndrome de l'intestin irritable (SII) est un trouble digestif chronique caractérisé par des douleurs abdominales, des ballonnements, des gaz, et des alternances de constipation et de diarrhée — sans lésion organique détectable. Il est souvent aggravé par le stress et les émotions." },
   { num: 127, text: "Avez-vous de la constipation chronique ?", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
   { num: 128, text: "Avez-vous des diarrhées ?", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
-  { num: 129, text: "Avez-vous des reflux, des brûlures d'estomac ?", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
-  { num: 130, text: "Avez-vous du mal à digérer les aliments sucrés ?", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"] },
-  { num: 131, text: "Avez-vous souvent des nausées ? Dans quelles circonstances ?", rangeLabels: ["0 · jamais", "5", "10 · très souvent"], commentPlaceholder: "Dans quelles circonstances ?" },
+  { num: 129, text: "Avez-vous des reflux, des brûlures d'estomac ?", special: "yesno_then_cursor", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
+  { num: 130, text: "Avez-vous du mal à digérer les aliments sucrés ?", special: "yesno_then_cursor", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"] },
+  { num: 131, text: "Avez-vous souvent des nausées ? Dans quelles circonstances ?", special: "yesno_then_cursor", rangeLabels: ["0 · jamais", "5", "10 · très souvent"], commentPlaceholder: "Dans quelles circonstances ?" },
   { num: 132, text: "Avez-vous des vertiges et/ou des évanouissements ?", rangeLabels: ["0 · jamais", "5", "10 · très souvent"], note: "Les vertiges et évanouissements peuvent prendre différentes formes : sensation que la pièce tourne (vertige rotatoire), instabilité à la marche, sensation de flottement ou de tête vide, noir devant les yeux, perte de connaissance brève. Causes possibles : problème de l'oreille interne (labyrinthite, VPPB), tension artérielle basse (hypotension orthostatique), hypoglycémie, déshydratation, stress intense, hyperventilation, problème cardiaque, troubles neurologiques, médicaments, anémie, ou encore fatigue extrême." },
   { num: 133, text: "Votre peau est-elle souvent irritée ou réactive ?", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"] },
   { num: 134, text: "Avez-vous des troubles du syndrome prémenstruel (SPM) ? Lesquels ?", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], note: "Le SPM peut inclure : douleurs abdominales ou lombaires, gonflement des seins, ballonnements, maux de tête, fatigue intense, sautes d'humeur, irritabilité, anxiété, pleurs inexpliqués, difficultés de concentration, troubles du sommeil, envies alimentaires compulsives.", commentPlaceholder: "Précisez lesquels…", pContexts: ["Bouffées de chaleur / migraines", "Si agressivité", "Brouillard cérébral"] },
@@ -4040,7 +4055,7 @@ var physiqueQuestions = [
   { num: 147, text: "Souffrez-vous de narcolepsie ?", noIntensity: true, note: "La narcolepsie est un trouble neurologique caractérisé par des endormissements soudains et incontrôlables durant la journée, parfois accompagnés de cataplexie (perte soudaine du tonus musculaire)." },
   { num: 148, text: "Avez-vous des maux de tête récurrents ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"] },
   { num: 149, text: "Avez-vous des maux de tête dus à des tensions musculaires ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"] },
-  { num: 150, text: "Avez-vous des migraines ?", special: "q150_migraines", note: "La migraine est un trouble neurologique caractérisé par des crises de maux de tête intenses, souvent d'un seul côté, pulsatiles, accompagnées de nausées, de vomissements et d'une hypersensibilité à la lumière et au bruit. Les crises durent de 4 à 72 heures et peuvent être très invalidantes." },
+  { num: 150, text: "Avez-vous, ou avez-vous eu par le passé, des migraines ?", special: "q150_migraines", note: "La migraine est un trouble neurologique caractérisé par des crises de maux de tête intenses, souvent d'un seul côté, pulsatiles, accompagnées de nausées, de vomissements et d'une hypersensibilité à la lumière et au bruit. Les crises durent de 4 à 72 heures et peuvent être très invalidantes." },
   { num: 151, text: "Avez-vous des névralgies ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"], note: "Une névralgie est une douleur intense ressentie le long d'un nerf, sans lésion de ce nerf — le nerf est intact mais « sonne l'alarme » de façon excessive.", pContexts: ["Chronique et hyperréactif"] },
   { num: 152, text: "Avez-vous des douleurs neuropathiques ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · très légères", "5", "10 · insupportables"], note: "Une neuropathie est une douleur due à une lésion réelle du nerf : brûlures, chocs électriques, engourdissements, hypersensibilité au toucher. Contrairement à la névralgie, le nerf est structurellement endommagé (chimiothérapie, diabète, compression…)." },
   { num: 153, text: "Avez-vous des névralgies du trijumeau ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"] },
