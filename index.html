@@ -1647,7 +1647,9 @@ function restoreFromText(text) {
       if (tag && tag.indexOf('annotation') !== -1) {
         var card3 = document.getElementById('qcard_' + qid);
         var annotTa = card3 ? card3.querySelector('.practitioner-annotation textarea') : null;
-        if (annotTa) { annotTa.value = valStr; resizeAnnotationTextarea(annotTa); count++; }
+        // Décode les retours à la ligne encodés « ⏎ » (voir construireBodyReponses) —
+        // sans ça une note multi-lignes ne revenait qu'avec sa 1re ligne.
+        if (annotTa) { annotTa.value = valStr.replace(/ ⏎ /g, '\n'); resizeAnnotationTextarea(annotTa); count++; }
         return;
       }
 
@@ -1676,7 +1678,15 @@ function restoreFromText(text) {
           var mDate = part.match(/^(.*)\s\(([^()]*)\)$/);
           var desc = row.querySelector('textarea');
           var date = row.querySelector('input[type=text]');
-          if (desc) desc.value = mDate ? mDate[1].trim() : part.trim();
+          if (desc) {
+            desc.value = mDate ? mDate[1].trim() : part.trim();
+            // CORRECTIF (14/07/2026, demande Camille) : sans ceci la case restait à
+            // sa hauteur par défaut (2 lignes) après réouverture, masquant le texte
+            // au-delà — l'agrandissement automatique ne se déclenche normalement que
+            // lors de la frappe (oninput), jamais lors d'un remplissage par code.
+            desc.style.height = 'auto';
+            desc.style.height = desc.scrollHeight + 'px';
+          }
           if (date && mDate) date.value = mDate[2].trim();
         });
         count++;
@@ -4015,11 +4025,25 @@ function addTraumaItem(qid, ph) {
   var container = document.getElementById('tl_items_' + qid);
   var idx = container.children.length;
   var div = document.createElement('div');
-  div.style.cssText = 'padding:10px;background:white;border-radius:8px;border:1px solid var(--border);margin-bottom:8px';
-  div.innerHTML = '<textarea class="field-input" placeholder="' + ph + '" rows="2" style="width:100%;margin-bottom:8px" oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'"></textarea>'
+  div.style.cssText = 'padding:10px;background:white;border-radius:8px;border:1px solid var(--border);margin-bottom:8px;position:relative';
+  div.innerHTML = '<button type="button" onclick="supprimerTraumaItem(this)" title="Supprimer cet événement" style="position:absolute;top:6px;right:6px;width:22px;height:22px;border:none;background:transparent;color:var(--text-muted);cursor:pointer;font-size:15px;line-height:1;border-radius:4px">✕</button>'
+    + '<textarea class="field-input" placeholder="' + ph + '" rows="2" style="width:100%;margin-bottom:8px;padding-right:26px" oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'"></textarea>'
     + '<input class="field-input" type="text" placeholder="Date ou période (ex : 2010, vers 15 ans…)" style="width:100%">';
   container.appendChild(div);
   garantirIdsTousLesChamps();
+  var ta = div.querySelector('textarea');
+  ta.style.height = 'auto';
+  ta.style.height = ta.scrollHeight + 'px';
+}
+
+// CORRECTIF (14/07/2026, demande Camille) : permettre de supprimer un événement de
+// traumatisme ajouté par erreur — confirmation simple (window.confirm, contexte hors
+// Electron pour ce fichier, pas de bug de focus connu ici contrairement à
+// electron-index.html).
+function supprimerTraumaItem(btn) {
+  if (!confirm('Supprimer cet événement ?')) return;
+  var row = btn.closest('div');
+  if (row) row.remove();
 }
 
 // Emplacements manuels sur les questions "texte libre" (Q58/58b/112/170b/175/182) —
@@ -4986,7 +5010,13 @@ function construireBodyReponses() {
     var card = ta.closest('.question-card');
     if (!card) return;
     var qt = card.querySelector('.q-num');
-    if (qt) msg += qt.textContent + ' [annotation praticien] : ' + ta.value + '\n';
+    // CORRECTIF DE PERTE DE DONNÉES (14/07/2026, remonté par Camille sur Q67) : les
+    // retours à la ligne n'étaient pas encodés ici (contrairement à partout ailleurs
+    // dans ce fichier, ex. Complément[...]) — une annotation praticien sur plusieurs
+    // lignes cassait le format "une ligne = une réponse" : seule la 1re ligne restait
+    // rattachée à "[annotation praticien]", les lignes suivantes devenaient des lignes
+    // orphelines non reconnues, perdues à la réouverture.
+    if (qt) msg += qt.textContent + ' [annotation praticien] : ' + ta.value.replace(/\r?\n/g, ' ⏎ ') + '\n';
   });
 
   // Add praticien context checkboxes
