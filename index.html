@@ -2475,7 +2475,7 @@ function buildQuestionCard(q) {
             <div class="intensity-display">
               <span class="intensity-val" id="val_${id}_${i}">—</span>
               <div style="flex:1">
-                <input type="range" min="0" max="10" step="1" value="0" oninput="updateIntensity('${id}_${i}',this.value)">
+                <input type="range" id="range_${id}_${i}" min="0" max="10" step="1" value="0" oninput="updateIntensity('${id}_${i}',this.value)">
                 <div class="range-labels"><span>${q.contextLabels ? q.contextLabels[0] : '0 · pas du tout'}</span><span>${q.contextLabels ? q.contextLabels[1] : '5'}</span><span>${q.contextLabels ? q.contextLabels[2] : '10 · vraiment beaucoup'}</span></div>
                 ${q.noTooltip ? '' : `<div class="freq-tooltip" id="freq_${id}_${i}"></div>`}
               </div>
