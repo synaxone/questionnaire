@@ -1550,6 +1550,18 @@ function restoreFromText(text) {
         if (depI) { depI.value = valStrI; count++; }
         return;
       }
+      // CORRECTIF DE PERTE DE DONNÉES (14/07/2026, audit systématique des annotations
+      // praticien demandé par Camille) : la branche "Intro" (traitée séparément car son
+      // qid ne suit pas le format "Q<num>") n'avait jamais de cas pour restaurer
+      // l'annotation praticien de cette carte — perdue à chaque réouverture,
+      // uniquement pour cette carte (toutes les autres passaient par le bloc générique
+      // plus bas). qcard_Intro n'existe pas (id réel : qcard_intro, minuscule).
+      if (tagI && tagI.indexOf('annotation') !== -1) {
+        var cardI = document.getElementById('qcard_intro');
+        var annotTaI = cardI ? cardI.querySelector('.practitioner-annotation textarea') : null;
+        if (annotTaI) { annotTaI.value = valStrI.replace(/ ⏎ /g, '\n'); count++; }
+        return;
+      }
       if (valStrI === 'oui' || valStrI === 'non') {
         document.querySelectorAll('button.yesno-btn').forEach(function(b) {
           var oc = b.getAttribute('onclick') || '';
