@@ -2121,6 +2121,30 @@ function activatePraticienMode() {
   });
   resizeAllAnnotationTextareas();
   updateAnswerHighlights();
+  afficherAvertissementSiNonConnecte();
+}
+
+// GARDE-FOU (15/07/2026, perte de données réelle remontée par Camille) : ce fichier
+// est le questionnaire PUBLIC (lien envoyé par email/GitHub Pages), jamais celui
+// ouvert par "Compléter avec le client" dans Synaxone (c'est questionnaire-client.html
+// qui joue ce rôle, voir CLAUDE.md §6ter) — _synaxoneEmbedded reste donc TOUJOURS
+// false ici en usage réel. Averti explicitement dès qu'on active le mode praticien :
+// sans ça, rien ne distinguait visuellement une session connectée à Synaxone d'une
+// session isolée, et des annotations tapées ici semblaient enregistrées alors
+// qu'aucun lien automatique vers Synaxone n'existe pour ce fichier.
+function afficherAvertissementSiNonConnecte() {
+  if (_synaxoneEmbedded) return;
+  if (document.getElementById('avertissement-non-connecte')) return;
+  var bar = document.createElement('div');
+  bar.id = 'avertissement-non-connecte';
+  bar.style.cssText = 'position:sticky;top:0;z-index:900;background:#c0392b;color:#fff;padding:12px 16px;'
+    + 'font-family:inherit;font-size:14px;font-weight:700;text-align:center;line-height:1.5;'
+    + 'box-shadow:0 2px 8px rgba(0,0,0,0.25)';
+  bar.innerHTML = '⚠️ CE QUESTIONNAIRE N\'EST PAS CONNECTÉ À SYNAXONE — vos annotations, curseurs modifiés et'
+    + ' emplacements ajoutés ici NE REVIENDRONT PAS automatiquement dans Synaxone.<br>'
+    + 'Pour que tout soit repris automatiquement, utilise le bouton « ✏️ Compléter avec le client »'
+    + ' depuis la fiche du patient, DANS Synaxone.';
+  document.body.insertBefore(bar, document.body.firstChild);
 }
 
 function deactivatePraticienMode() {
