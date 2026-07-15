@@ -182,6 +182,17 @@
   }
   .slider-wrapper { flex: 1; }
 
+  /* OUI/NON (widgets fidèles au grand questionnaire — voir QUESTION_WIDGETS) */
+  .yesno-group { display: flex; gap: 8px; }
+  .yesno-btn {
+    flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--bg); font-family: 'DM Sans', sans-serif; font-size: 13px;
+    cursor: pointer; transition: all 0.15s; color: var(--text-muted);
+  }
+  .yesno-btn.selected-oui, .yesno-btn.selected-non {
+    background: var(--accent-light); border-color: var(--accent); color: var(--text-muted); font-weight: 600;
+  }
+
   /* TEXTE LIBRE */
   .libre-card {
     background: var(--surface);
@@ -586,6 +597,349 @@ function getRenderInfo(qnum) {
   return QUESTION_RENDER_INFO[String(qnum)] || { kind: 'slider' };
 }
 
+// Widgets fidèles à la forme réelle des questions du grand questionnaire, pour les
+// symptômes dont le type n'est ni un simple curseur ni un double curseur (voir
+// QUESTION_RENDER_INFO, kind "texte"). Corrige le 16/07/2026 (retour de Camille :
+// "tu as simplifié les questions, ce ne sont pas les mêmes, cases de choix pour la
+// Q20 par ex") — un premier passage avait remplacé ces questions par une simple case
+// de texte libre, perdant leur vraie structure (cases à cocher, curseurs par
+// domaine…). Seule simplification volontaire, actée par Camille : le champ "Depuis
+// quand ?" est retiré partout (pas nécessaire pour ce suivi), le reste de la
+// structure d'origine est conservé. Couvre les symptômes de BILAN_CATEGORIES qui en
+// ont besoin ; un symptôme "signalé à l'entretien" sans entrée ici retombe sur la
+// case de texte libre (arbitraire parmi les ~270 questions, non couvrable une à une).
+var QUESTION_WIDGETS = {
+  '13': { kind: 'ouinon', detail: { yesno: { question: "Êtes-vous appareillé(e) ?" } } },
+  '20': { kind: 'checklist', items: ['Travail', 'Conversations', "École / apprentissage", 'Cadre familial', 'Réunions'], autre: true, sliderLabels: ['0 · pas du tout', '5', '10 · vraiment beaucoup'] },
+  '25': { kind: 'checklist', items: ['Au travail', 'À la maison'], sliderLabels: ['0 · aucune difficulté', '5', '10 · beaucoup de difficultés'] },
+  '27': { kind: 'checklist', items: ['En tête-à-tête', 'En groupe / réunion', 'En famille'], sliderLabels: ['0 · aucune difficulté', '5', '10 · beaucoup de difficultés'] },
+  '30': { kind: 'checklist', items: ['Affectif', 'Personnel', 'Professionnel'], sliderLabels: ['0 · aucune difficulté', '5', '10 · beaucoup de difficultés'] },
+  '35': { kind: 'checklist', items: ['Lecture / compréhension', 'Mémorisation', 'Mise en pratique', 'Concentration'], sliderLabels: ['0 · aucune difficulté', '5', '10 · beaucoup de difficultés'] },
+  '45': { kind: 'checklist', items: ['Problèmes auditifs (déficit, surdité partielle…)', 'Hypersensibilité auditive (sons insupportables, besoin de silence)'], sliderLabels: ['0 · pas du tout', '5', '10 · vraiment beaucoup'] },
+  '47': { kind: 'checklist', items: ['Déficit visuel (vue basse, flou, difficultés à lire…)', 'Hypersensibilité visuelle (lumière insupportable, écrans difficiles à supporter…)'], sliderLabels: ['0 · pas du tout', '5', '10 · vraiment beaucoup'] },
+  '56': { kind: 'checklist', items: ['Stressé(e) — tension intérieure, pression, inquiétude', 'Agité(e) — difficile de rester en place, besoin de bouger, de faire', 'Anxieux(se) — sentiment diffus de danger ou d\'inquiétude', 'Détendu(e) — je me sens calme et à l\'aise en ce moment'], sliderLabels: ['0 · pas du tout', '5', '10 · vraiment beaucoup'] },
+  '69': { kind: 'addictions' },
+  '74': { kind: 'ouinon', detail: { slider: { rangeLabels: ['0 · pas du tout', '5', '10 · vraiment beaucoup'] } } },
+  '90': { kind: 'checklist', items: ["Du noir / de l'obscurité", 'De la foule', 'Du regard des autres', 'Des espaces fermés (claustrophobie)', 'Des espaces ouverts (agoraphobie)', 'Autre'], sliderLabels: ['0 · pas du tout', '5', '10 · vraiment beaucoup'] },
+  '91': { kind: 'traumaliste' },
+  '106': { kind: 'ouinon', detail: { slider: { rangeLabels: ['0 · léger', '5', '10 · sévère'] }, yesno: { question: 'Prenez-vous des médicaments pour cela ?' } } },
+  '111': { kind: 'ouinon', detail: {} },
+  '113': { kind: 'checklist', items: ['Particulièrement en ce moment', 'De manière chronique (fatigue persistante au long cours)'], sliderLabels: ['0 · légèrement fatigué(e)', '5', '10 · épuisé(e)'] },
+  '129': { kind: 'ouinon', detail: { slider: { rangeLabels: ['0 · jamais', '5', '10 · très souvent'] } } },
+  '142': { kind: 'ouinon', detail: { yesno: { question: 'Prenez-vous des médicaments pour cela ?' } } },
+  '143': { kind: 'ouinon', detail: { yesno: { question: 'Prenez-vous des médicaments pour cela ?' } } },
+  '150': { kind: 'checklist', items: ['Sans aura', 'Avec aura'], sliderLabels: ['0 · jamais', '5', '10 · quotidien'] },
+  '164': { kind: 'ouinon', detail: { checkboxes: { items: ['Pseudo-crises', 'Crises épileptiques'] }, yesno: { question: 'Prenez-vous des médicaments pour cela ?' } } },
+  '174': { kind: 'ouinon', detail: { checkboxes: { items: ['Hémisphère gauche', 'Hémisphère droit', 'Les deux'] } } }
+};
+
+function selectYesNoBilan(btn, val, hiddenId) {
+  var group = btn.parentElement;
+  group.querySelectorAll('.yesno-btn').forEach(function(b) { b.className = 'yesno-btn'; });
+  btn.classList.add('selected-' + val);
+  document.getElementById(hiddenId).value = val;
+}
+
+function toggleChecklistItem(wrapId, checked) {
+  var el = document.getElementById(wrapId);
+  if (el) el.hidden = !checked;
+}
+
+// Checkbox par domaine, chacune révélant un curseur 0-10 (ex. Q20 : dans quels
+// contextes avez-vous des difficultés de concentration, et à quel point).
+function creerCarteChecklist(qnum, label, spec) {
+  var base = qnum.replace('Q', '');
+  var rl = spec.sliderLabels || ['0 · pas du tout', '5', '10 · vraiment beaucoup'];
+  var card = document.createElement('div');
+  card.className = 'question-card';
+  var itemsHtml = spec.items.map(function(it, i) {
+    var wrapId = 'wrap_' + base + '_' + i;
+    var sliderId = 'slider_' + base + '_' + i;
+    return `
+      <div style="margin-bottom:8px;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg)">
+          <input type="checkbox" id="chk_${base}_${i}" onchange="toggleChecklistItem('${wrapId}', this.checked)" style="accent-color:var(--accent);width:16px;height:16px;">
+          <span style="font-size:13px">${it}</span>
+        </label>
+        <div id="${wrapId}" hidden style="padding:8px 12px;background:var(--accent-light);border-radius:0 0 8px 8px;border:1px solid var(--border);border-top:none">
+          <div class="slider-container">
+            <div class="slider-wrapper">
+              <input type="range" id="${sliderId}" min="0" max="10" value="0" oninput="majSlider(this)" onchange="majProgressBar()">
+              <div class="slider-labels"><span>${rl[0]}</span><span>${rl[2]}</span></div>
+            </div>
+            <div class="slider-value" id="val_${sliderId}">0</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+  var autreHtml = '';
+  if (spec.autre) {
+    var wrapId = 'wrap_' + base + '_autre';
+    var sliderId = 'slider_' + base + '_autre';
+    autreHtml = `
+      <div style="margin-bottom:8px;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg)">
+          <input type="checkbox" id="chk_${base}_autre" onchange="toggleChecklistItem('${wrapId}', this.checked)" style="accent-color:var(--accent);width:16px;height:16px;">
+          <span style="font-size:13px">Autre</span>
+        </label>
+        <div id="${wrapId}" hidden style="padding:8px 12px;background:var(--accent-light);border-radius:0 0 8px 8px;border:1px solid var(--border);border-top:none">
+          <input type="text" id="texte_${base}_autre" placeholder="Précisez le contexte…" style="width:100%;margin-bottom:8px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px">
+          <div class="slider-container">
+            <div class="slider-wrapper">
+              <input type="range" id="${sliderId}" min="0" max="10" value="0" oninput="majSlider(this)" onchange="majProgressBar()">
+              <div class="slider-labels"><span>${rl[0]}</span><span>${rl[2]}</span></div>
+            </div>
+            <div class="slider-value" id="val_${sliderId}">0</div>
+          </div>
+        </div>
+      </div>`;
+  }
+  card.innerHTML = `
+    <div class="question-label"><span class="q-num">${qnum}</span>${label}</div>
+    ${itemsHtml}
+    ${autreHtml}
+    <textarea id="com_${base}" placeholder="Commentaires…" rows="2" style="margin-top:4px"></textarea>
+  `;
+  setTimeout(function() {
+    card.querySelectorAll('input[type="range"]').forEach(function(inp) { majSlider(inp); });
+  }, 50);
+  return card;
+}
+
+// Oui/Non révélant un détail (curseur et/ou cases à cocher et/ou sous-question
+// oui/non avec précision) — ex. Q106 dépression, Q164 épilepsie, Q174 AVC.
+function creerCarteOuiNon(qnum, label, spec) {
+  var base = qnum.replace('Q', '');
+  var detail = spec.detail || {};
+  var card = document.createElement('div');
+  card.className = 'question-card';
+  var detailId = 'detail_' + base;
+  var yesnoId = 'yn_' + base;
+
+  var sliderHtml = '';
+  if (detail.slider) {
+    var rl = detail.slider.rangeLabels || ['0 · pas du tout', '5', '10 · vraiment beaucoup'];
+    sliderHtml = `
+      <div class="slider-container" style="margin-bottom:10px">
+        <div class="slider-wrapper">
+          <input type="range" id="slider_${base}" min="0" max="10" value="0" oninput="majSlider(this)" onchange="majProgressBar()">
+          <div class="slider-labels"><span>${rl[0]}</span><span>${rl[2]}</span></div>
+        </div>
+        <div class="slider-value" id="val_slider_${base}">0</div>
+      </div>`;
+  }
+  var checkboxesHtml = '';
+  if (detail.checkboxes) {
+    checkboxesHtml = '<div style="margin-bottom:10px">' + detail.checkboxes.items.map(function(it, i) {
+      return `<label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:white;margin-bottom:6px">
+        <input type="checkbox" id="chk_${base}_${i}" style="accent-color:var(--accent)"> <span style="font-size:13px">${it}</span>
+      </label>`;
+    }).join('') + '</div>';
+  }
+  var nestedHtml = '';
+  if (detail.yesno) {
+    var nid = 'ynn_' + base;
+    var ntxtId = 'texte_nested_' + base;
+    nestedHtml = `
+      <div style="margin-bottom:10px">
+        <div style="font-size:13px;font-weight:500;margin-bottom:6px">${detail.yesno.question}</div>
+        <div class="yesno-group" style="margin-bottom:8px">
+          <button type="button" class="yesno-btn" onclick="selectYesNoBilan(this,'oui','${nid}');document.getElementById('${ntxtId}').hidden=false">Oui</button>
+          <button type="button" class="yesno-btn" onclick="selectYesNoBilan(this,'non','${nid}');document.getElementById('${ntxtId}').hidden=true">Non</button>
+        </div>
+        <input type="hidden" id="${nid}">
+        <textarea id="${ntxtId}" hidden placeholder="Lesquels ?" rows="2" style="width:100%"></textarea>
+      </div>`;
+  }
+  card.innerHTML = `
+    <div class="question-label"><span class="q-num">${qnum}</span>${label}</div>
+    <div class="yesno-group" style="margin-bottom:10px">
+      <button type="button" class="yesno-btn" onclick="selectYesNoBilan(this,'oui','${yesnoId}');document.getElementById('${detailId}').hidden=false">Oui</button>
+      <button type="button" class="yesno-btn" onclick="selectYesNoBilan(this,'non','${yesnoId}');document.getElementById('${detailId}').hidden=true">Non</button>
+    </div>
+    <input type="hidden" id="${yesnoId}">
+    <div id="${detailId}" hidden style="padding:12px;background:var(--accent-light);border-radius:8px">
+      ${sliderHtml}
+      ${checkboxesHtml}
+      ${nestedHtml}
+      <textarea id="com_${base}" placeholder="Commentaires…" rows="2" style="width:100%"></textarea>
+    </div>
+  `;
+  setTimeout(function() {
+    card.querySelectorAll('input[type="range"]').forEach(function(inp) { majSlider(inp); });
+  }, 50);
+  return card;
+}
+
+// Oui/Non + liste d'événements ajoutables librement (ex. Q91 phobies).
+function creerCarteTraumaListe(qnum, label) {
+  var base = qnum.replace('Q', '');
+  var card = document.createElement('div');
+  card.className = 'question-card';
+  var detailId = 'detail_' + base;
+  var yesnoId = 'yn_' + base;
+  var listId = 'liste_' + base;
+  card.innerHTML = `
+    <div class="question-label"><span class="q-num">${qnum}</span>${label}</div>
+    <div class="yesno-group" style="margin-bottom:10px">
+      <button type="button" class="yesno-btn" onclick="selectYesNoBilan(this,'oui','${yesnoId}');document.getElementById('${detailId}').hidden=false">Oui</button>
+      <button type="button" class="yesno-btn" onclick="selectYesNoBilan(this,'non','${yesnoId}');document.getElementById('${detailId}').hidden=true">Non</button>
+    </div>
+    <input type="hidden" id="${yesnoId}">
+    <div id="${detailId}" hidden style="padding:12px;background:var(--accent-light);border-radius:8px">
+      <div id="${listId}"></div>
+      <button type="button" onclick="ajouterElementListe('${listId}')" style="margin-top:6px;padding:6px 14px;border:1px dashed var(--accent);background:transparent;border-radius:6px;color:var(--accent);cursor:pointer;font-size:12px">+ Ajouter un événement</button>
+    </div>
+  `;
+  return card;
+}
+
+function ajouterElementListe(listId) {
+  var list = document.getElementById(listId);
+  if (!list) return;
+  var i = list.children.length;
+  var row = document.createElement('div');
+  row.className = 'liste-item';
+  row.style.cssText = 'margin-bottom:8px';
+  row.innerHTML = `<textarea placeholder="Décrivez…" rows="1" style="width:100%"></textarea>`;
+  list.appendChild(row);
+}
+
+// Liste fixe d'addictions, chacune révélant quantité/fréquence + intensité ressentie
+// (ex. Q69).
+var ADDICTIONS_LISTE = [
+  { label: 'Aliments sucrés', unit: 'quantité / fréquence' },
+  { label: 'Café', unit: 'tasses / jour' },
+  { label: 'Alcool', unit: 'verres / semaine' },
+  { label: 'Tabac', unit: 'cigarettes / jour' },
+  { label: 'Marijuana / cannabis', unit: 'fréquence' },
+  { label: 'Autres drogues', unit: 'précisez' },
+  { label: 'Médicaments', unit: 'lesquels' },
+  { label: 'Écrans / réseaux sociaux', unit: 'heures / jour' },
+  { label: 'Jeux vidéo', unit: 'heures / jour' },
+  { label: "Jeux d'argent", unit: 'fréquence' },
+  { label: 'Achats compulsifs', unit: 'fréquence' },
+  { label: 'Sport excessif', unit: 'heures / semaine' },
+  { label: 'Autre', unit: 'précisez' }
+];
+
+function creerCarteAddictions(qnum, label) {
+  var base = qnum.replace('Q', '');
+  var card = document.createElement('div');
+  card.className = 'question-card';
+  var itemsHtml = ADDICTIONS_LISTE.map(function(a, i) {
+    var wrapId = 'wrap_' + base + '_' + i;
+    return `
+      <div style="margin-bottom:8px;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg)">
+          <input type="checkbox" id="chk_${base}_${i}" onchange="toggleChecklistItem('${wrapId}', this.checked)" style="accent-color:var(--accent);width:16px;height:16px;">
+          <span style="font-size:13px;font-weight:500">${a.label}</span>
+        </label>
+        <div id="${wrapId}" hidden style="padding:10px 12px;background:var(--accent-light);border-radius:0 0 8px 8px;border:1px solid var(--border);border-top:none">
+          ${a.label === 'Autre' ? `<input type="text" id="texte_${base}_${i}_autre" placeholder="Précisez…" style="margin-bottom:8px;width:100%;padding:8px;border:1px solid var(--border);border-radius:6px">` : ''}
+          <input type="text" id="qte_${base}_${i}" placeholder="${a.unit}" style="width:100%;margin-bottom:8px;padding:8px;border:1px solid var(--border);border-radius:6px">
+          <div class="slider-container">
+            <div class="slider-wrapper">
+              <input type="range" id="slider_${base}_${i}" min="0" max="10" value="0" oninput="majSlider(this)" onchange="majProgressBar()">
+              <div class="slider-labels"><span>0 · pas gênant</span><span>10 · très gênant</span></div>
+            </div>
+            <div class="slider-value" id="val_slider_${base}_${i}">0</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+  card.innerHTML = `
+    <div class="question-label"><span class="q-num">${qnum}</span>${label}</div>
+    ${itemsHtml}
+    <textarea id="com_${base}" placeholder="Commentaires…" rows="2" style="margin-top:4px"></textarea>
+  `;
+  setTimeout(function() {
+    card.querySelectorAll('input[type="range"]').forEach(function(inp) { majSlider(inp); });
+  }, 50);
+  return card;
+}
+
+// Extraction des réponses des 4 widgets ci-dessus, appelée par construireDonneesBilan().
+// Chacune renvoie `null` si rien n'a été répondu (pour ne pas fabriquer une entrée
+// "répondue" vide côté Synaxone NFB — voir la logique de note dans importerBilan()).
+function extraireChecklist(base, spec) {
+  var items = spec.items.map(function(it, i) {
+    var chk = document.getElementById('chk_' + base + '_' + i);
+    var slider = document.getElementById('slider_' + base + '_' + i);
+    return { label: it, coche: !!(chk && chk.checked), valeur: (chk && chk.checked && slider) ? parseInt(slider.value, 10) : null };
+  });
+  var result = { items: items };
+  var uneReponse = items.some(function(it) { return it.coche; });
+  if (spec.autre) {
+    var chkA = document.getElementById('chk_' + base + '_autre');
+    var sliderA = document.getElementById('slider_' + base + '_autre');
+    var texteA = document.getElementById('texte_' + base + '_autre');
+    result.autre = { coche: !!(chkA && chkA.checked), texte: texteA ? texteA.value.trim() : '', valeur: (chkA && chkA.checked && sliderA) ? parseInt(sliderA.value, 10) : null };
+    if (result.autre.coche) uneReponse = true;
+  }
+  var com = document.getElementById('com_' + base);
+  result.commentaire = com ? com.value.trim() : '';
+  if (result.commentaire) uneReponse = true;
+  return uneReponse ? result : null;
+}
+
+function extraireOuiNon(base, spec) {
+  var yn = document.getElementById('yn_' + base);
+  var reponse = yn ? yn.value : '';
+  if (!reponse) return null;
+  var result = { reponse: reponse };
+  if (reponse !== 'oui') return result;
+  var detail = spec.detail || {};
+  if (detail.slider) {
+    var s = document.getElementById('slider_' + base);
+    result.valeur = s ? parseInt(s.value, 10) : null;
+  }
+  if (detail.checkboxes) {
+    result.coches = detail.checkboxes.items.filter(function(it, i) {
+      var c = document.getElementById('chk_' + base + '_' + i);
+      return c && c.checked;
+    });
+  }
+  if (detail.yesno) {
+    var nyn = document.getElementById('ynn_' + base);
+    var ntxt = document.getElementById('texte_nested_' + base);
+    result.medicaments = { reponse: nyn ? nyn.value : '', lesquels: ntxt ? ntxt.value.trim() : '' };
+  }
+  var com = document.getElementById('com_' + base);
+  result.commentaire = com ? com.value.trim() : '';
+  return result;
+}
+
+function extraireTraumaListe(base) {
+  var yn = document.getElementById('yn_' + base);
+  var reponse = yn ? yn.value : '';
+  if (!reponse) return null;
+  var result = { reponse: reponse };
+  if (reponse !== 'oui') return result;
+  var list = document.getElementById('liste_' + base);
+  result.evenements = list ? Array.prototype.slice.call(list.querySelectorAll('textarea')).map(function(t) { return t.value.trim(); }).filter(Boolean) : [];
+  return result;
+}
+
+function extraireAddictions(base) {
+  var items = ADDICTIONS_LISTE.map(function(a, i) {
+    var chk = document.getElementById('chk_' + base + '_' + i);
+    if (!chk || !chk.checked) return null;
+    var qte = document.getElementById('qte_' + base + '_' + i);
+    var slider = document.getElementById('slider_' + base + '_' + i);
+    var entry = { label: a.label, quantite: qte ? qte.value.trim() : '', valeur: slider ? parseInt(slider.value, 10) : null };
+    if (a.label === 'Autre') {
+      var autreTxt = document.getElementById('texte_' + base + '_' + i + '_autre');
+      entry.precision = autreTxt ? autreTxt.value.trim() : '';
+    }
+    return entry;
+  }).filter(Boolean);
+  var com = document.getElementById('com_' + base);
+  var commentaire = com ? com.value.trim() : '';
+  if (items.length === 0 && !commentaire) return null;
+  return { items: items, commentaire: commentaire };
+}
+
 // ─────────────────────────────────────────────
 // LECTURE DE LA CONFIG DANS L'URL
 // ─────────────────────────────────────────────
@@ -727,6 +1081,13 @@ function creerCarteSymptome(s) {
     return creerCarteDouble(qnum, s.texte, info.label1, info.label2, info.range1, info.range2);
   }
   if (info.kind === 'texte') {
+    var widget = QUESTION_WIDGETS[String(s.num)];
+    if (widget) {
+      if (widget.kind === 'checklist') return creerCarteChecklist(qnum, s.texte, widget);
+      if (widget.kind === 'ouinon') return creerCarteOuiNon(qnum, s.texte, widget);
+      if (widget.kind === 'traumaliste') return creerCarteTraumaListe(qnum, s.texte);
+      if (widget.kind === 'addictions') return creerCarteAddictions(qnum, s.texte);
+    }
     return creerCarteTexteSymptome(qnum, s.texte);
   }
   return creerCarteSlider(qnum, s.texte, info.rangeLabels);
@@ -895,6 +1256,16 @@ function construireDonneesBilan() {
       return base;
     }
     if (info.kind === 'texte') {
+      var widget = QUESTION_WIDGETS[String(s.num)];
+      if (widget) {
+        var detail = null;
+        if (widget.kind === 'checklist') detail = extraireChecklist(String(s.num), widget);
+        else if (widget.kind === 'ouinon') detail = extraireOuiNon(String(s.num), widget);
+        else if (widget.kind === 'traumaliste') detail = extraireTraumaListe(String(s.num));
+        else if (widget.kind === 'addictions') detail = extraireAddictions(String(s.num));
+        if (detail) base.reponseDetail = detail;
+        return base;
+      }
       var txt = document.getElementById('texte_' + s.num);
       base.reponseTexte = txt ? txt.value.trim() : '';
       return base;
@@ -1036,30 +1407,87 @@ function partagerBilan() {
 // ─────────────────────────────────────────────
 var SAVE_KEY_BILAN = 'synaxone_bilan_draft';
 
+// Étendu le 16/07/2026 pour les nouveaux widgets (checklist/oui-non/liste/addictions,
+// voir QUESTION_WIDGETS) : ceux-ci reposent sur des cases à cocher et des champs
+// oui/non cachés pour révéler leur contenu — pas seulement des curseurs/zones de
+// texte comme avant. Sans cette extension, le brouillon aurait pu sembler restauré
+// (curseur bien à la bonne valeur) tout en restant invisible/inaccessible pour le
+// client (case décochée, panneau de détail toujours masqué) — même risque de perte
+// perçue que documenté dans le CORRECTIF DE PERTE DE DONNÉES plus bas.
 function sauvegarderBrouillonBilan() {
   if (!CONFIG) return;
   try {
-    var data = { _clientCode: CONFIG.clientCode || '', _debutSuivi: CONFIG.debutSuivi || '', _ts: new Date().toISOString(), champs: {} };
+    var data = { _clientCode: CONFIG.clientCode || '', _debutSuivi: CONFIG.debutSuivi || '', _ts: new Date().toISOString(), champs: {}, cases: {} };
     document.querySelectorAll('#questionnaire-container input[type=range][id]').forEach(function(el) {
       data.champs[el.id] = el.value;
     });
+    document.querySelectorAll('#questionnaire-container input[type=text][id]').forEach(function(el) {
+      if (el.value) data.champs[el.id] = el.value;
+    });
+    document.querySelectorAll('#questionnaire-container input[type=hidden][id]').forEach(function(el) {
+      if (el.value) data.champs[el.id] = el.value;
+    });
     document.querySelectorAll('#questionnaire-container textarea[id]').forEach(function(el) {
       if (el.value) data.champs[el.id] = el.value;
+    });
+    document.querySelectorAll('#questionnaire-container input[type=checkbox][id]').forEach(function(el) {
+      if (el.checked) data.cases[el.id] = true;
     });
     localStorage.setItem(SAVE_KEY_BILAN, JSON.stringify(data));
   } catch(e) {}
 }
 
+// Restaure d'abord les cases à cocher (qui pilotent l'affichage des curseurs/champs
+// qu'elles révèlent), puis les valeurs, puis en dernier les champs oui/non cachés
+// (qui pilotent l'affichage de tout un bloc de détail) — l'ordre compte : révéler
+// les conteneurs avant de restaurer les valeurs qu'ils contiennent.
 function restaurerBrouillonBilan(data) {
   try {
+    Object.keys(data.cases || {}).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.checked = true;
+      el.dispatchEvent(new Event('change'));
+    });
     Object.keys(data.champs || {}).forEach(function(id) {
       var el = document.getElementById(id);
       if (!el) return;
+      if (el.type === 'hidden' && (id.indexOf('yn_') === 0 || id.indexOf('ynn_') === 0)) {
+        restaurerOuiNonUI(id, data.champs[id]);
+        return;
+      }
       el.value = data.champs[id];
       el.dispatchEvent(new Event('input'));
       el.dispatchEvent(new Event('change'));
     });
   } catch(e) {}
+}
+
+// Reproduit ce que fait selectYesNoBilan() au clic (mise en évidence du bouton
+// choisi + révélation du bloc de détail associé), à partir d'une valeur restaurée
+// plutôt que d'un vrai clic. Convention d'id : le groupe de boutons .yesno-group est
+// toujours le frère précédent immédiat de l'input caché (voir creerCarteOuiNon /
+// creerCarteTraumaListe) ; "yn_<base>" pilote "detail_<base>", "ynn_<base>" (oui/non
+// imbriqué, ex. "prenez-vous des médicaments ?") pilote "texte_nested_<base>".
+function restaurerOuiNonUI(hiddenId, value) {
+  var hidden = document.getElementById(hiddenId);
+  if (!hidden) return;
+  hidden.value = value;
+  var group = hidden.previousElementSibling;
+  if (group && group.classList && group.classList.contains('yesno-group')) {
+    group.querySelectorAll('.yesno-btn').forEach(function(b) { b.className = 'yesno-btn'; });
+    var target = Array.prototype.filter.call(group.querySelectorAll('.yesno-btn'), function(b) {
+      return b.textContent.trim().toLowerCase() === value;
+    })[0];
+    if (target) target.classList.add('selected-' + value);
+  }
+  if (hiddenId.indexOf('ynn_') === 0) {
+    var ntxt = document.getElementById('texte_nested_' + hiddenId.slice(4));
+    if (ntxt) ntxt.hidden = (value !== 'oui');
+  } else if (hiddenId.indexOf('yn_') === 0) {
+    var detail = document.getElementById('detail_' + hiddenId.slice(3));
+    if (detail) detail.hidden = (value !== 'oui');
+  }
 }
 
 function effacerBrouillonBilan() {
