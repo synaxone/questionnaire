@@ -568,6 +568,24 @@ CATEGORIES_SYMPTOMES.forEach(function(cat) {
   });
 });
 
+// Type de rendu réel de chaque question du grand questionnaire (index.html), par
+// qnum — extrait le 15/07/2026 pour corriger un bug remonté par Camille : les
+// symptômes "signalés à l'entretien" (à suivre au bilan) s'affichaient TOUS comme un
+// curseur d'intensité générique 0-10, y compris des questions qui n'en sont pas
+// (ex. Q1 « Combien d'heures dormez-vous ? », une question numérique). "slider" = un
+// curseur (avec les vraies graduations de la question d'origine si elles existent,
+// sinon 0-10 générique) ; "double" = deux curseurs (fréquence/intensité, comme
+// l'original) ; "texte" = question dont le rendu d'origine est trop spécifique pour
+// être reproduit fidèlement en curseur (choix multiples, listes, etc.) — affichée en
+// réponse libre plutôt que forcée dans un widget qui n'a pas de sens pour elle.
+// Regénérer avec verification/extract-question-render-lookup.js si le grand
+// questionnaire change (nouvelles questions, changement de type/graduations).
+var QUESTION_RENDER_INFO = {"1":{"kind":"texte"},"2":{"kind":"slider","rangeLabels":["0 · très récupérateur","5","10 · pas récupérateur du tout"]},"3":{"kind":"slider","rangeLabels":["0 · pas agité","5","10 · très agité"]},"4":{"kind":"texte"},"5":{"kind":"slider","rangeLabels":["0 · pas de difficulté","5","10 · beaucoup de difficultés"]},"6":{"kind":"texte"},"7":{"kind":"slider"},"8":{"kind":"texte"},"9":{"kind":"slider"},"10":{"kind":"slider"},"11":{"kind":"slider"},"12":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · toutes les nuits"],"range2":["0 · légères","5","10 · très abondantes"]},"13":{"kind":"texte"},"14":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · toutes les nuits"],"range2":["0 · léger","5","10 · très fort"]},"15":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · toutes les nuits"]},"16":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · toutes les nuits"],"range2":["0 · léger","5","10 · très intense"]},"17":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · toutes les nuits"],"range2":["0 · léger","5","10 · très intense"]},"18":{"kind":"slider"},"19":{"kind":"slider"},"20":{"kind":"texte"},"21":{"kind":"texte"},"22":{"kind":"slider","rangeLabels":["0 · très lisible","5","10 · illisible"]},"23":{"kind":"slider","rangeLabels":["0 · aucune difficulté","5","10 · grande difficulté"]},"24":{"kind":"slider","rangeLabels":["0 · aucune difficulté","5","10 · grande difficulté"]},"25":{"kind":"texte"},"26":{"kind":"slider","rangeLabels":["0 · aucune difficulté","5","10 · beaucoup de difficultés"]},"27":{"kind":"texte"},"28":{"kind":"texte"},"29":{"kind":"slider","rangeLabels":["0 · ne procrastine pas du tout","5","10 · procrastine tout le temps"]},"30":{"kind":"texte"},"31":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · grande difficulté"]},"32":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · grande difficulté"]},"33":{"kind":"slider","rangeLabels":["0","5","10"]},"34":{"kind":"slider","rangeLabels":["0","5","10"]},"35":{"kind":"texte"},"36":{"kind":"slider","rangeLabels":["0 · jamais démotivé(e)","5","10 · très démotivé(e)"]},"37":{"kind":"slider"},"38":{"kind":"slider"},"39":{"kind":"slider"},"40":{"kind":"slider","rangeLabels":["0 · aucune difficulté","5","10 · beaucoup de difficultés"]},"41":{"kind":"slider","rangeLabels":["0 · pas attentif(ve) du tout","5","10 · très attentif(ve)"]},"42":{"kind":"texte"},"43":{"kind":"slider","rangeLabels":["0 · bonne conscience espace/temps","5","10 · très altérée"]},"44":{"kind":"slider","rangeLabels":["0 · bon sens","5","10 · très mauvais sens"]},"45":{"kind":"texte"},"46":{"kind":"double","label1":"Intensité","label2":"Fréquence","range1":["0 · imperceptible","5","10 · très fort"],"range2":["0 · rarement","5","10 · en permanence"]},"47":{"kind":"texte"},"48":{"kind":"texte"},"49":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"50":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · vraiment beaucoup"]},"51":{"kind":"double","label1":"Fréquence","label2":"Intensité du malaise","range1":["0 · jamais","5","10 · toujours"],"range2":["0 · très léger","5","10 · très intense"]},"52":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · tout le temps"],"range2":["0 · très légères","5","10 · très intenses"]},"53":{"kind":"slider"},"54":{"kind":"texte"},"55":{"kind":"texte"},"56":{"kind":"texte"},"57":{"kind":"slider","rangeLabels":["0 · je me détends facilement","5","10 · jamais détendu(e)"]},"58":{"kind":"texte"},"59":{"kind":"slider","rangeLabels":["0 · aucune difficulté","5","10 · beaucoup de difficultés"]},"60":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · beaucoup"]},"61":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · beaucoup"]},"63":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · vraiment beaucoup"]},"64":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"65":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"66":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"67":{"kind":"texte"},"68":{"kind":"slider"},"69":{"kind":"texte"},"70":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · vraiment beaucoup"]},"71":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · beaucoup"]},"72":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"73":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · très envahissants"]},"74":{"kind":"texte"},"75":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"76":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"77":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · vraiment beaucoup"]},"78":{"kind":"slider","rangeLabels":["0 · très ordonné(e)","5","10 · très désordonné(e)"]},"79":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · très attentif(ve)"]},"80":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · vraiment beaucoup"]},"81":{"kind":"slider"},"82":{"kind":"slider"},"83":{"kind":"slider"},"84":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · beaucoup"]},"85":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · beaucoup"]},"87":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · énormément"]},"88":{"kind":"slider","rangeLabels":["0 · bonne estime","5","10 · très mauvaise estime"]},"89":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · énormément"]},"90":{"kind":"texte"},"91":{"kind":"texte"},"92":{"kind":"texte"},"93":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · vraiment beaucoup"]},"94":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"95":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · très souvent"]},"96":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · beaucoup"]},"97":{"kind":"texte"},"98":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"99":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"100":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · en permanence"]},"101":{"kind":"slider","rangeLabels":["0 · pas irritable du tout","5","10 · très irritable"]},"102":{"kind":"slider","rangeLabels":["0 · facilité à calmer sa colère","5","10 · beaucoup de mal à se calmer"]},"103":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"104":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · en permanence"]},"105":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"106":{"kind":"texte"},"107":{"kind":"slider"},"108":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"109":{"kind":"slider"},"110":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · souvent"]},"111":{"kind":"texte"},"112":{"kind":"texte"},"113":{"kind":"texte"},"114":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · constamment"],"range2":["0 · légères","5","10 · insupportables"]},"115":{"kind":"texte"},"116":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · vraiment beaucoup"]},"117":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"118":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · très souvent"],"range2":["0 · très légères","5","10 · très intenses"]},"119":{"kind":"texte"},"120":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · vraiment beaucoup"]},"121":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · vraiment beaucoup"]},"122":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · très souvent"],"range2":["0 · très légers","5","10 · très intenses"]},"123":{"kind":"slider"},"124":{"kind":"texte"},"125":{"kind":"slider"},"126":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · vraiment beaucoup"]},"127":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"128":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"129":{"kind":"texte"},"130":{"kind":"texte"},"131":{"kind":"texte"},"132":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"133":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · vraiment beaucoup"]},"134":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · vraiment beaucoup"]},"135":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"136":{"kind":"slider"},"137":{"kind":"texte"},"138":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"139":{"kind":"slider","rangeLabels":["0 · jamais","5","10 · très souvent"]},"140":{"kind":"texte"},"141":{"kind":"slider"},"142":{"kind":"texte"},"143":{"kind":"texte"},"144":{"kind":"texte"},"145":{"kind":"texte"},"146":{"kind":"texte"},"147":{"kind":"slider"},"148":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · constamment"],"range2":["0 · légères","5","10 · insupportables"]},"149":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · constamment"],"range2":["0 · légères","5","10 · insupportables"]},"150":{"kind":"texte"},"151":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · constamment"],"range2":["0 · légères","5","10 · insupportables"]},"152":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · constamment"],"range2":["0 · très légères","5","10 · insupportables"]},"153":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · constamment"],"range2":["0 · légères","5","10 · insupportables"]},"154":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · constamment"],"range2":["0 · légères","5","10 · insupportables"]},"155":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · constamment"],"range2":["0 · légères","5","10 · insupportables"]},"156":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · constamment"],"range2":["0 · légères","5","10 · insupportables"]},"157":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · constamment"],"range2":["0 · légères","5","10 · insupportables"]},"158":{"kind":"slider"},"159":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · constamment"],"range2":["0 · légères","5","10 · insupportables"]},"160":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · constamment"],"range2":["0 · légères","5","10 · insupportables"]},"161":{"kind":"double","label1":"Fréquence","label2":"Intensité","range1":["0 · jamais","5","10 · constamment"],"range2":["0 · légères","5","10 · insupportables"]},"162":{"kind":"slider","rangeLabels":["0 · très bien","5","10 · très mal"]},"163":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · vraiment beaucoup"]},"164":{"kind":"texte"},"165":{"kind":"slider","rangeLabels":["0 · très bonne immunité","5","10 · très mauvaise immunité"]},"166":{"kind":"slider"},"167":{"kind":"texte"},"168":{"kind":"texte"},"169":{"kind":"texte"},"170":{"kind":"texte"},"171":{"kind":"texte"},"172":{"kind":"texte"},"173":{"kind":"texte"},"174":{"kind":"texte"},"175":{"kind":"texte"},"176":{"kind":"texte"},"177":{"kind":"texte"},"178":{"kind":"texte"},"179":{"kind":"texte"},"180":{"kind":"texte"},"181":{"kind":"slider","rangeLabels":["0 · pas manqué","5","10 · beaucoup manqué"]},"182":{"kind":"texte"},"183":{"kind":"texte"},"184":{"kind":"texte"},"185":{"kind":"texte"},"186":{"kind":"texte"},"187":{"kind":"texte"},"188":{"kind":"texte"},"189":{"kind":"texte"},"192":{"kind":"texte"},"193":{"kind":"texte"},"194":{"kind":"texte"},"195":{"kind":"texte"},"196":{"kind":"texte"},"197":{"kind":"texte"},"198":{"kind":"texte"},"199":{"kind":"texte"},"200":{"kind":"texte"},"201":{"kind":"texte"},"202":{"kind":"texte"},"203":{"kind":"texte"},"204":{"kind":"texte"},"205":{"kind":"texte"},"206":{"kind":"texte"},"207":{"kind":"texte"},"208":{"kind":"texte"},"209":{"kind":"texte"},"210":{"kind":"texte"},"211":{"kind":"texte"},"212":{"kind":"texte"},"213":{"kind":"texte"},"214":{"kind":"texte"},"215":{"kind":"texte"},"31b":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · grande difficulté"]},"31c":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · beaucoup"]},"58b":{"kind":"texte"},"59b":{"kind":"slider","rangeLabels":["0 · pas du tout","5","10 · beaucoup"]},"60b":{"kind":"slider"},"170b":{"kind":"texte"},"titre_lesions":{"kind":"texte"},"titre_medic":{"kind":"texte"},"titre_therapies":{"kind":"texte"},"titre_fam":{"kind":"texte"},"Intro":{"kind":"texte"}};
+
+function getRenderInfo(qnum) {
+  return QUESTION_RENDER_INFO[String(qnum)] || { kind: 'slider' };
+}
+
 // ─────────────────────────────────────────────
 // LECTURE DE LA CONFIG DANS L'URL
 // ─────────────────────────────────────────────
@@ -583,13 +601,26 @@ function lireConfig() {
     var config = JSON.parse(decodeURIComponent(escape(atob(raw))));
     // Format compact (depuis le 15/07/2026) : symptomesSpecifiques est un tableau
     // d'ids ("s10", ...), résolus ici via SYMPTOME_PAR_ID pour garder le lien court.
+    // `source` distingue les deux origines possibles d'un symptôme, pour savoir
+    // comment le rendre juste après (voir construire()) :
+    //   - 'categorie' : vient de la liste fixe BILAN_CATEGORIES (réévaluation 0-10
+    //     volontaire, toujours un/deux curseur(s), design assumé — voir Camille si
+    //     à revoir un jour) ;
+    //   - 'flag'      : symptôme "signalé à l'entretien", qnum arbitraire du grand
+    //     questionnaire — doit reprendre le VRAI type de la question d'origine
+    //     (curseur, double curseur, ou texte libre), jamais un curseur générique.
     // Anciens liens déjà envoyés : le tableau contient encore les objets complets
-    // {id, num, texte, categorie} — on les garde tels quels.
+    // {id, num, texte, categorie} SANS `source` — traités comme 'flag' par défaut
+    // (le plus prudent : jamais de curseur forcé sur une question qui n'en est pas
+    // une), aucune perte de données dans tous les cas.
     if (Array.isArray(config.symptomesSpecifiques)) {
       config.symptomesSpecifiques = config.symptomesSpecifiques.map(function(s) {
         if (typeof s === 'string') {
-          return SYMPTOME_PAR_ID[s] || { id: s, num: s, texte: s, categorie: 'Autres' };
+          var resolved = SYMPTOME_PAR_ID[s] || { id: s, num: s, texte: s, categorie: 'Autres' };
+          resolved.source = 'categorie';
+          return resolved;
         }
+        if (!s.source) s.source = 'flag';
         return s;
       });
     }
@@ -635,7 +666,7 @@ function construire(config) {
       container.appendChild(catTitle);
 
       byCat[cat].forEach(function(s) {
-        container.appendChild(creerCarteSlider('Q' + s.num, s.texte));
+        container.appendChild(creerCarteSymptome(s));
         totalQuestions++;
       });
     });
@@ -678,6 +709,25 @@ function construire(config) {
   majProgressBar();
 }
 
+// Choisit le bon rendu pour un symptôme spécifique (liste fixe BILAN_CATEGORIES ou
+// signalé à l'entretien) selon son type réel dans le grand questionnaire — voir
+// QUESTION_RENDER_INFO plus haut. Pour la liste fixe (`source: 'categorie'`), on
+// garde toujours un curseur (design assumé de la réévaluation 0-10), en 1 ou 2
+// curseurs selon le type d'origine. Pour un symptôme signalé à l'entretien
+// (`source: 'flag'`, qnum arbitraire), on respecte le vrai type — y compris "texte"
+// si l'original n'est pas une question à noter sur une échelle.
+function creerCarteSymptome(s) {
+  var qnum = 'Q' + s.num;
+  var info = getRenderInfo(s.num);
+  if (info.kind === 'double') {
+    return creerCarteDouble(qnum, s.texte, info.label1, info.label2, info.range1, info.range2);
+  }
+  if (info.kind === 'texte' && s.source === 'flag') {
+    return creerCarteTexteSymptome(qnum, s.texte);
+  }
+  return creerCarteSlider(qnum, s.texte, info.rangeLabels);
+}
+
 function creerCarteSlider(qnum, label, labelRange) {
   var id = 'slider_' + qnum.replace('Q', '');
   var card = document.createElement('div');
@@ -688,14 +738,14 @@ function creerCarteSlider(qnum, label, labelRange) {
     <div class="question-label"><span class="q-num">${qnum}</span>${label}</div>
     <div class="slider-container">
       <div class="slider-wrapper">
-        <input type="range" id="${id}" min="0" max="10" value="5"
+        <input type="range" id="${id}" min="0" max="10" value="0"
                oninput="majSlider(this)" onchange="majProgressBar()">
         <div class="slider-labels">
           <span>${rangeMin}</span>
           <span>${rangeMax}</span>
         </div>
       </div>
-      <div class="slider-value" id="val_${id}">5</div>
+      <div class="slider-value" id="val_${id}">0</div>
     </div>
   `;
   // Initialiser gradient
@@ -703,6 +753,63 @@ function creerCarteSlider(qnum, label, labelRange) {
     var inp = card.querySelector('input[type="range"]');
     if (inp) majSlider(inp);
   }, 50);
+  return card;
+}
+
+// Double curseur (fréquence/intensité, ou équivalent) — même principe que
+// `special: "double_cursor"` dans index.html, pour les questions qui ont deux
+// dimensions distinctes (ex. Q12 sueurs nocturnes : fréquence ET intensité).
+function creerCarteDouble(qnum, label, label1, label2, range1, range2) {
+  var base = qnum.replace('Q', '');
+  var idA = 'slider_' + base + '_a';
+  var idB = 'slider_' + base + '_b';
+  var r1 = range1 || ['0 · jamais', '5', '10 · toujours'];
+  var r2 = range2 || ['0 · léger', '5', '10 · très fort'];
+  var card = document.createElement('div');
+  card.className = 'question-card';
+  card.innerHTML = `
+    <div class="question-label"><span class="q-num">${qnum}</span>${label}</div>
+    <div style="margin-bottom:14px">
+      <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px">${label1 || 'Intensité'}</div>
+      <div class="slider-container">
+        <div class="slider-wrapper">
+          <input type="range" id="${idA}" min="0" max="10" value="0"
+                 oninput="majSlider(this)" onchange="majProgressBar()">
+          <div class="slider-labels"><span>${r1[0]}</span><span>${r1[2]}</span></div>
+        </div>
+        <div class="slider-value" id="val_${idA}">0</div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px">${label2 || 'Fréquence'}</div>
+      <div class="slider-container">
+        <div class="slider-wrapper">
+          <input type="range" id="${idB}" min="0" max="10" value="0"
+                 oninput="majSlider(this)" onchange="majProgressBar()">
+          <div class="slider-labels"><span>${r2[0]}</span><span>${r2[2]}</span></div>
+        </div>
+        <div class="slider-value" id="val_${idB}">0</div>
+      </div>
+    </div>
+  `;
+  setTimeout(function() {
+    card.querySelectorAll('input[type="range"]').forEach(function(inp) { majSlider(inp); });
+  }, 50);
+  return card;
+}
+
+// Réponse libre pour un symptôme signalé à l'entretien dont la question d'origine
+// n'est pas une échelle 0-10 (ex. "Combien d'heures dormez-vous ?") — une case à
+// remplir avec la vraie formulation de la question, plutôt qu'un curseur qui n'a
+// aucun sens pour ce type de réponse.
+function creerCarteTexteSymptome(qnum, label) {
+  var id = 'texte_' + qnum.replace('Q', '');
+  var card = document.createElement('div');
+  card.className = 'question-card';
+  card.innerHTML = `
+    <div class="question-label"><span class="q-num">${qnum}</span>${label}</div>
+    <textarea id="${id}" placeholder="Votre réponse…" rows="2"></textarea>
+  `;
   return card;
 }
 
@@ -726,18 +833,32 @@ function majSlider(inp) {
   if (valEl) valEl.textContent = val;
 }
 
+// Compte les questions "touchées" au niveau de la CARTE (pas du widget individuel) :
+// une question à double curseur ou en texte libre ne doit compter que pour une seule
+// question dans la barre de progression, comme un curseur simple.
 function majProgressBar() {
   if (totalQuestions === 0) return;
-  var sliders = document.querySelectorAll('input[type="range"]');
-  // On considère que l'utilisateur a "répondu" à partir du moment où il a touché le slider
-  // Ici on compte ceux dont la valeur diffère de 5 (valeur par défaut), ou on compte tout
+  var container = document.getElementById('questionnaire-container');
+  var cards = container.querySelectorAll('.question-card');
+  cards.forEach(function(card) {
+    var inputs = card.querySelectorAll('input[type="range"], textarea');
+    inputs.forEach(function(inp) {
+      if (inp.dataset.touchBound) return;
+      inp.dataset.touchBound = '1';
+      inp.addEventListener('input', function() {
+        card.dataset.touched = '1';
+        majProgressBarCompute();
+      });
+    });
+  });
+  majProgressBarCompute();
+}
+
+function majProgressBarCompute() {
+  var container = document.getElementById('questionnaire-container');
+  var touched = container.querySelectorAll('.question-card[data-touched="1"]').length;
   var fill = document.getElementById('progress-fill');
   var lbl = document.getElementById('progress-label');
-  // Compter sliders touchés : on utilise dataset
-  sliders.forEach(function(s) {
-    s.addEventListener('input', function() { s.dataset.touched = '1'; }, {once: false});
-  });
-  var touched = document.querySelectorAll('input[type="range"][data-touched="1"]').length;
   var pct = Math.round((touched / totalQuestions) * 100);
   fill.style.width = pct + '%';
   lbl.textContent = pct + ' %';
@@ -755,14 +876,28 @@ function construireDonneesBilan() {
 
   // Symptômes spécifiques : num = qnum du grand questionnaire (réutilisé tel quel
   // par le module plan-logic.js côté Synaxone NFB pour recalculer les placements).
+  // Le champ effectivement rempli dépend du type de rendu choisi par creerCarteSymptome()
+  // (voir QUESTION_RENDER_INFO) : `valeur` pour un curseur simple, `valeurA`/`valeurB`
+  // pour un double curseur, `reponseTexte` pour une réponse libre — jamais les trois à
+  // la fois, mais toujours au moins un rempli si la question a été affichée.
   var specifiques = (CONFIG.symptomesSpecifiques || []).map(function(s) {
+    var info = getRenderInfo(s.num);
+    var base = { num: s.num, texte: s.texte, categorie: s.categorie || '' };
+    if (info.kind === 'double') {
+      var inpA = document.getElementById('slider_' + s.num + '_a');
+      var inpB = document.getElementById('slider_' + s.num + '_b');
+      base.valeurA = inpA ? parseInt(inpA.value, 10) : null;
+      base.valeurB = inpB ? parseInt(inpB.value, 10) : null;
+      return base;
+    }
+    if (info.kind === 'texte' && s.source === 'flag') {
+      var txt = document.getElementById('texte_' + s.num);
+      base.reponseTexte = txt ? txt.value.trim() : '';
+      return base;
+    }
     var inp = document.getElementById('slider_' + s.num);
-    return {
-      num: s.num,
-      texte: s.texte,
-      categorie: s.categorie || '',
-      valeur: inp ? parseInt(inp.value, 10) : null
-    };
+    base.valeur = inp ? parseInt(inp.value, 10) : null;
+    return base;
   });
 
   var generales = QUESTIONS_COMMUNES.map(function(q) {
