@@ -5105,6 +5105,17 @@ async function envoyerQuestionnaire() {
     consentEl.parentElement.style.outline = '2px solid #c0392b';
     consentEl.parentElement.style.borderRadius = '8px';
     consentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // CORRECTIF (15/07/2026, perte de données réelle remontée par Camille) : ce
+    // blocage était totalement SILENCIEUX — un simple contour rouge autour d'une
+    // case en bas de page, sans aucun message. La case "consentement RGPD" n'est
+    // JAMAIS restaurée par restoreFromText()/parserReponsesIntake (elle est en
+    // dehors de toute .question-card, donc hors du mécanisme d'export/import par
+    // qid) : à CHAQUE réouverture d'un questionnaire déjà envoyé (mode praticien,
+    // "recharger réponses"…) elle repart décochée. Cliquer sur "Terminer et
+    // télécharger" en étant scrollé ailleurs (ex. en train d'annoter une question)
+    // ne produisait alors STRICTEMENT AUCUN effet visible — exactement ce qui a
+    // été vécu comme "ça ne sert à rien". Message explicite désormais.
+    alert('⚠️ Le téléchargement est bloqué : la case de consentement RGPD (tout en bas de page) doit être cochée.\n\nElle repart décochée à chaque réouverture du questionnaire — pensez à la recocher avant de télécharger.');
     return;
   }
 
