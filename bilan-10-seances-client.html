@@ -709,20 +709,24 @@ function construire(config) {
   majProgressBar();
 }
 
-// Choisit le bon rendu pour un symptôme spécifique (liste fixe BILAN_CATEGORIES ou
-// signalé à l'entretien) selon son type réel dans le grand questionnaire — voir
-// QUESTION_RENDER_INFO plus haut. Pour la liste fixe (`source: 'categorie'`), on
-// garde toujours un curseur (design assumé de la réévaluation 0-10), en 1 ou 2
-// curseurs selon le type d'origine. Pour un symptôme signalé à l'entretien
-// (`source: 'flag'`, qnum arbitraire), on respecte le vrai type — y compris "texte"
-// si l'original n'est pas une question à noter sur une échelle.
+// Choisit le bon rendu pour un symptôme spécifique selon son type réel dans le grand
+// questionnaire (voir QUESTION_RENDER_INFO plus haut) — TOUJOURS le même, peu importe
+// comment ce symptôme est arrivé dans le bilan (liste fixe BILAN_CATEGORIES cochée
+// dans l'écran "Générer bilan", ou signalé "à suivre" pendant l'entretien initial).
+// Décision de Camille le 16/07/2026 : un même symptôme doit garder EXACTEMENT la même
+// forme d'un bilan à l'autre pour rester comparable dans le temps — la distinction
+// initiale par `source` (liste fixe = toujours curseur, signalé = vrai type) créait
+// une incohérence : un même symptôme (ex. Q106 Dépression) pouvait s'afficher en
+// curseur une fois et en texte libre une autre selon le chemin d'entrée, ce qui n'a
+// pas de sens pour une comparaison. `s.source` reste disponible sur l'objet (utile
+// pour du diagnostic) mais n'influence plus le rendu.
 function creerCarteSymptome(s) {
   var qnum = 'Q' + s.num;
   var info = getRenderInfo(s.num);
   if (info.kind === 'double') {
     return creerCarteDouble(qnum, s.texte, info.label1, info.label2, info.range1, info.range2);
   }
-  if (info.kind === 'texte' && s.source === 'flag') {
+  if (info.kind === 'texte') {
     return creerCarteTexteSymptome(qnum, s.texte);
   }
   return creerCarteSlider(qnum, s.texte, info.rangeLabels);
@@ -890,7 +894,7 @@ function construireDonneesBilan() {
       base.valeurB = inpB ? parseInt(inpB.value, 10) : null;
       return base;
     }
-    if (info.kind === 'texte' && s.source === 'flag') {
+    if (info.kind === 'texte') {
       var txt = document.getElementById('texte_' + s.num);
       base.reponseTexte = txt ? txt.value.trim() : '';
       return base;
