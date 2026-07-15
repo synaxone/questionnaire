@@ -1217,7 +1217,7 @@
     <div class="card-header">Adresse email du praticien</div>
     <div style="padding:16px 20px">
       <input class="field-input" type="email" id="praticien_email" readonly
-        value="synaxone.nfb@gmail.com"
+        value="contact@synaxone-nfb.fr"
         style="width:100%;font-size:15px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#f5f5f5;color:#666">
       <div style="font-size:11px;color:var(--text-muted);margin-top:6px">Le questionnaire sera envoyé à cette adresse.</div>
     </div>
@@ -1227,12 +1227,12 @@
     <div class="card-header">Informations sur le traitement de vos données</div>
     <div style="padding:16px 20px;font-size:12px;line-height:1.7;color:var(--text-muted)">
       <p style="margin:0 0 8px 0">Dans le cadre de ce questionnaire, <strong>Synaxone</strong> collecte des informations sur votre santé (sommeil, cognition, comportement, émotions, douleurs, antécédents) afin de personnaliser votre protocole d'entraînement en neurofeedback ILF et de suivre votre évolution.</p>
-      <p style="margin:0 0 8px 0"><strong>Responsable du traitement :</strong> Synaxone — <a href="mailto:synaxone.nfb@gmail.com" style="color:var(--accent)">synaxone.nfb@gmail.com</a></p>
+      <p style="margin:0 0 8px 0"><strong>Responsable du traitement :</strong> Synaxone — <a href="mailto:contact@synaxone-nfb.fr" style="color:var(--accent)">contact@synaxone-nfb.fr</a></p>
       <p style="margin:0 0 8px 0"><strong>Base légale :</strong> exécution de la prestation d'accompagnement (article 6.1.b du RGPD) ; pour les données relatives à votre santé, <strong>consentement explicite</strong> (article 9.2.a du RGPD) — que vous pouvez retirer à tout moment.</p>
       <p style="margin:0 0 8px 0"><strong>Destinataires :</strong> votre praticien uniquement. Aucune transmission à des tiers, aucun usage commercial.</p>
       <p style="margin:0 0 8px 0"><strong>Hébergement :</strong> vos réponses sont enregistrées localement sur votre appareil (aucun envoi automatique à un serveur), puis transmises directement à votre praticien.</p>
       <p style="margin:0 0 8px 0"><strong>Durée de conservation :</strong> 5 ans à compter de votre dernière séance (suivi de votre accompagnement). Les données de facturation sont conservées séparément 10 ans, conformément à l'obligation comptable légale.</p>
-      <p style="margin:0 0 8px 0"><strong>Vos droits :</strong> accès, rectification, effacement, limitation et opposition — à exercer par email à <a href="mailto:synaxone.nfb@gmail.com" style="color:var(--accent)">synaxone.nfb@gmail.com</a>. Vous pouvez également introduire une réclamation auprès de la CNIL (<a href="https://www.cnil.fr" target="_blank" style="color:var(--accent)">cnil.fr</a>).</p>
+      <p style="margin:0 0 8px 0"><strong>Vos droits :</strong> accès, rectification, effacement, limitation et opposition — à exercer par email à <a href="mailto:contact@synaxone-nfb.fr" style="color:var(--accent)">contact@synaxone-nfb.fr</a>. Vous pouvez également introduire une réclamation auprès de la CNIL (<a href="https://www.cnil.fr" target="_blank" style="color:var(--accent)">cnil.fr</a>).</p>
       <p style="margin:0" id="mention_mineur" style="display:none"><strong>Patient mineur :</strong> le consentement doit être donné par le représentant légal.</p>
     </div>
   </div>
@@ -1281,7 +1281,7 @@
       <div style="flex-shrink:0;width:30px;height:30px;border-radius:50%;background:#6b4e00;color:white;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:16px">1</div>
       <div style="flex:1">
         <div style="font-size:16px;font-weight:700;margin-bottom:10px">Copiez mon adresse email</div>
-        <div style="font-size:18px;font-weight:700;user-select:all;background:#fdf6ea;border:1px solid #e8c49a;border-radius:8px;padding:10px 12px;text-align:center;letter-spacing:0.01em" id="adresse_praticien">synaxone.nfb@gmail.com</div>
+        <div style="font-size:18px;font-weight:700;user-select:all;background:#fdf6ea;border:1px solid #e8c49a;border-radius:8px;padding:10px 12px;text-align:center;letter-spacing:0.01em" id="adresse_praticien">contact@synaxone-nfb.fr</div>
         <button type="button" onclick="copierAdresse(this)"
           style="width:100%;margin-top:10px;padding:14px;background:#6b4e00;color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;cursor:pointer">📋 Copier l'adresse</button>
       </div>
@@ -5107,7 +5107,7 @@ async function envoyerQuestionnaire() {
   // Adresse destinataire : pré-remplie et masquée (le client ne la saisit plus).
   // Repli en dur au cas où le champ serait vide, pour ne jamais bloquer l'envoi.
   var emailEl = document.getElementById('praticien_email');
-  var email = (emailEl ? emailEl.value.trim() : '') || 'synaxone.nfb@gmail.com';
+  var email = (emailEl ? emailEl.value.trim() : '') || 'contact@synaxone-nfb.fr';
 
   var consentEl = document.getElementById('consent_rgpd');
   if (consentEl && !consentEl.checked) {
@@ -5205,7 +5205,7 @@ var _lastIntakeFilename = '';
 var _lastIntakeDestEmail = '';
 
 function copierAdresse(btn) {
-  var adresse = 'synaxone.nfb@gmail.com';
+  var adresse = 'contact@synaxone-nfb.fr';
   var ok = function () {
     if (btn) {
       var t = btn.textContent;
@@ -5233,7 +5233,7 @@ function copierAdresse(btn) {
 
 function partagerIntake() {
   if (!_lastIntakeBlob) return;
-  var email = _lastIntakeDestEmail || 'synaxone.nfb@gmail.com';
+  var email = _lastIntakeDestEmail || 'contact@synaxone-nfb.fr';
 
   // Affiche la consigne « le fichier est déjà téléchargé, joignez-le à un email ».
   // On NE re-télécharge PAS (le fichier a déjà été téléchargé au clic « Terminer »).
