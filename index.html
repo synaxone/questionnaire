@@ -1562,6 +1562,15 @@ function restoreFromText(text) {
         if (annotTaI) { annotTaI.value = valStrI.replace(/ ⏎ /g, '\n'); count++; }
         return;
       }
+      // CORRECTIF DE PERTE DE DONNÉES (15/07/2026, audit exhaustif des données
+      // praticien demandé par Camille) : même angle mort que l'annotation ci-dessus
+      // (bug du 14/07) — la case "à suivre au bilan des 10 séances" de CETTE carte
+      // précise n'avait aucun cas ici, donc jamais restaurée à la réouverture.
+      if (tagI === 'suivi_bilan') {
+        var suiviI = document.getElementById('suivi10_intro');
+        if (suiviI) { suiviI.checked = true; count++; }
+        return;
+      }
       if (valStrI === 'oui' || valStrI === 'non') {
         document.querySelectorAll('button.yesno-btn').forEach(function(b) {
           var oc = b.getAttribute('onclick') || '';
