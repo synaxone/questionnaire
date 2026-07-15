@@ -807,6 +807,19 @@ function effacerBrouillonBilan() {
 
 setInterval(sauvegarderBrouillonBilan, 30000);
 
+// CORRECTIF DE PERTE DE DONNÉES (15/07/2026, demande explicite de Camille : vérifier
+// TOUS les scénarios, y compris changement d'onglet/fenêtre) : contrairement à
+// index.html/questionnaire-client.html, ce fichier n'avait QUE la sauvegarde
+// périodique (30s) — fermer/masquer l'onglet juste après avoir répondu, avant le
+// prochain tic, perdait la réponse. 'visibilitychange'/'pagehide' se déclenchent de
+// façon fiable dès que l'onglet est masqué ou fermé (y compris navigateurs mobiles,
+// contrairement à 'beforeunload' souvent ignoré) — sauvegarde immédiate à ce
+// moment-là, en plus du tic périodique qui reste utile en cas de crash/coupure.
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'hidden') sauvegarderBrouillonBilan();
+});
+window.addEventListener('pagehide', sauvegarderBrouillonBilan);
+
 // Appelée une fois le formulaire construit (donc les champs présents dans le DOM).
 function verifierBrouillonBilan() {
   try {

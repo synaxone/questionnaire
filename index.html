@@ -5736,22 +5736,37 @@ var DYN_LIST_ADDERS = {
 // (input/select/textarea) sans id en reçoit un automatiquement. sauvegarderBrouillon()
 // ne scanne que "les éléments avec un id" — désormais TOUJOURS vrai pour TOUT champ,
 // présent ou futur, sans qu'aucun développeur n'ait à s'en souvenir.
-var _autoIdCompteur;
+var _autoIdCompteursParAncre;
 function garantirIdsTousLesChamps() {
-  // Bug trouvé le 14/07/2026 (script verification/check-brouillon-integrite.js) :
-  // garantirIdsTousLesChamps() est appelée juste après buildFamiliauxQuestions(), plus
-  // haut dans le script que la ligne "var _autoIdCompteur = ...". `var` est hoisté mais
-  // pas son affectation : au tout premier appel, _autoIdCompteur valait encore
-  // `undefined`, donc `undefined + 1` = NaN — et NaN reste NaN pour toujours ensuite
-  // (NaN + 1 = NaN). Résultat : 79 champs recevaient tous le même id "__autoid_NaN" et
-  // s'écrasaient mutuellement à la sauvegarde. Ce garde initialise le compteur au
-  // premier besoin réel, peu importe l'ordre d'exécution du script.
-  if (typeof _autoIdCompteur !== 'number' || Number.isNaN(_autoIdCompteur)) _autoIdCompteur = 0;
+  // CORRECTIF STRUCTUREL (15/07/2026, bug Q25 remonté par Camille — priorité absolue
+  // "aucune donnée ne doit jamais disparaître") : la version précédente attribuait un
+  // id purement POSITIONNEL sur l'ensemble du document (__autoid_1, __autoid_2, ...,
+  // un seul compteur global). Conséquence découverte en testant Q25 : si le DOM change
+  // AILLEURS dans le questionnaire entre le moment où un brouillon est sauvegardé et
+  // celui où il est restauré (ex. une mise à jour du fichier pendant qu'un client a un
+  // brouillon en cours dans son navigateur — ce qui arrive plusieurs fois par jour sur
+  // ce projet), TOUS les ids positionnels après le point de changement se décalent d'un
+  // cran. La valeur sauvegardée pour UNE question atterrissait alors silencieusement
+  // sur UNE AUTRE (reproduit : la valeur de Q25 migrait vers Q21) — pas juste une perte,
+  // une corruption silencieuse.
+  //
+  // Le nouvel id est ancré au plus proche ancêtre ayant déjà un id STABLE (la carte de
+  // question qcard_<num>, ou un conteneur spécifique comme slider_<id>_<i>,
+  // slider68_<id>_<i>...), avec un compteur LOCAL à cet ancêtre plutôt que global au
+  // document. Un champ ajouté/retiré n'importe où AILLEURS dans le questionnaire ne
+  // peut plus jamais décaler l'id d'un champ ici — seul un changement DANS la même
+  // question pourrait le faire, un risque très largement plus restreint et déjà
+  // couvert par verification/check-drift-dom-integrite.js.
   document.querySelectorAll('input, select, textarea').forEach(function(el) {
-    if (!el.id) {
-      _autoIdCompteur++;
-      el.id = '__autoid_' + _autoIdCompteur;
+    if (el.id) return;
+    var ancre = el.parentElement;
+    while (ancre && !ancre.id) ancre = ancre.parentElement;
+    var ancreId = ancre ? ancre.id : '__racine';
+    if (!_autoIdCompteursParAncre) _autoIdCompteursParAncre = {};
+    if (typeof _autoIdCompteursParAncre[ancreId] !== 'number' || Number.isNaN(_autoIdCompteursParAncre[ancreId])) {
+      _autoIdCompteursParAncre[ancreId] = 0;
     }
+    el.id = '__autoid_' + ancreId + '_' + (_autoIdCompteursParAncre[ancreId]++);
   });
 }
 
