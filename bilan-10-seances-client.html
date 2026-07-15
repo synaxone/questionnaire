@@ -459,6 +459,115 @@ var QUESTIONS_COMMUNES = [
   { id: 'qc_controle',      num: 218, texte: 'Sentiment de contrôle sur sa vie',                     labelRange: ['0 · aucun', '5', '10 · très élevé'] },
 ];
 
+// Table maître des symptômes spécifiques — copie de CATEGORIES dans
+// bilan-selection-praticienne.html. Le lien généré par la praticienne ne transporte
+// plus que les ids sélectionnés (voir genererQuestionnaire()) : num/texte/catégorie
+// sont retrouvés ici, ce qui évite de gonfler le lien avec des données déjà connues
+// des deux fichiers. Toute modif de la liste des symptômes doit être répercutée ici aussi.
+var CATEGORIES_SYMPTOMES = [
+  { id: "sommeil", titre: "Sommeil", symptomes: [
+    { id: "s10", num: 10, texte: "Syndrome des jambes sans repos / impatiences" },
+    { id: "s11", num: 11, texte: "Terreurs nocturnes" },
+    { id: "s12", num: 12, texte: "Sueurs nocturnes" },
+    { id: "s13", num: 13, texte: "Apnées du sommeil" },
+    { id: "s14", num: 14, texte: "Ronflements" },
+    { id: "s16", num: 16, texte: "Bruxisme (grincements de dents la nuit)" },
+    { id: "s17", num: 17, texte: "Somnambulisme" },
+    { id: "s18", num: 18, texte: "Énurésie (fuites urinaires nocturnes)" },
+  ]},
+  { id: "cognition", titre: "Cognition & Attention", symptomes: [
+    { id: "s20", num: 20, texte: "Difficultés de concentration / distractivité" },
+    { id: "s24", num: 24, texte: "Difficultés à lire" },
+    { id: "s25", num: 25, texte: "Difficultés à planifier / s'organiser" },
+    { id: "s26", num: 26, texte: "Difficultés à terminer des tâches" },
+    { id: "s27", num: 27, texte: "Difficultés à suivre une conversation" },
+    { id: "s29", num: 29, texte: "Procrastination" },
+    { id: "s30", num: 30, texte: "Difficultés à prendre des décisions" },
+    { id: "s32", num: 32, texte: "Difficultés à se rappeler des noms" },
+    { id: "s33", num: 33, texte: "Problèmes de mémoire à court terme" },
+    { id: "s34", num: 34, texte: "Problèmes de mémoire à long terme" },
+    { id: "s35", num: 35, texte: "Difficultés à assimiler de nouvelles connaissances" },
+    { id: "s36", num: 36, texte: "Démotivation dans l'apprentissage" },
+    { id: "s39", num: 39, texte: "Troubles dys (dyslexie, dyspraxie, dysphasie…)" },
+    { id: "s74", num: 74, texte: "Hyperactivité (diagnostiquée ou ressentie)" },
+  ]},
+  { id: "perception", titre: "Perception & Sensorialité", symptomes: [
+    { id: "s43", num: 43, texte: "Conscience altérée de l'espace et du temps" },
+    { id: "s45", num: 45, texte: "Problèmes auditifs / hypersensibilité auditive" },
+    { id: "s46", num: 46, texte: "Acouphènes" },
+    { id: "s47", num: 47, texte: "Troubles visuels" },
+    { id: "s50", num: 50, texte: "Intolérances ou allergies chimiques" },
+    { id: "s51", num: 51, texte: "Mal des transports (voiture, bateau, avion)" },
+    { id: "s52", num: 52, texte: "Fluctuations d'énergie dans la journée" },
+  ]},
+  { id: "comportement", titre: "Comportement", symptomes: [
+    { id: "s56", num: 56, texte: "Stress ou agitation actuels" },
+    { id: "s57", num: 57, texte: "Difficultés à se détendre" },
+    { id: "s59", num: 59, texte: "Difficultés à s'affirmer" },
+    { id: "s63", num: 63, texte: "Impulsivité" },
+    { id: "s64", num: 64, texte: "Comportements compulsifs" },
+    { id: "s66", num: 66, texte: "Agressivité envers les autres" },
+    { id: "s68", num: 68, texte: "Automutilation" },
+    { id: "s69", num: 69, texte: "Addictions" },
+    { id: "s70", num: 70, texte: "Troubles des conduites alimentaires" },
+    { id: "s73", num: 73, texte: "TOC (troubles obsessionnels compulsifs)" },
+    { id: "s77", num: 77, texte: "Anxiété sociale" },
+    { id: "s82", num: 82, texte: "Troubles du stress post-traumatique (TSPT)" },
+  ]},
+  { id: "emotions", titre: "Émotions & Humeur", symptomes: [
+    { id: "s87", num: 87, texte: "Manque de confiance en soi" },
+    { id: "s88", num: 88, texte: "Manque d'estime de soi" },
+    { id: "s89", num: 89, texte: "Craintes ou inquiétudes" },
+    { id: "s90", num: 90, texte: "Peurs" },
+    { id: "s91", num: 91, texte: "Phobies" },
+    { id: "s94", num: 94, texte: "Attaques de panique" },
+    { id: "s95", num: 95, texte: "Tristesse fréquente" },
+    { id: "s96", num: 96, texte: "Manque de joie et de plaisirs" },
+    { id: "s98", num: 98, texte: "Sautes d'humeur" },
+    { id: "s99", num: 99, texte: "Impatience" },
+    { id: "s100", num: 100, texte: "Hypervigilance" },
+    { id: "s101", num: 101, texte: "Irritabilité" },
+    { id: "s103", num: 103, texte: "Pensées obsessionnelles" },
+    { id: "s104", num: 104, texte: "Pensées négatives obsessionnelles" },
+    { id: "s105", num: 105, texte: "Souvenirs de traumatismes (images, sensations)" },
+    { id: "s106", num: 106, texte: "Dépression (diagnostiquée ou ressentie)" },
+    { id: "s107", num: 107, texte: "Burn-out (actuel ou passé)" },
+    { id: "s109", num: 109, texte: "Épisodes dissociatifs" },
+    { id: "s111", num: 111, texte: "Pensées suicidaires (actuelles ou passées)" },
+  ]},
+  { id: "corps", titre: "Corps & Physique", symptomes: [
+    { id: "s113", num: 113, texte: "Fatigue chronique" },
+    { id: "s114", num: 114, texte: "Tensions musculaires" },
+    { id: "s116", num: 116, texte: "Manque de coordination motrice" },
+    { id: "s118", num: 118, texte: "Crampes musculaires" },
+    { id: "s121", num: 121, texte: "Troubles de l'équilibre" },
+    { id: "s122", num: 122, texte: "Tremblements" },
+    { id: "s125", num: 125, texte: "Asthme" },
+    { id: "s126", num: 126, texte: "Syndrome de l'intestin irritable" },
+    { id: "s129", num: 129, texte: "Reflux gastrique / brûlures d'estomac" },
+    { id: "s132", num: 132, texte: "Vertiges / évanouissements" },
+    { id: "s134", num: 134, texte: "Syndrome prémenstruel (SPM)" },
+    { id: "s138", num: 138, texte: "Transpiration lors du stress" },
+    { id: "s142", num: 142, texte: "Arythmie / tachycardie / palpitations" },
+    { id: "s143", num: 143, texte: "Hypotension ou hypertension" },
+    { id: "s148", num: 148, texte: "Maux de tête récurrents" },
+    { id: "s150", num: 150, texte: "Migraines" },
+    { id: "s157", num: 157, texte: "Douleurs musculaires" },
+    { id: "s158", num: 158, texte: "Fibromyalgie" },
+    { id: "s164", num: 164, texte: "Épilepsie" },
+    { id: "s166", num: 166, texte: "Covid Long" },
+    { id: "s173", num: 173, texte: "Traumatisme crânien" },
+    { id: "s174", num: 174, texte: "AVC" },
+  ]},
+];
+
+var SYMPTOME_PAR_ID = {};
+CATEGORIES_SYMPTOMES.forEach(function(cat) {
+  cat.symptomes.forEach(function(s) {
+    SYMPTOME_PAR_ID[s.id] = { id: s.id, num: s.num, texte: s.texte, categorie: cat.titre };
+  });
+});
+
 // ─────────────────────────────────────────────
 // LECTURE DE LA CONFIG DANS L'URL
 // ─────────────────────────────────────────────
@@ -471,7 +580,20 @@ function lireConfig() {
   var raw = params.get('config');
   if (!raw) return null;
   try {
-    return JSON.parse(decodeURIComponent(escape(atob(raw))));
+    var config = JSON.parse(decodeURIComponent(escape(atob(raw))));
+    // Format compact (depuis le 15/07/2026) : symptomesSpecifiques est un tableau
+    // d'ids ("s10", ...), résolus ici via SYMPTOME_PAR_ID pour garder le lien court.
+    // Anciens liens déjà envoyés : le tableau contient encore les objets complets
+    // {id, num, texte, categorie} — on les garde tels quels.
+    if (Array.isArray(config.symptomesSpecifiques)) {
+      config.symptomesSpecifiques = config.symptomesSpecifiques.map(function(s) {
+        if (typeof s === 'string') {
+          return SYMPTOME_PAR_ID[s] || { id: s, num: s, texte: s, categorie: 'Autres' };
+        }
+        return s;
+      });
+    }
+    return config;
   } catch(e) {
     return null;
   }
