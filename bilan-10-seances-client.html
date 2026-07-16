@@ -3681,6 +3681,20 @@ function sauvegarderBrouillonBilan() {
     document.querySelectorAll('#questionnaire-container input[type=range][id]').forEach(function(el) {
       data.champs[el.id] = el.value;
     });
+    // Curseurs sans id propre (ex. Q20 "domaines_attention", seule question de ce type
+    // à ne pas avoir reçu d'id sur son curseur dans index.html — repéré le 16/07/2026
+    // en portant le moteur ici) : même repli générique que sauvegarderBrouillon() dans
+    // index.html depuis le 09/07/2026 — clé basée sur le plus proche ancêtre avec un
+    // id (le conteneur "wrap_"/"slider_" révélé par la case à cocher), pas sur un nom
+    // de conteneur codé en dur. La collecte finale (construireBodyReponses) n'a jamais
+    // ce problème, elle scanne par type et pas par id — seul ce brouillon intermédiaire
+    // en avait besoin.
+    document.querySelectorAll('#questionnaire-container input[type=range]').forEach(function(range) {
+      if (range.id) return;
+      var node = range.parentElement;
+      while (node && !node.id) node = node.parentElement;
+      if (node) data.champs['__slider__' + node.id] = range.value;
+    });
     document.querySelectorAll('#questionnaire-container input[type=text][id]').forEach(function(el) {
       if (el.value) data.champs[el.id] = el.value;
     });
@@ -3708,6 +3722,19 @@ function restaurerBrouillonBilan(data) {
       if (!el) return;
       el.checked = true;
       el.dispatchEvent(new Event('change'));
+    });
+    // Curseurs sans id propre (voir sauvegarderBrouillonBilan) — après les cases à
+    // cocher ci-dessus, qui révèlent le conteneur dont dépend cette clé générique.
+    document.querySelectorAll('#questionnaire-container input[type=range]').forEach(function(range) {
+      if (range.id) return;
+      var node = range.parentElement;
+      while (node && !node.id) node = node.parentElement;
+      if (!node) return;
+      var key = '__slider__' + node.id;
+      if (data.champs && data.champs[key] !== undefined) {
+        range.value = data.champs[key];
+        range.dispatchEvent(new Event('input'));
+      }
     });
     Object.keys(data.champs || {}).forEach(function(id) {
       var el = document.getElementById(id);
