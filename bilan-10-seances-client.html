@@ -3280,6 +3280,51 @@ var QUESTIONS_PAR_NUM = {};
   if (q.num !== undefined) QUESTIONS_PAR_NUM[String(q.num)] = q;
 });
 
+// GARDE-FOU ORDRE/CATÉGORIE (16/07/2026, remonté par Camille — persistait après le
+// tri des symptômes "signalés à l'entretien" seuls) : la vraie cause était que ces
+// symptômes signalés recevaient tous la catégorie générique "Signalé à l'entretien"
+// (electron-index.html), au lieu de leur VRAIE catégorie clinique — un symptôme du
+// sommeil signalé pendant l'entretien s'affichait donc dans un bloc à part, avant
+// toutes les vraies catégories, cassant le rangement "par catégorie" même si l'ordre
+// à l'intérieur de ce bloc était correct. CATEGORIE_PAR_NUM redonne à CHAQUE qnum
+// (y compris les qnum à suffixe lettré comme 31b/58b/170b, absents de
+// BILAN_CATEGORIES) sa vraie catégorie d'origine dans le moteur, pour que TOUS les
+// symptômes — signalés ou non — se regroupent ensemble sous leur vraie catégorie.
+var CATEGORIE_ORDRE = ['Sommeil', 'Cognition & Attention', 'Perception & Sensorialité', 'Comportement', "Émotions & Humeur", 'Corps & Physique', 'Petite enfance', 'Trauma', 'Antécédents médicaux', 'Contexte familial'];
+var CATEGORIE_PAR_NUM = {};
+[
+  [sommeilQuestions, 'Sommeil'],
+  [cognitionQuestions, 'Cognition & Attention'],
+  [perceptionQuestions, 'Perception & Sensorialité'],
+  [comportementsQuestions, 'Comportement'],
+  [emotionnelQuestions, "Émotions & Humeur"],
+  [physiqueQuestions, 'Corps & Physique'],
+  [petiteEnfanceQuestions, 'Petite enfance'],
+  [traumaQuestions, 'Trauma'],
+  [medicQuestions, 'Antécédents médicaux'],
+  [familiauxQuestions, 'Contexte familial']
+].forEach(function(pair) {
+  pair[0].forEach(function(q) {
+    if (q.num !== undefined) CATEGORIE_PAR_NUM[String(q.num)] = pair[1];
+  });
+});
+
+// Tri numérique d'un qnum ("Intro" en tête, "31" avant "31b" à qnum égal) — copie de
+// comparerQnum() (electron-index.html), nécessaire ici aussi pour trier l'ensemble
+// des symptômes une fois regroupés par leur vraie catégorie (voir construire()).
+function comparerQnum(a, b) {
+  function parts(qnum) {
+    var s = String(qnum);
+    if (s === 'Intro') return [0, ''];
+    var m = s.match(/^(\d+)([a-z]*)$/i);
+    if (!m) return [999999, s];
+    return [parseInt(m[1], 10), m[2] || ''];
+  }
+  var pa = parts(a), pb = parts(b);
+  if (pa[0] !== pb[0]) return pa[0] - pb[0];
+  return pa[1].localeCompare(pb[1]);
+}
+
 // ─────────────────────────────────────────────
 // LECTURE DE LA CONFIG DANS L'URL
 // ─────────────────────────────────────────────
@@ -3346,15 +3391,33 @@ function construire(config) {
     sectionSpecifiques.id = 'section-specifiques';
     container.appendChild(sectionSpecifiques);
 
-    // Regrouper par catégorie
+    // Regrouper par catégorie — la vraie catégorie clinique d'origine (voir
+    // CATEGORIE_PAR_NUM plus haut), pas celle transmise par Synaxone (les symptômes
+    // "signalés à l'entretien" arrivaient tous avec la même étiquette générique
+    // "Signalé à l'entretien", formant un bloc à part qui cassait le rangement par
+    // catégorie même quand ce bloc lui-même était trié).
     var byCat = {};
     specifiques.forEach(function(s) {
-      var cat = s.categorie || 'Autres';
+      var cat = CATEGORIE_PAR_NUM[String(s.num)] || s.categorie || 'Autres';
       if (!byCat[cat]) byCat[cat] = [];
       byCat[cat].push(s);
     });
-
     Object.keys(byCat).forEach(function(cat) {
+      byCat[cat].sort(function(a, b) { return comparerQnum(a.num, b.num); });
+    });
+
+    // Catégories dans un ordre fixe et prévisible (CATEGORIE_ORDRE), pas dans l'ordre
+    // d'apparition dans specifiques (qui dépendait de quel symptôme avait été
+    // sélectionné/signalé en premier — source du "n'importe quoi" remonté par Camille).
+    var categoriesTriees = Object.keys(byCat).sort(function(a, b) {
+      var ia = CATEGORIE_ORDRE.indexOf(a), ib = CATEGORIE_ORDRE.indexOf(b);
+      if (ia === -1) ia = 999;
+      if (ib === -1) ib = 999;
+      if (ia !== ib) return ia - ib;
+      return a.localeCompare(b);
+    });
+
+    categoriesTriees.forEach(function(cat) {
       var catTitle = document.createElement('div');
       catTitle.style.cssText = 'font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin:16px 0 8px;';
       catTitle.textContent = cat;
