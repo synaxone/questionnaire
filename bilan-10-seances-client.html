@@ -3418,10 +3418,17 @@ function construire(config) {
     });
 
     categoriesTriees.forEach(function(cat) {
-      var catTitle = document.createElement('div');
-      catTitle.style.cssText = 'font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin:16px 0 8px;';
-      catTitle.textContent = cat;
-      sectionSpecifiques.appendChild(catTitle);
+      // Pas de titre de catégorie pour les quelques qnum sans vraie catégorie clinique
+      // (ex. Intro, ou d'anciens qnum hors des 10 tableaux du moteur) : Camille ne
+      // veut plus voir apparaître de bloc "Signalé à l'entretien" séparé — ces
+      // questions restent affichées (aucune perte), simplement sans en-tête, à la
+      // suite des vraies catégories (toujours en dernier, voir CATEGORIE_ORDRE).
+      if (CATEGORIE_ORDRE.indexOf(cat) !== -1) {
+        var catTitle = document.createElement('div');
+        catTitle.style.cssText = 'font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin:16px 0 8px;';
+        catTitle.textContent = cat;
+        sectionSpecifiques.appendChild(catTitle);
+      }
 
       byCat[cat].forEach(function(s) {
         var q = QUESTIONS_PAR_NUM[String(s.num)];
