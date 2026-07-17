@@ -1873,6 +1873,21 @@ function restoreFromText(text) {
               }
               var cbDcMatch = cbDcExact || cbDcFuzzy;
               if (cbDcMatch) {
+                // CORRECTIF DE PERTE DE DONNÉES (17/07/2026, remonté par Camille :
+                // "je ne trouve même pas la question [incontinence fécale] quand je
+                // fais compléter avec le client") : ce repli remettait la valeur du
+                // curseur mais ne cochait JAMAIS la case elle-même — le curseur restait
+                // donc caché (`hidden`, piloté par toggleDomainCursor() sur l'état de
+                // la case) et la case apparaissait décochée à la réouverture, alors que
+                // la note était bel et bien conservée dessous et aurait été réexportée
+                // telle quelle au prochain enregistrement, invisible et impossible à
+                // corriger. Cocher la case AVANT de fixer le curseur, exactement comme
+                // le ferait un vrai clic (même événement 'change' que l'attribut
+                // onchange="toggleDomainCursor(...)" posé par buildQuestionCard()).
+                if (!cbDcMatch.checked) {
+                  cbDcMatch.checked = true;
+                  cbDcMatch.dispatchEvent(new Event('change'));
+                }
                 var wrapperDc = cbDcMatch.closest('label') ? cbDcMatch.closest('label').parentElement : null;
                 var inpDc = wrapperDc ? wrapperDc.querySelector('input[type=range]') : null;
                 if (inpDc) {
@@ -4828,6 +4843,18 @@ function construireBodyReponses() {
 
     // Range inputs
     card.querySelectorAll('input[type=range]').forEach(function(inp) {
+      // CORRECTIF DE FIABILITÉ DES DONNÉES (17/07/2026, remonté par Camille : une
+      // case "Fécales" jamais cochée par le client apparaissait quand même dans le
+      // plan avec une note). Cause racine : un curseur caché derrière une case à
+      // cocher (domaines_cursor, yesno_then_cursor, et tous les autres blocs
+      // `hidden` du formulaire) GARDE sa valeur en mémoire même après avoir été
+      // décoché — cocher, glisser le curseur, puis décocher NE remet PAS le curseur
+      // à zéro, seul son affichage est masqué. L'export scannait ENSUITE tous les
+      // curseurs du DOM sans regarder s'ils étaient actuellement visibles, réintégrant
+      // cette valeur fantôme comme si elle avait été confirmée. Un curseur dont un
+      // ancêtre est actuellement `hidden` ne représente PAS une réponse active :
+      // on l'ignore purement et simplement, quelle que soit sa valeur résiduelle.
+      if (inp.closest('[hidden]')) return;
       var v = parseInt(inp.value);
       if (v < 1) return;
       var rg = inp.closest('.response-group');

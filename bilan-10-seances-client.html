@@ -2975,6 +2975,18 @@ function construireBodyReponses() {
 
     // Range inputs
     card.querySelectorAll('input[type=range]').forEach(function(inp) {
+      // CORRECTIF DE FIABILITÉ DES DONNÉES (17/07/2026, remonté par Camille : une
+      // case "Fécales" jamais cochée par le client apparaissait quand même dans le
+      // plan avec une note). Cause racine : un curseur caché derrière une case à
+      // cocher (domaines_cursor, yesno_then_cursor, et tous les autres blocs
+      // `hidden` du formulaire) GARDE sa valeur en mémoire même après avoir été
+      // décoché — cocher, glisser le curseur, puis décocher NE remet PAS le curseur
+      // à zéro, seul son affichage est masqué. L'export scannait ENSUITE tous les
+      // curseurs du DOM sans regarder s'ils étaient actuellement visibles, réintégrant
+      // cette valeur fantôme comme si elle avait été confirmée. Un curseur dont un
+      // ancêtre est actuellement `hidden` ne représente PAS une réponse active :
+      // on l'ignore purement et simplement, quelle que soit sa valeur résiduelle.
+      if (inp.closest('[hidden]')) return;
       var v = parseInt(inp.value);
       if (v < 1) return;
       var rg = inp.closest('.response-group');
