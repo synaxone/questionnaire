@@ -4834,6 +4834,27 @@ function construireBodyReponses() {
   // Add ALL inputs with values (range, number, text, select, checkbox, yesno)
   var processedCards = new Set();
   var extras = []; // filet de sécurité : zones de texte non captées autrement (voir plus bas)
+
+  // GARDE-FOU GÉNÉRALISÉ (17/07/2026, suite du correctif "curseur fantôme" du même
+  // jour — Camille : "est-ce pareil pour tous les types de questionnaires et autres
+  // informations qui resteraient fantômes ?" → oui, ça l'était) : le premier correctif
+  // ne couvrait QUE les curseurs, et QUE le masquage par attribut `hidden` — or le
+  // formulaire masque aussi des blocs par style.display='none' (détails réveils,
+  // apnées, burn-out, dépression…), et les mêmes valeurs résiduelles existent pour
+  // les champs texte, cases à cocher, menus déroulants, Oui/Non imbriqués et listes
+  // dynamiques d'un bloc refermé après coup. Ce helper détecte les DEUX mécanismes,
+  // en s'arrêtant à la carte (les sections elles-mêmes sont masquées par la navigation
+  // normale — il ne faut surtout pas exclure les réponses des sections non affichées).
+  // Il ne s'applique qu'aux lignes SÉMANTIQUES (Q… lues par plan-logic.js) : le filet
+  // de sécurité Complément[id] plus bas continue de tout capturer, y compris les
+  // champs masqués, pour garantir un rechargement fidèle à 100 % sans aucune perte.
+  function champDansBlocMasque(el, carte) {
+    for (var n = el && el.parentElement; n && n !== carte; n = n.parentElement) {
+      if (n.hasAttribute('hidden') || (n.style && n.style.display === 'none')) return true;
+    }
+    return false;
+  }
+
   document.querySelectorAll('.question-card').forEach(function(card) {
     var qt = card.querySelector('.q-num');
     var ql = card.querySelector('.q-text');
@@ -4852,9 +4873,10 @@ function construireBodyReponses() {
       // à zéro, seul son affichage est masqué. L'export scannait ENSUITE tous les
       // curseurs du DOM sans regarder s'ils étaient actuellement visibles, réintégrant
       // cette valeur fantôme comme si elle avait été confirmée. Un curseur dont un
-      // ancêtre est actuellement `hidden` ne représente PAS une réponse active :
-      // on l'ignore purement et simplement, quelle que soit sa valeur résiduelle.
-      if (inp.closest('[hidden]')) return;
+      // ancêtre est actuellement masqué (attribut `hidden` OU style.display='none' —
+      // les deux mécanismes coexistent dans ce formulaire, voir champDansBlocMasque)
+      // ne représente PAS une réponse active : on l'ignore, quelle que soit sa valeur.
+      if (champDansBlocMasque(inp, card)) return;
       var v = parseInt(inp.value);
       if (v < 1) return;
       var rg = inp.closest('.response-group');
@@ -4907,6 +4929,7 @@ function construireBodyReponses() {
     // Number and text inputs (not dep_, not addqty_, not adddep_, not field-input search)
     card.querySelectorAll('input[type=number], input[type=text]:not([id^=dep_]):not([id^=addqty_]):not([id^=adddep_])').forEach(function(inp) {
       if (!inp.value || inp.id === 'praticien_email') return;
+      if (champDansBlocMasque(inp, card)) return; // valeur résiduelle d'un bloc refermé (voir garde-fou 17/07/2026)
       var rg = inp.closest('.response-group');
       var rlbl = rg ? (rg.querySelector('label') ? rg.querySelector('label').textContent.trim() : '') : '';
       if (rlbl) cardLines.push(qid + ' [' + rlbl + '] : ' + inp.value);
@@ -4934,13 +4957,19 @@ function construireBodyReponses() {
       cardLines.push(qid + ' [addiction] : ' + parts.join(' — '));
     });
 
-    // Yesno hidden fields
+    // Yesno hidden fields — le garde-fou champDansBlocMasque ne concerne ici que les
+    // Oui/Non IMBRIQUÉS dans un bloc de détail refermé (yn_medoc_, yn_epi_med_,
+    // yn_trt_, yn_med2_… : ex. répondre Oui à "des médicaments pour cela ?" puis
+    // rebasculer la question principale sur Non laissait ce sous-Oui fantôme) ; le
+    // yn_<qid> principal est un enfant direct de la carte, jamais masqué, non affecté.
     card.querySelectorAll('input[type=hidden][id^=yn_]').forEach(function(inp) {
+      if (champDansBlocMasque(inp, card)) return;
       if (inp.value) cardLines.push(qid + ' — ' + (ql ? ql.textContent.substring(0,60) : '') + ' : ' + inp.value);
     });
 
     // Checkboxes (exclure pctx_, suivi10_ et chkadd_ déjà traités séparément)
     card.querySelectorAll('input[type=checkbox]:not([id^=pctx_]):not([id^=chkadd_]):not([id^=suivi10_])').forEach(function(cb) {
+      if (champDansBlocMasque(cb, card)) return; // case restée cochée dans un bloc refermé (voir garde-fou 17/07/2026)
       if (cb.checked) {
         var lbl = cb.closest('label');
         var lblText = lbl ? lbl.textContent.trim() : '';
@@ -4955,6 +4984,7 @@ function construireBodyReponses() {
     // "non reconnue". Bug trouvé le 14/07/2026 via verification/check-questionnaire-integrite.js.)
     card.querySelectorAll('select').forEach(function(sel) {
       if (sel.closest('div[id^="pm_items_"]')) return;
+      if (champDansBlocMasque(sel, card)) return; // sélection résiduelle d'un bloc refermé (voir garde-fou 17/07/2026)
       if (sel.value) {
         var rg = sel.closest('.response-group');
         var rlbl = rg ? (rg.querySelector('label') ? rg.querySelector('label').textContent.trim() : '') : '';
@@ -4970,14 +5000,17 @@ function construireBodyReponses() {
     // commentaire n'était pas la 1re zone de texte (Q28, Q150, Q164…).
     var qidNum = qid.replace('Q', '');
     var commentEl = document.getElementById('com_' + qidNum);
+    if (commentEl && champDansBlocMasque(commentEl, card)) commentEl = null; // bloc refermé (voir garde-fou 17/07/2026)
     if (commentEl && commentEl.value) msg += qid + ' [commentaire] : ' + commentEl.value.replace(/\r?\n/g, ' ⏎ ') + '\n';
     // Case "Commentaires" additionnelle (commentaireLibre, ex. Q142) : distincte de
     // com_<qid> qui, sur ce type de carte (q_medicament), sert déjà à noter le nom
     // des médicaments — tag [commentaire2] séparé pour ne jamais les confondre au
     // rechargement (restoreFromText).
     var commentLibreEl = document.getElementById('comlibre_' + qidNum);
+    if (commentLibreEl && champDansBlocMasque(commentLibreEl, card)) commentLibreEl = null;
     if (commentLibreEl && commentLibreEl.value) msg += qid + ' [commentaire2] : ' + commentLibreEl.value.replace(/\r?\n/g, ' ⏎ ') + '\n';
     var depEl = document.getElementById('dep_' + qidNum);
+    if (depEl && champDansBlocMasque(depEl, card)) depEl = null;
     if (depEl && depEl.value) msg += qid + ' [depuis] : ' + depEl.value + '\n';
 
     // Champ "libre" pur (special:'libre' — Q58, 58b, 112, 175, 182, 189…) : un simple
@@ -4987,7 +5020,7 @@ function construireBodyReponses() {
     // plan-logic.js — le texte tapé n'apparaissait donc jamais dans Synaxone.
     // Bug remonté par Camille le 08/07/2026.
     var libreEl = card.querySelector('textarea[id^="val_"]');
-    if (libreEl && libreEl.value && libreEl.value.trim()) {
+    if (libreEl && !champDansBlocMasque(libreEl, card) && libreEl.value && libreEl.value.trim()) {
       msg += qid + ' [libre] : ' + libreEl.value.replace(/\r?\n/g, ' ⏎ ') + '\n';
     }
 
@@ -4998,6 +5031,7 @@ function construireBodyReponses() {
     // exige un id) — tout ce qui y était tapé était silencieusement perdu, absent même
     // du fichier JSON exporté. Bug remonté par Camille le 08/07/2026.
     var tlContainer = document.getElementById('tl_items_' + qidNum);
+    if (tlContainer && champDansBlocMasque(tlContainer, card)) tlContainer = null; // liste dans un bloc refermé (Oui→Non), voir garde-fou 17/07/2026
     if (tlContainer) {
       var tlParts = [];
       tlContainer.querySelectorAll(':scope > div').forEach(function(row) {
@@ -5010,6 +5044,7 @@ function construireBodyReponses() {
       if (tlParts.length) msg += qid + ' [libre] : ' + tlParts.join(' ⏎ ') + '\n';
     }
     var medocContainer = document.getElementById('medoc_list_' + qidNum);
+    if (medocContainer && champDansBlocMasque(medocContainer, card)) medocContainer = null; // liste dans un bloc refermé (Oui→Non), voir garde-fou 17/07/2026
     if (medocContainer) {
       var medocParts = [];
       medocContainer.querySelectorAll(':scope > div').forEach(function(row) {
@@ -5036,6 +5071,8 @@ function construireBodyReponses() {
       q28Labels.forEach(function(lbl, ii) {
         var cEl = document.getElementById('c28_28_' + ii);
         var dEl = document.getElementById('d28_28_' + ii);
+        if (cEl && champDansBlocMasque(cEl, card)) cEl = null; // item décoché après saisie (voir garde-fou 17/07/2026)
+        if (dEl && champDansBlocMasque(dEl, card)) dEl = null;
         var cVal = cEl && cEl.value ? cEl.value.trim() : '';
         var dVal = dEl && dEl.value ? dEl.value.trim() : '';
         if (cVal || dVal) q28Parts.push(lbl + ' : ' + cVal + (dVal ? ' (depuis ' + dVal + ')' : ''));
@@ -5050,6 +5087,8 @@ function construireBodyReponses() {
       q68Labels.forEach(function(lbl, i) {
         var cEl = document.getElementById('c68_' + i);
         var dEl = document.getElementById('d68_' + i);
+        if (cEl && champDansBlocMasque(cEl, card)) cEl = null; // item décoché après saisie (voir garde-fou 17/07/2026)
+        if (dEl && champDansBlocMasque(dEl, card)) dEl = null;
         var cVal = cEl && cEl.value ? cEl.value.trim() : '';
         var dVal = dEl && dEl.value ? dEl.value.trim() : '';
         if (cVal || dVal) q68Parts.push(lbl + ' : ' + cVal + (dVal ? ' (depuis ' + dVal + ')' : ''));
@@ -5063,6 +5102,7 @@ function construireBodyReponses() {
       var q150Parts = [];
       q150Labels.forEach(function(lbl, i) {
         var cEl = document.getElementById('c150_' + i);
+        if (cEl && champDansBlocMasque(cEl, card)) cEl = null; // item décoché après saisie (voir garde-fou 17/07/2026)
         var cVal = cEl && cEl.value ? cEl.value.trim() : '';
         if (cVal) q150Parts.push(lbl + ' : ' + cVal);
       });
@@ -5072,6 +5112,7 @@ function construireBodyReponses() {
     // Idem pour la liste de symptômes ménopause/andropause (Q137, "+ Ajouter") : le champ
     // description de chaque symptôme n'a jamais eu d'id (seul le curseur de sévérité en a un).
     var menoContainer = document.getElementById('meno_items_' + qidNum);
+    if (menoContainer && champDansBlocMasque(menoContainer, card)) menoContainer = null; // liste dans un bloc refermé (Oui→Non), voir garde-fou 17/07/2026
     if (menoContainer) {
       var menoParts = [];
       menoContainer.querySelectorAll(':scope > div').forEach(function(row) {
