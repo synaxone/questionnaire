@@ -4382,6 +4382,415 @@ function ignorerBrouillonBilan() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// RECHARGEMENT D'UN BILAN DÉJÀ ENVOYÉ/IMPORTÉ (18/07/2026, demande Camille :
+// pouvoir rouvrir un bilan déjà importé dans Synaxone pour le compléter/corriger
+// AVEC le client en séance, comme "Compléter l'intake avec le client" côté grand
+// questionnaire). restoreFromTextBilan() est un portage quasi verbatim de
+// restoreFromText() dans index.html (même moteur de cartes .question-card, donc
+// même format de texte produit par construireBodyReponses() — voir CLAUDE.md
+// §6ter, "porter le moteur verbatim, jamais refaire"). Différences volontaires
+// par rapport à l'original : pas de mapping d'en-tête patient (aucun champ
+// p_nom/p_prenom/... dans le bilan) ; pas d'appel à calcAgeSel() (aucun champ
+// âge/date de naissance ici) ; pas d'appel à updateAnswerHighlights() (le
+// surlignage "has-answer" est déjà géré au fil de l'eau par updateIntensity()
+// et les gestionnaires oui/non, voir plus haut — aucun besoin d'un passage final).
+function restoreFromTextBilan(text) {
+  if (!text || !text.trim()) return 0;
+
+  var count = 0;
+  var lines = text.split('\n');
+
+  lines.forEach(function(rawLine) {
+    var line = rawLine.trim();
+    if (!line) return;
+
+    if (line.indexOf('Intro') === 0) {
+      var spaceIdxI = line.indexOf(' ');
+      if (spaceIdxI === -1) return;
+      var restI = line.substring(spaceIdxI + 1).replace(/^[–—-] /, '');
+      var mTagI = restI.match(/\[([^\]]*)\]\s*:\s/);
+      var tagI, valStrI;
+      if (mTagI) {
+        tagI = mTagI[1].trim();
+        valStrI = restI.substring(mTagI.index + mTagI[0].length).trim();
+      } else {
+        var colonIdxI = restI.lastIndexOf(' : ');
+        if (colonIdxI === -1) return;
+        tagI = null;
+        valStrI = restI.substring(colonIdxI + 3).trim();
+      }
+      if (tagI === 'depuis') {
+        var depI = document.getElementById('dep_Intro');
+        if (depI) { depI.value = valStrI; count++; }
+        return;
+      }
+      if (tagI && tagI.indexOf('annotation') !== -1) {
+        var cardI = document.getElementById('qcard_intro');
+        var annotTaI = cardI ? cardI.querySelector('.practitioner-annotation textarea') : null;
+        if (annotTaI) { annotTaI.value = valStrI.replace(/ ⏎ /g, '\n'); count++; }
+        return;
+      }
+      if (tagI === 'suivi_bilan') {
+        var suiviI = document.getElementById('suivi10_intro');
+        if (suiviI) { suiviI.checked = true; count++; }
+        return;
+      }
+      if (valStrI === 'oui' || valStrI === 'non') {
+        document.querySelectorAll('button.yesno-btn').forEach(function(b) {
+          var oc = b.getAttribute('onclick') || '';
+          if (oc.indexOf("'yn_intro'") !== -1 && oc.indexOf("'" + valStrI + "'") !== -1) {
+            b.click();
+            count++;
+          }
+        });
+      }
+      return;
+    }
+
+    if (line.charAt(0) === 'Q') {
+      var spaceIdx = line.indexOf(' ');
+      if (spaceIdx === -1) return;
+      var qid = line.substring(1, spaceIdx);
+      if (!/^\d+[a-z]?$/.test(qid)) return;
+
+      var rest = line.substring(spaceIdx + 1).replace(/^[–—-] /, '');
+      var rawLabel, valStr, tag;
+      var mTag2 = rest.match(/\[([^\]]*)\]\s*:\s/);
+      if (mTag2) {
+        tag = mTag2[1].trim();
+        rawLabel = rest.substring(0, mTag2.index + mTag2[0].indexOf(']') + 1).trim();
+        valStr = rest.substring(mTag2.index + mTag2[0].length).trim();
+      } else {
+        var colonIdx = rest.lastIndexOf(' : ');
+        if (colonIdx === -1) return;
+        rawLabel = rest.substring(0, colonIdx).trim();
+        valStr = rest.substring(colonIdx + 3).trim();
+        tag = null;
+      }
+
+      if (tag === 'commentaire') {
+        var com = document.getElementById('com_' + qid);
+        if (com) {
+          com.value = valStr.replace(/ ⏎ /g, '\n');
+          com.style.height = 'auto';
+          com.style.height = com.scrollHeight + 'px';
+          count++;
+        }
+        return;
+      }
+
+      if (tag === 'commentaire2') {
+        var com2 = document.getElementById('comlibre_' + qid);
+        if (com2) {
+          com2.value = valStr.replace(/ ⏎ /g, '\n');
+          com2.style.height = 'auto';
+          com2.style.height = com2.scrollHeight + 'px';
+          count++;
+        }
+        return;
+      }
+
+      if (tag === 'depuis') {
+        var dep = document.getElementById('dep_' + qid);
+        if (dep) { dep.value = valStr; count++; }
+        return;
+      }
+
+      if (tag === 'coché' || tag === 'praticien') {
+        var card2 = document.getElementById('qcard_' + qid);
+        if (card2 && valStr) {
+          var target = valStr.trim().toLowerCase();
+          var checkboxes = card2.querySelectorAll('input[type=checkbox]');
+          var cbExact = null, cbFuzzy = null;
+          for (var ci = 0; ci < checkboxes.length; ci++) {
+            var cb = checkboxes[ci];
+            var lblTxt = cb.parentElement ? cb.parentElement.textContent.trim().toLowerCase().replace(/\s+/g, ' ') : '';
+            if (lblTxt === target) { cbExact = cb; break; }
+            if (!cbFuzzy && (lblTxt.indexOf(target) !== -1 || target.indexOf(lblTxt) !== -1)) cbFuzzy = cb;
+          }
+          var cbMatch = cbExact || cbFuzzy;
+          if (cbMatch) {
+            if (!cbMatch.checked) {
+              cbMatch.checked = true;
+              if (cbMatch.onchange) cbMatch.onchange();
+              cbMatch.dispatchEvent(new Event('change'));
+            }
+            count++;
+          }
+        }
+        return;
+      }
+
+      if (tag && tag.indexOf('annotation') !== -1) {
+        var card3 = document.getElementById('qcard_' + qid);
+        var annotTa = card3 ? card3.querySelector('.practitioner-annotation textarea') : null;
+        if (annotTa) {
+          annotTa.value = valStr.replace(/ ⏎ /g, '\n');
+          annotTa.style.height = 'auto';
+          annotTa.style.height = annotTa.scrollHeight + 'px';
+          count++;
+        }
+        return;
+      }
+
+      if (tag === 'suivi_bilan') {
+        var suiviCb = document.getElementById('suivi10_' + qid);
+        if (suiviCb) { suiviCb.checked = true; count++; }
+        return;
+      }
+
+      if (tag === 'libre' && document.getElementById('tl_items_' + qid)) {
+        var tlContainer = document.getElementById('tl_items_' + qid);
+        valStr.split(' ⏎ ').forEach(function(part) {
+          addTraumaItem(qid, '');
+          var row = tlContainer.lastElementChild;
+          if (!row) return;
+          var mDate = part.match(/^(.*)\s\(([^()]*)\)$/);
+          var desc = row.querySelector('textarea');
+          var date = row.querySelector('input[type=text]');
+          if (desc) {
+            desc.value = mDate ? mDate[1].trim() : part.trim();
+            desc.style.height = 'auto';
+            desc.style.height = desc.scrollHeight + 'px';
+          }
+          if (date && mDate) date.value = mDate[2].trim();
+        });
+        count++;
+        return;
+      }
+      if (tag === 'libre' && document.getElementById('meno_items_' + qid)) {
+        var menoContainer = document.getElementById('meno_items_' + qid);
+        valStr.split(' ⏎ ').forEach(function(part) {
+          addMenoItem(qid);
+          var row = menoContainer.lastElementChild;
+          var desc = row ? row.querySelector('input[type=text]') : null;
+          if (desc) desc.value = part.trim();
+        });
+        count++;
+        return;
+      }
+      if (tag === 'libre' && document.getElementById('medoc_list_' + qid)) {
+        var medocContainer = document.getElementById('medoc_list_' + qid);
+        valStr.split(' ⏎ ').forEach(function(part) {
+          addMedocItem(qid);
+          var row = medocContainer.lastElementChild;
+          if (!row) return;
+          var mInputs = row.querySelectorAll('input[type=text]');
+          var mDepuis = part.match(/^(.*)\s\(depuis ([^()]*)\)$/);
+          if (mInputs[0]) mInputs[0].value = mDepuis ? mDepuis[1].trim() : part.trim();
+          if (mInputs[1] && mDepuis) mInputs[1].value = mDepuis[2].trim();
+        });
+        count++;
+        return;
+      }
+      if (tag === 'placement_manuel') {
+        var pmContainer = document.getElementById('pm_items_' + qid);
+        if (pmContainer) {
+          valStr.split(' ⏎ ').forEach(function(part) {
+            var pipeIdx = part.indexOf('|');
+            if (pipeIdx === -1) return;
+            var zone = part.substring(0, pipeIdx).trim();
+            var annotation = part.substring(pipeIdx + 1).trim();
+            addPlacementManuelItem(qid);
+            var row = pmContainer.lastElementChild;
+            if (!row) return;
+            var sel = row.querySelector('select');
+            var inp = row.querySelector('input[type=text]');
+            if (sel) sel.value = zone;
+            if (inp) inp.value = annotation;
+          });
+          count++;
+        }
+        return;
+      }
+
+      if (tag === 'addiction') {
+        var cardAd = document.getElementById('qcard_' + qid);
+        if (cardAd) {
+          var partsAd = valStr.split(' — ');
+          var labelAd = partsAd[0];
+          var checkboxesAd = cardAd.querySelectorAll('input[type=checkbox][id^=chkadd_]');
+          var targetAd = labelAd.trim().toLowerCase();
+          var cbAd = null;
+          for (var ai = 0; ai < checkboxesAd.length; ai++) {
+            var lbltxtAd = checkboxesAd[ai].parentElement ? checkboxesAd[ai].parentElement.textContent.trim().toLowerCase() : '';
+            if (lbltxtAd === targetAd) { cbAd = checkboxesAd[ai]; break; }
+          }
+          if (!cbAd) {
+            for (var ai2 = 0; ai2 < checkboxesAd.length; ai2++) {
+              var idxAd2 = checkboxesAd[ai2].id.replace('chkadd_', '');
+              if (document.getElementById('addautre_' + qid + '_' + idxAd2) && !checkboxesAd[ai2].checked) { cbAd = checkboxesAd[ai2]; break; }
+            }
+          }
+          if (cbAd) {
+            var idxFinalAd = cbAd.id.replace('chkadd_', '');
+            if (!cbAd.checked) { cbAd.checked = true; if (cbAd.onchange) cbAd.onchange(); cbAd.dispatchEvent(new Event('change')); }
+            var autreElAd = document.getElementById('addautre_' + qid + '_' + idxFinalAd);
+            if (autreElAd && targetAd !== 'autre') autreElAd.value = labelAd;
+            var qtyElAd = document.getElementById('addqty_' + qid + '_' + idxFinalAd);
+            var depElAd = document.getElementById('adddep_' + qid + '_' + idxFinalAd);
+            var intElAd = document.getElementById('addint_' + qid + '_' + idxFinalAd);
+            for (var piAd = 1; piAd < partsAd.length; piAd++) {
+              var pAd = partsAd[piAd];
+              var mIntAd = pAd.match(/^intensité (\d+)\/10$/);
+              var mDepAd = pAd.match(/^depuis (.+)$/);
+              if (mIntAd) { if (intElAd) { intElAd.value = mIntAd[1]; intElAd.dispatchEvent(new Event('input')); } }
+              else if (mDepAd) { if (depElAd) depElAd.value = mDepAd[1]; }
+              else if (qtyElAd) qtyElAd.value = pAd;
+            }
+            count++;
+          }
+        }
+        return;
+      }
+
+      // Curseur(s) (valeur du type "x/10")
+      var noteMatch = valStr.match(/^(\d+(?:\.\d+)?)\/10$/);
+      if (noteMatch) {
+        var val = noteMatch[1];
+        var single = document.getElementById('range_' + qid);
+        if (single) {
+          single.value = val;
+          updateIntensity(qid, val);
+          count++;
+        } else if (tag) {
+          var trouveDouble = false;
+          ['a', 'b'].forEach(function(suffix) {
+            var inp = document.getElementById('range_' + qid + '_' + suffix);
+            if (!inp) return;
+            var group = inp.closest('.response-group');
+            var lbl = group ? group.querySelector('label') : null;
+            var lblText = lbl ? lbl.textContent.replace(/\(0–10\)/, '').trim() : '';
+            if (lblText === tag) {
+              inp.value = val;
+              updateIntensity(qid + '_' + suffix, val);
+              count++;
+              trouveDouble = true;
+            }
+          });
+          if (!trouveDouble) {
+            var cardDc = document.getElementById('qcard_' + qid);
+            if (cardDc) {
+              var targetDc = tag.trim().toLowerCase();
+              var checkboxesDc = cardDc.querySelectorAll('input[type=checkbox]');
+              var cbDcExact = null, cbDcFuzzy = null;
+              for (var cdi = 0; cdi < checkboxesDc.length; cdi++) {
+                var cbDc = checkboxesDc[cdi];
+                var lblDc = cbDc.parentElement ? cbDc.parentElement.textContent.trim().toLowerCase().replace(/\s+/g, ' ') : '';
+                if (lblDc === targetDc) { cbDcExact = cbDc; break; }
+                if (!cbDcFuzzy && (lblDc.indexOf(targetDc) !== -1 || targetDc.indexOf(lblDc) !== -1)) cbDcFuzzy = cbDc;
+              }
+              var cbDcMatch = cbDcExact || cbDcFuzzy;
+              if (cbDcMatch) {
+                if (!cbDcMatch.checked) {
+                  cbDcMatch.checked = true;
+                  cbDcMatch.dispatchEvent(new Event('change'));
+                }
+                var wrapperDc = cbDcMatch.closest('label') ? cbDcMatch.closest('label').parentElement : null;
+                var inpDc = wrapperDc ? wrapperDc.querySelector('input[type=range]') : null;
+                if (inpDc) {
+                  inpDc.value = val;
+                  inpDc.dispatchEvent(new Event('input'));
+                  count++;
+                }
+              }
+            }
+          }
+        }
+        return;
+      }
+
+      if (tag && tag.indexOf('sous:') === 0 && (valStr === 'oui' || valStr === 'non')) {
+        var sousId = tag.substring('sous:'.length);
+        document.querySelectorAll('button.yesno-btn').forEach(function(b) {
+          var ocSous = b.getAttribute('onclick') || '';
+          if (ocSous.indexOf("'" + sousId + "'") !== -1 && ocSous.indexOf("'" + valStr + "'") !== -1) {
+            b.click();
+            count++;
+          }
+        });
+        return;
+      }
+
+      if (valStr === 'oui' || valStr === 'non') {
+        document.querySelectorAll('button.yesno-btn').forEach(function(b) {
+          var oc = b.getAttribute('onclick') || '';
+          if (oc.indexOf("'yn_" + qid + "'") !== -1 && oc.indexOf("'" + valStr + "'") !== -1) {
+            b.click();
+            count++;
+          }
+        });
+        return;
+      }
+
+      if (tag && valStr) {
+        var card = document.getElementById('qcard_' + qid);
+        var sel = card ? card.querySelector('select') : null;
+        if (sel) {
+          for (var i = 0; i < sel.options.length; i++) {
+            var opt = sel.options[i];
+            if (opt.value === valStr || opt.textContent.trim() === valStr) {
+              sel.value = opt.value;
+              count++;
+              break;
+            }
+          }
+        }
+      }
+      return;
+    }
+
+    // Filet de sécurité : « Complément[<id>] : valeur » → recharge par identifiant
+    // (zones de texte captées par le filet de construireBodyReponses).
+    var colonIdx2 = line.indexOf(' : ');
+    if (colonIdx2 === -1) return;
+    var label2 = line.substring(0, colonIdx2).trim();
+    var value2 = line.substring(colonIdx2 + 3).trim();
+    var mComp = label2.match(/^Complément\[(.+)\]$/);
+    if (mComp) {
+      if (mComp[1].indexOf('__autoid_') === 0) return;
+      var elComp = document.getElementById(mComp[1]);
+      if (elComp) {
+        elComp.value = value2.replace(/ ⏎ /g, '\n');
+        if (elComp.tagName === 'TEXTAREA') { elComp.style.height = 'auto'; elComp.style.height = elComp.scrollHeight + 'px'; }
+        count++;
+      }
+    }
+  });
+
+  return count;
+}
+
+// Restaure un bilan précédemment envoyé/importé (symptômes spécifiques + questions
+// générales + observations libres) — utilisé par le pont Synaxone quand la
+// praticienne rouvre un bilan déjà reçu pour le compléter avec le client (voir
+// completerBilanExistant() côté Synaxone). `prior` a la forme { bodySpecifiques,
+// questionsGenerales, libres } — exactement les champs déjà stockés par Synaxone
+// pour tout bilan importé (voir finaliserBilanImporte() côté electron-index.html).
+function restaurerReponsesBilan(prior) {
+  if (!prior) return;
+
+  if (typeof prior.bodySpecifiques === 'string' && prior.bodySpecifiques.trim()) {
+    restoreFromTextBilan(prior.bodySpecifiques);
+  }
+
+  (prior.questionsGenerales || []).forEach(function(q) {
+    if (q.valeur === null || q.valeur === undefined) return;
+    var inp = document.getElementById('slider_' + q.num);
+    if (inp) { inp.value = q.valeur; majSlider(inp); }
+  });
+
+  var libres = prior.libres || {};
+  ['changements', 'nouveau', 'priorite'].forEach(function(key) {
+    if (!libres[key]) return;
+    var el = document.getElementById('libre_' + key);
+    if (el) el.value = libres[key];
+  });
+
+  majProgressBar();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // PONT SYNAXONE — permet à l'app Synaxone NFB d'ouvrir ce bilan (en iframe
 // locale) pour que la praticienne le remplisse AVEC le client en séance, avec
 // ses propres annotations (mode praticien, voir .practitioner-annotation),
@@ -4394,6 +4803,12 @@ var isPraticien = false;
 var _synaxoneEmbedded = false;
 var _synaxoneSource = null;
 var _synaxoneOrigin = '*';
+// Renseigné uniquement quand Synaxone rouvre un bilan DÉJÀ importé (pas une
+// création fraîche) — voir CLAUDE.md, renvoyé avec les réponses pour que
+// appliquerCompletionBilan() sache enregistrer une NOUVELLE VERSION plutôt
+// qu'un nouveau bilan (priorité "aucune perte de données", jamais écraser
+// l'original).
+var _bilanSourceId = null;
 
 function activatePraticienMode() {
   isPraticien = true;
@@ -4407,7 +4822,7 @@ function renvoyerBilanASynaxone() {
   if (!_synaxoneSource) return;
   var data = construireDonneesBilan();
   if (!data) return;
-  _synaxoneSource.postMessage({ source: 'synaxone-bilan', type: 'save', data: data }, _synaxoneOrigin);
+  _synaxoneSource.postMessage({ source: 'synaxone-bilan', type: 'save', data: data, bilanSourceId: _bilanSourceId }, _synaxoneOrigin);
   effacerBrouillonBilan();
   var b = document.getElementById('synaxone-bilan-return-btn');
   if (b) { b.textContent = '✅ Renvoyé à Synaxone'; b.disabled = true; }
@@ -4437,9 +4852,14 @@ window.addEventListener('message', function(ev) {
     var cfg = d.config || {};
     cfg.symptomesSpecifiques = resoudreSymptomesSpecifiques(cfg.symptomesSpecifiques);
     CONFIG = cfg;
+    _bilanSourceId = d.bilanSourceId || null;
     var err = document.getElementById('erreur-config');
     if (err) err.style.display = 'none';
     construire(CONFIG);
+    // Bilan déjà rempli qu'on rouvre pour compléter/corriger avec le client
+    // (par opposition à une création fraîche) : pré-remplir avec les réponses
+    // déjà données, voir restaurerReponsesBilan().
+    if (d.priorReponses) restaurerReponsesBilan(d.priorReponses);
     activatePraticienMode();
     injecterBarreSynaxoneBilan();
     verifierBrouillonBilan();
