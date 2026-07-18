@@ -623,40 +623,39 @@
 
   <div id="confirmation">
     <h3>Bilan enregistré ✓</h3>
-    <p style="margin-bottom:18px">Merci pour vos réponses 🌿 Votre bilan est prêt ! Il ne me parviendra que si vous me l'envoyez. Deux petits gestes suffisent :</p>
+    <p style="margin-bottom:6px">Merci pour vos réponses 🌿 Votre bilan est prêt !</p>
+    <p style="margin-bottom:18px">Il a été <strong>téléchargé automatiquement</strong> sur votre appareil, sous le nom <strong id="nom_fichier_bilan" style="user-select:all">…</strong> (dans votre dossier « Téléchargements »). Il ne me parviendra que si vous me l'envoyez <strong>par email</strong>. Deux petits gestes suffisent :</p>
 
-    <!-- Étape 1 : copier l'adresse -->
+    <!-- Étape 1 : ouvrir la messagerie -->
     <div style="display:flex;gap:10px;align-items:flex-start;background:white;border:1px solid var(--green);border-radius:8px;padding:12px 14px;text-align:left">
       <div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--green);color:white;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px">1</div>
       <div style="flex:1">
-        <div style="font-size:14px;font-weight:600;margin-bottom:6px;color:var(--text)">Copiez mon adresse email</div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span id="adresse_praticien" style="font-weight:700;font-size:14px;user-select:all;color:var(--text)">contact@synaxone-nfb.fr</span>
-          <button type="button" onclick="copierAdresse(this)"
-            style="padding:8px 12px;background:var(--green);color:white;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">📋 Copier l'adresse</button>
+        <div style="font-size:14px;font-weight:600;margin-bottom:8px;color:var(--text)">Ouvrez un email pour moi</div>
+        <button onclick="ouvrirMessagerieBilan()" id="btn_partager_bilan"
+          style="width:100%;padding:15px;background:var(--green);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer">
+          ✉️ Ouvrir ma messagerie
+        </button>
+        <div style="font-size:12.5px;line-height:1.6;margin-top:8px;color:var(--text-muted)">
+          Ce bouton ouvre votre application email habituelle, avec mon adresse déjà indiquée.<br>
+          Si rien ne s'ouvre, copiez mon adresse et créez l'email vous-même :
+          <span style="display:inline-flex;align-items:center;gap:6px;margin-top:4px">
+            <span id="adresse_praticien" style="font-weight:700;color:var(--text)">contact@synaxone-nfb.fr</span>
+            <button type="button" onclick="copierAdresse(this)"
+              style="padding:6px 10px;background:var(--green);color:white;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer">📋 Copier</button>
+          </span>
         </div>
       </div>
     </div>
 
-    <!-- Étape 2 : envoyer le fichier -->
+    <!-- Étape 2 : joindre le fichier -->
     <div style="display:flex;gap:10px;align-items:flex-start;background:white;border:1px solid var(--green);border-radius:8px;padding:12px 14px;margin-top:10px;text-align:left">
       <div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--green);color:white;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px">2</div>
       <div style="flex:1">
-        <div style="font-size:14px;font-weight:600;margin-bottom:8px;color:var(--text)">Envoyez-moi le fichier</div>
-        <button onclick="partagerBilan()" id="btn_partager_bilan"
-          style="width:100%;padding:15px;background:var(--green);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer">
-          📤 Envoyer le fichier maintenant
-        </button>
-        <div style="font-size:12.5px;line-height:1.6;margin-top:8px;color:var(--text-muted)">
-          Choisissez votre messagerie (Gmail, Mail…), <strong>collez mon adresse</strong> dans le champ « À », puis envoyez.<br>
-          <span style="opacity:0.85">Astuce : si vous préférez WhatsApp ou Messages, choisissez simplement mon contact — rien à coller.</span>
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px;color:var(--text)">Joignez le fichier, puis envoyez</div>
+        <div style="font-size:12.5px;line-height:1.6;color:var(--text-muted)">
+          Dans l'email, appuyez sur l'icône trombone 📎 pour joindre un fichier, cherchez <strong id="nom_fichier_bilan2">…</strong> dans « Téléchargements », puis envoyez l'email.
         </div>
       </div>
-    </div>
-
-    <div id="partage_fallback_note" hidden style="margin-top:10px;padding:12px 14px;background:white;border:1px solid var(--green);border-radius:8px;font-size:13px;line-height:1.7;text-align:left;color:var(--text)">
-      <strong>Le partage direct n'est pas disponible sur cet appareil.</strong><br>
-      Pas d'inquiétude : le fichier de votre bilan est <strong>déjà enregistré</strong> dans votre dossier <strong>« Téléchargements »</strong>. Ouvrez votre messagerie, créez un email pour moi (collez mon adresse ci-dessus dans « À »), <strong>joignez ce fichier</strong> (icône trombone 📎) et envoyez-le.
     </div>
 
     <p style="font-size:13px;margin:16px 0 0 0">Merci beaucoup, et à très bientôt 🌿</p>
@@ -3807,6 +3806,14 @@ async function envoyerBilan() {
   afficherConfirmation();
 }
 
+function afficherNomFichierBilan() {
+  var f = _lastBilanFilename || '';
+  ['nom_fichier_bilan', 'nom_fichier_bilan2'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = f;
+  });
+}
+
 function afficherConfirmation() {
   document.getElementById('submit-section').style.display = 'none';
   document.getElementById('confirmation').style.display = 'block';
@@ -3815,6 +3822,7 @@ function afficherConfirmation() {
   // body.confirmation-page-mode. Le questionnaire n'est pas perdu, juste masqué :
   // imprimerQuestionnaireRempli() le ré-affiche pour l'impression.
   document.body.classList.add('confirmation-page-mode');
+  afficherNomFichierBilan();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -3827,9 +3835,14 @@ function imprimerQuestionnaireRempli() {
 }
 
 // ─────────────────────────────────────────────
-// PARTAGE DU FICHIER — Web Share API (mobile) avec repli explicatif (desktop).
-// Le téléchargement local ci-dessus reste la garantie principale (aucune perte de
-// données) ; ce bouton ne fait que fluidifier la remise du fichier à la praticienne.
+// ENVOI DU FICHIER — EMAIL UNIQUEMENT, aucun autre canal proposé (décision du
+// 18/07/2026 : le circuit conforme RGPD documenté dans CLAUDE.md §5 repose sur
+// l'adresse mail dédiée contact@synaxone-nfb.fr, pas sur "n'importe quelle appli"
+// via la feuille de partage native — WhatsApp/Messages/Drive… retirés). Un lien
+// "mailto:" ne peut pas joindre automatiquement un fichier (restriction de
+// sécurité des navigateurs, aucune exception) : il ouvre la messagerie du client
+// avec l'adresse déjà remplie, puis le client joint lui-même le fichier déjà
+// téléchargé (voir étape 2 du HTML).
 // ─────────────────────────────────────────────
 var _lastBilanBlob = null;
 var _lastBilanFilename = '';
@@ -3857,37 +3870,13 @@ function copierAdresse(btn) {
   }
 }
 
-function partagerBilan() {
-  if (!_lastBilanBlob) return;
-
-  // Affiche la consigne « le fichier est déjà téléchargé, joignez-le à un email ».
-  // On NE re-télécharge PAS (le fichier a déjà été téléchargé à l'envoi du bilan).
-  var montrerConsigne = function () {
-    var note = document.getElementById('partage_fallback_note');
-    if (note) {
-      note.hidden = false;
-      note.removeAttribute('hidden');
-      note.style.display = 'block';
-      try { note.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
-    }
-  };
-
-  // Sur mobile : on tente la feuille de partage native (envoi direct avec le fichier
-  // en pièce jointe). Si elle ne s'ouvre pas / échoue / est annulée, on explique quoi faire.
-  try {
-    var file = new File([_lastBilanBlob], _lastBilanFilename, { type: 'text/plain' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({
-        files: [file],
-        title: 'Bilan Synaxone',
-        text: 'Voici mon bilan de suivi pour Synaxone.'
-      }).catch(function () { montrerConsigne(); });
-      return;
-    }
-  } catch (e) {}
-
-  // Pas de partage natif disponible : on explique directement.
-  montrerConsigne();
+function ouvrirMessagerieBilan() {
+  var sujet = 'Mon bilan Synaxone';
+  var corps = 'Bonjour,\n\nVoici mon bilan de suivi (fichier ' + (_lastBilanFilename || '') + ' en pièce jointe).\n\nMerci !';
+  var lien = 'mailto:contact@synaxone-nfb.fr'
+    + '?subject=' + encodeURIComponent(sujet)
+    + '&body=' + encodeURIComponent(corps);
+  window.location.href = lien;
 }
 
 // ─────────────────────────────────────────────
