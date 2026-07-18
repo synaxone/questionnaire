@@ -518,35 +518,11 @@
     width: 100%;
   }
 
-  /* IMPRESSION DU QUESTIONNAIRE REMPLI — déclenchée depuis l'encart de
-     confirmation ; on ré-affiche le questionnaire (masqué à l'écran par le
-     mode "page de confirmation" ci-dessus) et on masque tout le reste.
-     Sélecteurs préfixés par "body.confirmation-page-mode" (même spécificité
-     que la règle d'écran ci-dessus) : une règle @media print moins spécifique
-     perdait contre elle malgré !important des deux côtés (spécificité CSS
-     prioritaire sur l'ordre du fichier), page d'impression vide constatée le
-     18/07/2026 — corrigé en égalant la spécificité pour que l'ordre (cette
-     règle est déclarée après) tranche en faveur de l'impression. */
-  @media print {
-    body.confirmation-page-mode #page-header,
-    body.confirmation-page-mode #progress-bar-wrap,
-    body.confirmation-page-mode #intro-card,
-    body.confirmation-page-mode #confirmation,
-    body.confirmation-page-mode #erreur-config,
-    body.confirmation-page-mode #restore-banner-bilan,
-    #page-header, #progress-bar-wrap, #intro-card, #confirmation,
-    #erreur-config, #restore-banner-bilan, .submit-section {
-      display: none !important;
-    }
-    body.confirmation-page-mode #questionnaire-container,
-    #questionnaire-container {
-      display: block !important;
-    }
-    body.confirmation-page-mode main {
-      display: block !important;
-    }
-    body { background: white; }
-  }
+  /* L'impression du questionnaire rempli (bouton "Imprimer le questionnaire
+     rempli") n'imprime PAS cette page telle quelle : elle ouvre un document
+     condensé généré à part (buildBilanPrintHtml(), même principe que
+     buildPrintHtml() dans index.html pour le grand questionnaire) — pas
+     besoin de règles @media print ici. */
 
   /* ERREUR CONFIG */
   #erreur-config {
@@ -3838,18 +3814,170 @@ function afficherConfirmation() {
   // Bascule vers une "page" dédiée : tout le reste (en-tête, intro, questionnaire
   // rempli) est masqué, seul l'encart vert reste visible — voir CSS
   // body.confirmation-page-mode. Le questionnaire n'est pas perdu, juste masqué :
-  // imprimerQuestionnaireRempli() le ré-affiche pour l'impression.
+  // imprimerQuestionnaireRempli() lit son contenu directement dans le DOM (masqué
+  // ou non) pour générer le document imprimable, voir buildBilanPrintHtml().
   document.body.classList.add('confirmation-page-mode');
   afficherNomFichierBilan();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Imprime le questionnaire rempli (réponses telles que saisies par le client),
-// pas l'encart de confirmation. On utilise la mise en page CSS @media print
-// définie plus haut (masque tout sauf #questionnaire-container) plutôt que de
-// reconstruire une vue séparée — même contenu que ce que le client a rempli.
+// Imprime le questionnaire rempli, sous une forme condensée générée à part —
+// même principe que buildPrintHtml()/imprimerQuestionnaire() dans index.html
+// pour le grand questionnaire (18/07/2026, demande Camille : "mis en page et
+// condensé comme pour l'impression du questionnaire initial"). On n'imprime
+// pas la page elle-même (mise en page écran, curseurs, boutons...) mais un
+// document Arial compact avec juste les réponses.
 function imprimerQuestionnaireRempli() {
-  window.print();
+  var win = window.open('', '_blank');
+  if (!win) { alert('Veuillez autoriser les popups pour imprimer.'); return; }
+  win.document.write(buildBilanPrintHtml());
+  win.document.close();
+  win.focus();
+  setTimeout(function() { win.print(); }, 500);
+}
+
+// Raccourcit un libellé long (ex. "Introverti(e) — je me ressource seul(e)…")
+// — identique à shortLabel() dans buildPrintHtml() côté index.html.
+function shortLabelBilan(text) {
+  if (!text) return text;
+  var cut = text.split(/[—(]/)[0].trim();
+  return cut || text.trim();
+}
+
+function buildBilanPrintHtml() {
+  var css = '<style>body{font-family:Arial,sans-serif;font-size:11px;margin:20px}'
+    + 'h1{font-size:14px;color:#4A7C59;border-bottom:2px solid #4A7C59;padding-bottom:6px}'
+    + '.st{background:#4A7C59;color:white;padding:4px 8px;font-size:11px;font-weight:bold;margin:10px 0 4px;border-radius:4px}'
+    + '.f{margin:2px 0;font-size:11px}.fl{font-weight:bold;color:#555}.fv{color:#000;margin-left:4px}'
+    + '.ta{margin:2px 0;font-size:11px;white-space:pre-wrap}'
+    + '.q{margin:4px 0;padding:4px 8px;border-left:2px solid #4A7C59;background:#F5FAF7}'
+    + '.qn{font-size:9px;color:#4A7C59;font-weight:bold}.qt{font-size:10px;color:#555}'
+    + '.qv{font-size:12px;font-weight:bold;color:#4A7C59}.qc{font-size:10px;color:#444;font-style:italic}'
+    + '@media print{body{margin:10px}}</style>';
+
+  var code = (CONFIG && CONFIG.clientCode) || '';
+  var body = '<h1>Bilan d&rsquo;&eacute;volution &mdash; 10 s&eacute;ances' + (code ? ' &mdash; ' + code : '') + '</h1>';
+  body += '<div class="f"><span class="fl">Code :</span><span class="fv">' + (code || '—') + '</span></div>';
+  body += '<div class="f"><span class="fl">Suivi depuis le :</span><span class="fv">' + ((CONFIG && CONFIG.debutSuivi) || '—') + '</span></div>';
+  body += '<div class="f"><span class="fl">Bilan du :</span><span class="fv">' + new Date().toLocaleDateString('fr-FR') + '</span></div>';
+
+  // ── Symptômes spécifiques : mêmes cartes .question-card que le grand
+  // questionnaire (moteur porté verbatim, voir CLAUDE.md §3/§6ter) — logique
+  // d'extraction copiée telle quelle de buildPrintHtml() dans index.html.
+  var section = document.getElementById('section-specifiques');
+  if (section) {
+    var secContent = '';
+    section.querySelectorAll('.question-card').forEach(function(card) {
+      var qnum = card.querySelector('.q-num');
+      var qtext = card.querySelector('.q-text');
+      if (!qnum) return;
+      var lines = [];
+      var consumed = [];
+      card.querySelectorAll('input[type=checkbox]:not([id^=pctx_]):not([id^=suivi10_])').forEach(function(cb) {
+        var wrapper = cb.closest('div');
+        if (!wrapper) return;
+        var detailInputs = [];
+        wrapper.querySelectorAll('input[type=range], input[type=text], input[type=number], textarea').forEach(function(inp) {
+          if (inp === cb) return;
+          if (inp.id && inp.id.indexOf('dep_') === 0) return;
+          detailInputs.push(inp);
+        });
+        if (detailInputs.length === 0) return;
+        detailInputs.forEach(function(inp) { consumed.push(inp); });
+        consumed.push(cb);
+        if (!cb.checked) return;
+        var lblEl = cb.closest('label');
+        var span = (lblEl && lblEl.querySelector('span > span')) || (lblEl ? lblEl.querySelector('span') : null);
+        var name = span ? span.textContent.trim() : (lblEl ? lblEl.textContent.trim() : '');
+        name = shortLabelBilan(name);
+        var parts = [];
+        detailInputs.forEach(function(inp) {
+          if (inp.tagName === 'TEXTAREA') {
+            if (inp.value) parts.push(inp.value);
+          } else if (inp.type === 'range') {
+            if (parseInt(inp.value) > 0) parts.push(inp.value);
+          } else if (inp.value) {
+            var rg = inp.closest('.response-group');
+            var lbl2 = rg && rg.querySelector('label') ? rg.querySelector('label').textContent.trim() : '';
+            parts.push((lbl2 ? lbl2 + ': ' : '') + inp.value);
+          }
+        });
+        lines.push(name + (parts.length ? ' — ' + parts.join(', ') : ''));
+      });
+      function isConsumed(el) { return consumed.indexOf(el) !== -1; }
+
+      card.querySelectorAll('input[type=range]').forEach(function(inp) {
+        if (isConsumed(inp)) return;
+        if (parseInt(inp.value) > 0) {
+          var rg = inp.closest('.response-group');
+          var lbl = rg && rg.querySelector('label') ? rg.querySelector('label').textContent.replace('(0–10)', '').trim() : '';
+          if (lbl === '0 → 10') lbl = '';
+          lines.push((lbl ? lbl + ': ' : '') + inp.value);
+        }
+      });
+      card.querySelectorAll('input[type=hidden]').forEach(function(inp) {
+        if (inp.value) lines.push(inp.value);
+      });
+      card.querySelectorAll('input[type=number],input[type=text]:not([id^=dep_])').forEach(function(inp) {
+        if (isConsumed(inp)) return;
+        if (inp.value && !inp.readOnly) {
+          var rg = inp.closest('.response-group');
+          var lbl = rg && rg.querySelector('label') ? rg.querySelector('label').textContent.trim() : '';
+          lines.push((lbl ? lbl + ': ' : '') + inp.value);
+        }
+      });
+      card.querySelectorAll('input[type=checkbox]:not([id^=pctx_]):not([id^=suivi10_])').forEach(function(cb) {
+        if (isConsumed(cb)) return;
+        if (cb.checked) { var lbl = cb.closest('label'); if (lbl) lines.push(shortLabelBilan(lbl.textContent.trim())); }
+      });
+      card.querySelectorAll('select').forEach(function(sel) {
+        if (sel.value) lines.push(sel.value);
+      });
+      var commentsList = [];
+      card.querySelectorAll('textarea.field-input').forEach(function(ta) {
+        if (!isConsumed(ta) && ta.value) commentsList.push(ta.value);
+      });
+      var dep = card.querySelector('input[id^=dep_]');
+      if (lines.length === 0 && commentsList.length === 0 && !(dep && dep.value)) return;
+      secContent += '<div class="q"><div class="qn">' + qnum.textContent + '</div>';
+      if (qtext) secContent += '<div class="qt">' + qtext.textContent.trim() + '</div>';
+      if (lines.length > 0) secContent += '<div class="qv">' + lines.join(' | ') + '</div>';
+      commentsList.forEach(function(cv) { secContent += '<div class="qc">' + cv + '</div>'; });
+      if (dep && dep.value) secContent += '<div class="qc">Depuis: ' + dep.value + '</div>';
+      secContent += '</div>';
+    });
+    if (secContent) {
+      body += '<div class="st">🎯 Vos symptômes personnalisés</div>';
+      body += secContent;
+    }
+  }
+
+  // ── Questions générales : simple curseur par question (voir creerCarteSlider).
+  body += '<div class="st">🌐 Questions générales</div>';
+  QUESTIONS_COMMUNES.forEach(function(q) {
+    var inp = document.getElementById('slider_' + q.num);
+    var val = inp ? inp.value : '0';
+    body += '<div class="q"><div class="qn">Q' + q.num + '</div><div class="qt">' + q.texte + '</div>'
+      + '<div class="qv">' + val + ' / 10</div></div>';
+  });
+
+  // ── Observations libres.
+  var libres = [
+    ['Changements observés', document.getElementById('libre_changements')],
+    ['Nouveau / à améliorer', document.getElementById('libre_nouveau')],
+    ['Priorité actuelle', document.getElementById('libre_priorite')]
+  ];
+  var libresContent = '';
+  libres.forEach(function(pair) {
+    var val = pair[1] ? pair[1].value.trim() : '';
+    if (val) libresContent += '<div class="f"><span class="fl">' + pair[0] + ' :</span><br><div class="ta">' + val + '</div></div>';
+  });
+  if (libresContent) {
+    body += '<div class="st">💬 Vos observations</div>';
+    body += libresContent;
+  }
+
+  return '<!DOCTYPE html><html><head><meta charset="utf-8">' + css + '</head><body>' + body + '</body></html>';
 }
 
 // ─────────────────────────────────────────────
