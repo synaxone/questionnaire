@@ -565,6 +565,100 @@
   }
   .progress-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
 
+  /* PAGINATION PAR ÉTAPES (18/07/2026, demande Camille : "ça donne l'impression
+     d'avancer par étapes" — questionnaire perçu comme long) — même principe que
+     les onglets de section (.section-tabs/.nav-bar/goToSection) du grand
+     questionnaire index.html, adapté ici en pages dynamiques (une par catégorie
+     de symptômes, générées selon les symptômes réellement sélectionnés pour ce
+     client). Aucune perte de données : le passage d'une page à l'autre masque
+     seulement (display:none), les valeurs des champs restent en mémoire DOM et
+     sont collectées normalement à l'envoi. */
+  .bilan-tabs-wrapper { position: relative; }
+  .bilan-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 10px 24px;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .bilan-tabs::-webkit-scrollbar { display: none; }
+  .bilan-tab {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .bilan-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+  .bilan-tab.done { background: var(--accent-light); border-color: var(--accent); color: var(--text-muted); font-weight: 600; }
+  .bilan-tabs-arrow {
+    display: none;
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 32px;
+    background: linear-gradient(to right, var(--bg) 60%, transparent);
+    border: none;
+    cursor: pointer;
+    z-index: 2;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--accent);
+  }
+  .bilan-tabs-arrow.right { right: 0; background: linear-gradient(to left, var(--bg) 60%, transparent); }
+  .bilan-tabs-arrow.left { left: 0; }
+  @media (min-width: 700px) {
+    .bilan-tabs-arrow { display: flex; }
+    .bilan-tabs { padding: 10px 40px; }
+  }
+
+  .bilan-nav-bar {
+    position: sticky;
+    bottom: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+  }
+  .bilan-nav-info { font-size: 12px; color: var(--text-muted); text-align: center; }
+  .bilan-nav-track { height: 3px; background: var(--border); border-radius: 2px; width: 100px; margin: 4px auto 0; }
+  .bilan-nav-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; }
+  .bilan-nav-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .bilan-nav-btn.primary { background: var(--accent); color: white; }
+  .bilan-nav-btn.primary:hover, .bilan-nav-btn.primary:active { background: #A0622A; }
+  .bilan-nav-btn.secondary { background: var(--bg); border: 1px solid var(--border); color: var(--text-muted); }
+  .bilan-nav-btn.secondary:hover, .bilan-nav-btn.secondary:active { border-color: var(--accent); color: var(--accent); }
+
+  body.confirmation-page-mode .bilan-tabs-wrapper,
+  body.confirmation-page-mode .bilan-nav-bar {
+    display: none !important;
+  }
+
   @media (max-width: 600px) {
     main { padding: 20px 12px 60px; }
     header { padding: 16px; }
@@ -598,7 +692,22 @@
     <p>Ce lien ne contient pas de configuration valide.<br>Demandez à votre praticien de régénérer le lien depuis l'interface de sélection.</p>
   </div>
 
+  <div class="bilan-tabs-wrapper" id="bilan-tabs-wrapper" style="display:none">
+    <button class="bilan-tabs-arrow left" onclick="document.getElementById('bilanTabs').scrollBy({left:-150,behavior:'smooth'})">‹</button>
+    <div class="bilan-tabs" id="bilanTabs"></div>
+    <button class="bilan-tabs-arrow right" onclick="document.getElementById('bilanTabs').scrollBy({left:150,behavior:'smooth'})">›</button>
+  </div>
+
   <div id="questionnaire-container"></div>
+
+  <div class="bilan-nav-bar" id="bilan-nav-bar" style="display:none">
+    <button class="bilan-nav-btn secondary" onclick="prevSectionBilan()" id="bilanBtnPrev">← Retour</button>
+    <div class="bilan-nav-info">
+      <div id="bilanNavLabel">Étape 1 / 1</div>
+      <div class="bilan-nav-track"><div class="bilan-nav-fill" id="bilanNavFill" style="width:0%"></div></div>
+    </div>
+    <button class="bilan-nav-btn primary" onclick="nextSectionBilan()" id="bilanBtnNext">Suivant →</button>
+  </div>
 
   <div id="restore-banner-bilan" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:8888;background:var(--accent);color:white;padding:14px 16px;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 -2px 12px rgba(0,0,0,0.15)">
     <span id="restore-banner-bilan-label" style="flex:1;font-size:13px;font-family:'DM Sans',sans-serif;line-height:1.4"></span>
@@ -3472,29 +3581,34 @@ function lireConfig() {
 // ─────────────────────────────────────────────
 // CONSTRUCTION DU QUESTIONNAIRE
 // ─────────────────────────────────────────────
+var bilanPages = [];
+var currentSectionBilan = 0;
+
 function construire(config) {
   var container = document.getElementById('questionnaire-container');
   var submitSection = document.getElementById('submit-section');
   var infoBox = document.getElementById('client-info-box');
+  var tabsWrap = document.getElementById('bilan-tabs-wrapper');
+  var tabsBar = document.getElementById('bilanTabs');
+  var navBar = document.getElementById('bilan-nav-bar');
 
   // Info client
   infoBox.innerHTML = '<strong>Code :</strong> ' + (config.clientCode || '—') +
     ' &nbsp;·&nbsp; <strong>Suivi depuis le :</strong> ' + (config.debutSuivi || '—') +
     ' &nbsp;·&nbsp; <strong>Bilan du :</strong> ' + new Date().toLocaleDateString('fr-FR');
 
-  // ── SECTION 1 : Symptômes spécifiques — rendus via le vrai moteur du grand
-  // questionnaire (buildQuestionCard), regroupés dans #section-specifiques pour que
-  // construireBodyReponses() (également porté depuis index.html, cherche les cartes
-  // via document.querySelectorAll('.question-card')) ne récolte QUE ces cartes-là,
-  // jamais les questions générales ci-dessous (qui utilisent .carte-generale, une
-  // classe volontairement différente).
+  bilanPages = [];
+  currentSectionBilan = 0;
+
+  // ── PAGES "Symptômes spécifiques" — une page par catégorie, pour "donner
+  // l'impression d'avancer par étapes" plutôt qu'un unique long défilement
+  // (demande Camille, 18/07/2026). Cartes rendues via le vrai moteur du grand
+  // questionnaire (buildQuestionCard), toutes regroupées dans #section-specifiques
+  // (peu importe la sous-page qui les contient : construireBodyReponses() et
+  // buildBilanPrintHtml() les retrouvent par la classe .question-card / l'id
+  // #section-specifiques, indépendamment de l'imbrication en pages).
   var specifiques = config.symptomesSpecifiques || [];
   if (specifiques.length > 0) {
-    var h1 = document.createElement('div');
-    h1.className = 'section-title';
-    h1.innerHTML = '<span>🎯</span> Vos symptômes personnalisés';
-    container.appendChild(h1);
-
     var sectionSpecifiques = document.createElement('div');
     sectionSpecifiques.id = 'section-specifiques';
     container.appendChild(sectionSpecifiques);
@@ -3535,79 +3649,157 @@ function construire(config) {
     });
 
     categoriesTriees.forEach(function(cat) {
-      // Pas de titre de catégorie pour les quelques qnum sans vraie catégorie clinique
-      // (ex. Intro, ou d'anciens qnum hors des 10 tableaux du moteur) : Camille ne
-      // veut plus voir apparaître de bloc "Signalé à l'entretien" séparé — ces
-      // questions restent affichées (aucune perte), simplement sans en-tête, à la
-      // suite des vraies catégories (toujours en dernier, voir CATEGORIE_ORDRE).
-      if (CATEGORIE_ORDRE.indexOf(cat) !== -1) {
-        var catTitle = document.createElement('div');
-        catTitle.style.cssText = 'font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin:16px 0 8px;';
-        catTitle.textContent = cat;
-        sectionSpecifiques.appendChild(catTitle);
-      }
+      var estCategorieReelle = CATEGORIE_ORDRE.indexOf(cat) !== -1;
+      var page = document.createElement('div');
+      page.className = 'bilan-page';
+      page.style.display = 'none';
+
+      // Titre de page : pour les quelques qnum sans vraie catégorie clinique (ex.
+      // Intro, ou d'anciens qnum hors des 10 tableaux du moteur), un libellé
+      // générique plutôt que le nom technique de regroupement ("Autres") — Camille
+      // ne veut plus voir apparaître de bloc "Signalé à l'entretien" à part, mais
+      // une page a maintenant besoin d'un titre visible (contrairement à l'ancien
+      // rendu en un seul long défilement, où ce groupe passait inaperçu sans titre).
+      var catTitle = document.createElement('div');
+      catTitle.className = 'section-title';
+      catTitle.innerHTML = '<span>🎯</span> ' + (estCategorieReelle ? cat : 'Symptômes personnalisés');
+      page.appendChild(catTitle);
 
       byCat[cat].forEach(function(s) {
         var q = QUESTIONS_PAR_NUM[String(s.num)];
         if (q) {
           var wrapper = document.createElement('div');
           wrapper.innerHTML = buildQuestionCard(q);
-          sectionSpecifiques.appendChild(wrapper.firstElementChild);
+          page.appendChild(wrapper.firstElementChild);
         } else {
           // qnum introuvable dans le grand questionnaire actuel (ex. Intro/Q1, hors
           // tableaux de questions, ou question retirée/renumérotée depuis) — repli en
           // texte libre plutôt que de ne rien afficher, aucune perte de sélection.
-          sectionSpecifiques.appendChild(creerCarteTexteRepli('Q' + s.num, s.texte));
+          page.appendChild(creerCarteTexteRepli('Q' + s.num, s.texte));
         }
         totalQuestions++;
       });
-    });
 
-    // "On n'a juste plus besoin de la case depuis quand" (Camille, 16/07/2026) —
-    // seule simplification demandée par rapport au grand questionnaire d'origine :
-    // tout le reste de chaque question (cases à cocher, oui/non, curseurs...) reste
-    // strictement identique. Ciblé par le texte du label plutôt que par id (les ids
-    // varient selon le type de question — dep_<id>, adddep_<id>_<i>...) pour rester
-    // robuste à ces variations.
-    masquerDepuisQuand(sectionSpecifiques);
+      // "On n'a juste plus besoin de la case depuis quand" (Camille, 16/07/2026) —
+      // seule simplification demandée par rapport au grand questionnaire d'origine :
+      // tout le reste de chaque question (cases à cocher, oui/non, curseurs...) reste
+      // strictement identique. Ciblé par le texte du label plutôt que par id (les ids
+      // varient selon le type de question — dep_<id>, adddep_<id>_<i>...) pour rester
+      // robuste à ces variations.
+      masquerDepuisQuand(page);
+
+      sectionSpecifiques.appendChild(page);
+      bilanPages.push({ label: estCategorieReelle ? cat : 'Symptômes', el: page });
+    });
   }
 
-  // ── SECTION 2 : Questions générales (construites sur mesure pour le bilan, voir
+  // ── PAGE "Questions générales" (construites sur mesure pour le bilan, voir
   // QUESTIONS_COMMUNES — toujours un simple curseur, design assumé par Camille) ──
+  var pageGen = document.createElement('div');
+  pageGen.className = 'bilan-page';
+  pageGen.style.display = 'none';
   var h2 = document.createElement('div');
   h2.className = 'section-title';
   h2.innerHTML = '<span>🌐</span> Questions générales';
-  container.appendChild(h2);
-
+  pageGen.appendChild(h2);
   QUESTIONS_COMMUNES.forEach(function(q) {
-    container.appendChild(creerCarteSlider('Q' + q.num, q.texte, q.labelRange));
+    pageGen.appendChild(creerCarteSlider('Q' + q.num, q.texte, q.labelRange));
     totalQuestions++;
   });
+  container.appendChild(pageGen);
+  bilanPages.push({ label: 'Général', el: pageGen });
 
-  // ── SECTION 3 : Questions libres ──
+  // ── PAGE "Questions libres" (dernière page — contient aussi le bouton d'envoi,
+  // voir #submit-section géré par updateNavBilan()) ──
+  var pageObs = document.createElement('div');
+  pageObs.className = 'bilan-page';
+  pageObs.style.display = 'none';
   var h3 = document.createElement('div');
   h3.className = 'section-title';
   h3.innerHTML = '<span>💬</span> Vos observations';
-  container.appendChild(h3);
+  pageObs.appendChild(h3);
 
-  container.appendChild(creerCarteLibre(
+  pageObs.appendChild(creerCarteLibre(
     'libre_changements',
     'Depuis que vous avez commencé le neurofeedback, avez-vous remarqué certains changements ?',
     'Décrivez les changements que vous avez observés, même subtils, dans votre quotidien, votre corps, vos émotions, votre sommeil…'
   ));
-  container.appendChild(creerCarteLibre(
+  pageObs.appendChild(creerCarteLibre(
     'libre_nouveau',
     'Y a-t-il quelque chose de nouveau qu\'il vous semble important d\'améliorer ?',
     'Un symptôme qui est apparu, une difficulté que vous n\'aviez pas mentionnée, un domaine de votre vie que vous aimeriez travailler…'
   ));
-  container.appendChild(creerCarteLibre(
+  pageObs.appendChild(creerCarteLibre(
     'libre_priorite',
     'Qu\'est-ce qui reste le plus important à travailler à ce jour ?',
     'Parmi tout ce que vous avez évoqué, qu\'est-ce qui vous pèse le plus ou que vous souhaiteriez voir évoluer en priorité ?'
   ));
+  container.appendChild(pageObs);
+  bilanPages.push({ label: 'Observations', el: pageObs });
 
-  submitSection.style.display = 'block';
+  // ── Onglets + navigation ──
+  var CHIFFRES_CERCLES = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩', '⑪', '⑫', '⑬', '⑭', '⑮'];
+  tabsBar.innerHTML = '';
+  bilanPages.forEach(function(p, i) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'bilan-tab' + (i === 0 ? ' active' : '');
+    btn.textContent = (CHIFFRES_CERCLES[i] || (i + 1)) + ' ' + p.label;
+    btn.onclick = (function(idx) { return function() { goToSectionBilan(idx); }; })(i);
+    tabsBar.appendChild(btn);
+  });
+  bilanPages[0].el.style.display = 'block';
+  var plusieursPages = bilanPages.length > 1;
+  tabsWrap.style.display = plusieursPages ? 'block' : 'none';
+  navBar.style.display = plusieursPages ? 'flex' : 'none';
+  submitSection.style.display = plusieursPages ? 'none' : 'block';
+  updateNavBilan();
+
   majProgressBar();
+}
+
+function goToSectionBilan(n) {
+  if (!bilanPages[n] || n === currentSectionBilan) return;
+  var tabs = document.querySelectorAll('.bilan-tab');
+  bilanPages[currentSectionBilan].el.style.display = 'none';
+  if (tabs[currentSectionBilan]) {
+    tabs[currentSectionBilan].classList.remove('active');
+    tabs[currentSectionBilan].classList.add('done');
+  }
+  currentSectionBilan = n;
+  bilanPages[n].el.style.display = 'block';
+  if (tabs[n]) {
+    tabs[n].classList.add('active');
+    tabs[n].classList.remove('done');
+    tabs[n].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+  updateNavBilan();
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
+}
+
+function nextSectionBilan() {
+  sauvegarderBrouillonBilan();
+  if (currentSectionBilan < bilanPages.length - 1) goToSectionBilan(currentSectionBilan + 1);
+}
+
+function prevSectionBilan() {
+  sauvegarderBrouillonBilan();
+  if (currentSectionBilan > 0) goToSectionBilan(currentSectionBilan - 1);
+}
+
+function updateNavBilan() {
+  var lbl = document.getElementById('bilanNavLabel');
+  var fill = document.getElementById('bilanNavFill');
+  var btnP = document.getElementById('bilanBtnPrev');
+  var btnN = document.getElementById('bilanBtnNext');
+  var total = bilanPages.length;
+  var derniere = currentSectionBilan === total - 1;
+  if (lbl) lbl.textContent = 'Étape ' + (currentSectionBilan + 1) + ' / ' + total;
+  if (fill) fill.style.width = (((currentSectionBilan + 1) / total) * 100) + '%';
+  if (btnP) btnP.style.visibility = currentSectionBilan === 0 ? 'hidden' : 'visible';
+  if (btnN) btnN.style.display = derniere ? 'none' : 'inline-block';
+  var submitSection = document.getElementById('submit-section');
+  if (submitSection && total > 1) submitSection.style.display = derniere ? 'block' : 'none';
 }
 
 // Masque tout champ "Depuis quand ?"/"Quand ?" dans les cartes du vrai moteur — seule
