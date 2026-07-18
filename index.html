@@ -1902,6 +1902,30 @@ function restoreFromText(text) {
         return;
       }
 
+      // Sous-question Oui/Non IMBRIQUÉE dans la même carte que la question principale
+      // (ex. Q13 apnées → "Êtes-vous appareillé(e) ?", yn_app_13 ; idem yn_medoc_,
+      // yn_epi_med_, yn_trt_, yn_med2_…). CORRECTIF DE PERTE DE DONNÉES (18/07/2026,
+      // remonté par Camille : la réponse principale à Q13 revenait décochée/inversée
+      // après une réouverture "Compléter avec le client"). Cause racine : l'export
+      // taguait ces sous-champs avec le MÊME numéro Q<id> que la question principale
+      // (voir construireBodyReponses), donc une carte avec deux champs yn_ produisait
+      // deux lignes "Q13 : oui" / "Q13 : non" indiscernables — la restauration
+      // cliquait alors le bouton PRINCIPAL deux fois de suite, la seconde écrasant la
+      // bonne réponse. Le tag [sous:<id exact>] (ajouté à l'export) lève l'ambiguïté :
+      // on cible ici le bouton exact par son id complet plutôt que par un id reconstruit
+      // à partir du numéro de question, qui ne peut correspondre qu'à un seul champ.
+      if (tag && tag.indexOf('sous:') === 0 && (valStr === 'oui' || valStr === 'non')) {
+        var sousId = tag.substring('sous:'.length);
+        document.querySelectorAll('button.yesno-btn').forEach(function(b) {
+          var ocSous = b.getAttribute('onclick') || '';
+          if (ocSous.indexOf("'" + sousId + "'") !== -1 && ocSous.indexOf("'" + valStr + "'") !== -1) {
+            b.click();
+            count++;
+          }
+        });
+        return;
+      }
+
       // Oui / Non : simule un clic sur le bon bouton pour conserver tous les effets (sous-questions, etc.)
       if (valStr === 'oui' || valStr === 'non') {
         document.querySelectorAll('button.yesno-btn').forEach(function(b) {
@@ -4962,9 +4986,24 @@ function construireBodyReponses() {
     // yn_trt_, yn_med2_… : ex. répondre Oui à "des médicaments pour cela ?" puis
     // rebasculer la question principale sur Non laissait ce sous-Oui fantôme) ; le
     // yn_<qid> principal est un enfant direct de la carte, jamais masqué, non affecté.
+    var ynMainId = 'yn_' + qid.replace('Q', '');
     card.querySelectorAll('input[type=hidden][id^=yn_]').forEach(function(inp) {
       if (champDansBlocMasque(inp, card)) return;
-      if (inp.value) cardLines.push(qid + ' — ' + (ql ? ql.textContent.substring(0,60) : '') + ' : ' + inp.value);
+      if (!inp.value) return;
+      // CORRECTIF DE PERTE DE DONNÉES (18/07/2026, remonté par Camille sur Q13
+      // apnées) : une carte peut contenir PLUSIEURS champs yn_ (la question
+      // principale + une sous-question imbriquée, ex. yn_app_13 "appareillé(e) ?").
+      // Sans distinction, les deux étaient exportées sous le MÊME numéro Q<id>,
+      // rendant les deux réponses indiscernables au rechargement (restoreFromText
+      // reclique alors le bouton PRINCIPAL pour les deux lignes, la seconde écrasant
+      // la première). Le tag [sous:<id exact>] ne s'applique qu'aux champs autres que
+      // le principal, pour garder le format historique (donc la compatibilité avec
+      // plan-logic.js) inchangé sur la question principale.
+      if (inp.id === ynMainId) {
+        cardLines.push(qid + ' — ' + (ql ? ql.textContent.substring(0,60) : '') + ' : ' + inp.value);
+      } else {
+        cardLines.push(qid + ' [sous:' + inp.id + '] : ' + inp.value);
+      }
     });
 
     // Checkboxes (exclure pctx_, suivi10_ et chkadd_ déjà traités séparément)

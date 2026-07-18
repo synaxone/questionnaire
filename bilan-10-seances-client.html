@@ -3094,9 +3094,20 @@ function construireBodyReponses() {
     // yn_trt_, yn_med2_… : ex. répondre Oui à "des médicaments pour cela ?" puis
     // rebasculer la question principale sur Non laissait ce sous-Oui fantôme) ; le
     // yn_<qid> principal est un enfant direct de la carte, jamais masqué, non affecté.
+    var ynMainId = 'yn_' + qid.replace('Q', '');
     card.querySelectorAll('input[type=hidden][id^=yn_]').forEach(function(inp) {
       if (champDansBlocMasque(inp, card)) return;
-      if (inp.value) cardLines.push(qid + ' — ' + (ql ? ql.textContent.substring(0,60) : '') + ' : ' + inp.value);
+      if (!inp.value) return;
+      // CORRECTIF DE PERTE DE DONNÉES (18/07/2026, aligné sur index.html/
+      // questionnaire-client.html suite au bug remonté par Camille sur Q13 apnées) :
+      // une carte peut contenir plusieurs champs yn_ (question principale + sous-
+      // question imbriquée) ; sans distinction, les deux étaient exportées sous le
+      // même numéro Q<id>, indiscernables l'une de l'autre.
+      if (inp.id === ynMainId) {
+        cardLines.push(qid + ' — ' + (ql ? ql.textContent.substring(0,60) : '') + ' : ' + inp.value);
+      } else {
+        cardLines.push(qid + ' [sous:' + inp.id + '] : ' + inp.value);
+      }
     });
 
     // Checkboxes (exclure pctx_, suivi10_ et chkadd_ déjà traités séparément)
