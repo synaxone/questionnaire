@@ -520,13 +520,29 @@
 
   /* IMPRESSION DU QUESTIONNAIRE REMPLI — déclenchée depuis l'encart de
      confirmation ; on ré-affiche le questionnaire (masqué à l'écran par le
-     mode "page de confirmation" ci-dessus) et on masque tout le reste. */
+     mode "page de confirmation" ci-dessus) et on masque tout le reste.
+     Sélecteurs préfixés par "body.confirmation-page-mode" (même spécificité
+     que la règle d'écran ci-dessus) : une règle @media print moins spécifique
+     perdait contre elle malgré !important des deux côtés (spécificité CSS
+     prioritaire sur l'ordre du fichier), page d'impression vide constatée le
+     18/07/2026 — corrigé en égalant la spécificité pour que l'ordre (cette
+     règle est déclarée après) tranche en faveur de l'impression. */
   @media print {
+    body.confirmation-page-mode #page-header,
+    body.confirmation-page-mode #progress-bar-wrap,
+    body.confirmation-page-mode #intro-card,
+    body.confirmation-page-mode #confirmation,
+    body.confirmation-page-mode #erreur-config,
+    body.confirmation-page-mode #restore-banner-bilan,
     #page-header, #progress-bar-wrap, #intro-card, #confirmation,
     #erreur-config, #restore-banner-bilan, .submit-section {
       display: none !important;
     }
+    body.confirmation-page-mode #questionnaire-container,
     #questionnaire-container {
+      display: block !important;
+    }
+    body.confirmation-page-mode main {
       display: block !important;
     }
     body { background: white; }
@@ -659,6 +675,8 @@
     </div>
 
     <p style="font-size:13px;margin:16px 0 0 0">Merci beaucoup, et à très bientôt 🌿</p>
+
+    <p style="font-size:12.5px;color:var(--text-muted);margin:18px 0 0 0">Si vous le souhaitez, vous pouvez garder une copie de votre questionnaire rempli via le bouton suivant :</p>
 
     <button type="button" onclick="imprimerQuestionnaireRempli()" id="btn_imprimer_bilan"
       style="width:100%;max-width:340px;margin:18px auto 0;display:block;padding:13px 20px;background:white;color:var(--green);border:1.5px solid var(--green);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer">
