@@ -14,8 +14,8 @@
     --text-muted: #7A4A1E;
     --accent: #C17A3E;
     --accent-light: #F5D5A8;
-    --practitioner: #8B4513;
-    --practitioner-light: #FAEBD7;
+    --practitioner: #6A4C93;
+    --practitioner-light: #EFE6F5;
     --shadow: 0 2px 16px rgba(0,0,0,0.06);
     --green: #4A7C59;
     --green-light: #E8F5EE;
@@ -344,6 +344,34 @@
   }
   .practitioner-annotation.visible { display: none; }
   .practitioner-mode .practitioner-annotation.visible { display: block; }
+  /* "Écriture violette" du mode praticien (18/07/2026, demande Camille) — le label
+     "Annotation praticien" n'avait jamais reçu la couleur --practitioner, contrairement
+     au reste du bloc (Trauma, Précisions praticien...) : porté depuis index.html, où
+     cette règle existe déjà pour le même bloc .practitioner-annotation. */
+  .practitioner-annotation label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--practitioner);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .practitioner-annotation label::before { content: '✦'; font-size: 8px; }
+  .practitioner-annotation textarea {
+    width: 100%;
+    border: 1px solid #d4b8dc;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    resize: vertical;
+    min-height: 50px;
+  }
+  .practitioner-annotation textarea::placeholder { color: #c4a0cc; }
+  .practitioner-annotation textarea:focus { border-color: var(--practitioner); outline: none; }
 
   /* CHECKBOX LIST (choix multiples type "chips") */
   .checkbox-list {
@@ -499,7 +527,6 @@
      l'envoi (header, intro, questionnaire rempli masqués), pour que le client
      ne voie plus que l'encart vert, comme une page dédiée. */
   body.confirmation-page-mode #page-header,
-  body.confirmation-page-mode #progress-bar-wrap,
   body.confirmation-page-mode #intro-card,
   body.confirmation-page-mode #questionnaire-container,
   body.confirmation-page-mode #erreur-config,
@@ -536,34 +563,6 @@
   }
   #erreur-config h3 { color: var(--practitioner); margin-bottom: 8px; font-family: 'Cormorant Garamond', serif; font-size: 18px; }
   #erreur-config p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
-
-  /* PROGRESS */
-  .progress-bar-wrap {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 8px 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .progress-bar {
-    flex: 1;
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  .progress-bar-fill {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 3px;
-    transition: width 0.3s;
-    width: 0%;
-  }
-  .progress-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
 
   /* PAGINATION PAR ÉTAPES (18/07/2026, demande Camille : "ça donne l'impression
      d'avancer par étapes" — questionnaire perçu comme long) — même principe que
@@ -672,11 +671,6 @@
   <div class="logo">Synaxone</div>
   <div class="subtitle">Bilan d'évolution — 10 séances</div>
 </header>
-
-<div class="progress-bar-wrap" id="progress-bar-wrap">
-  <div class="progress-bar"><div class="progress-bar-fill" id="progress-fill"></div></div>
-  <span class="progress-label" id="progress-label">0 %</span>
-</div>
 
 <main>
 
@@ -3754,8 +3748,6 @@ function construire(config) {
   navBar.style.display = plusieursPages ? 'flex' : 'none';
   submitSection.style.display = plusieursPages ? 'none' : 'block';
   updateNavBilan();
-
-  majProgressBar();
 }
 
 function goToSectionBilan(n) {
@@ -3833,7 +3825,7 @@ function creerCarteSlider(qnum, label, labelRange) {
     <div class="slider-container">
       <div class="slider-wrapper">
         <input type="range" id="${id}" min="0" max="10" value="0"
-               oninput="majSlider(this)" onchange="majProgressBar()">
+               oninput="majSlider(this)">
         <div class="slider-labels">
           <span>${rangeMin}</span>
           <span>${rangeMax}</span>
@@ -3886,37 +3878,6 @@ function majSlider(inp) {
   if (valEl) valEl.textContent = val;
 }
 
-// Compte les questions "touchées" au niveau de la CARTE (curseur, case à cocher,
-// bouton oui/non ou zone de texte — n'importe quelle interaction sur la carte compte
-// pour une seule question, quel que soit le nombre de champs qu'elle contient).
-function majProgressBar() {
-  if (totalQuestions === 0) return;
-  var container = document.getElementById('questionnaire-container');
-  var cards = container.querySelectorAll('.question-card, .carte-generale');
-  cards.forEach(function(card) {
-    if (card.dataset.touchBound) return;
-    card.dataset.touchBound = '1';
-    card.addEventListener('input', function() { card.dataset.touched = '1'; majProgressBarCompute(); });
-    card.addEventListener('change', function() { card.dataset.touched = '1'; majProgressBarCompute(); });
-    card.addEventListener('click', function(e) {
-      if (e.target.closest('.yesno-btn, input[type=checkbox], button')) {
-        card.dataset.touched = '1';
-        majProgressBarCompute();
-      }
-    });
-  });
-  majProgressBarCompute();
-}
-
-function majProgressBarCompute() {
-  var container = document.getElementById('questionnaire-container');
-  var touched = container.querySelectorAll('.question-card[data-touched="1"], .carte-generale[data-touched="1"]').length;
-  var fill = document.getElementById('progress-fill');
-  var lbl = document.getElementById('progress-label');
-  var pct = Math.round((touched / totalQuestions) * 100);
-  fill.style.width = pct + '%';
-  lbl.textContent = pct + ' %';
-}
 
 // ─────────────────────────────────────────────
 // ENVOI
@@ -4786,8 +4747,6 @@ function restaurerReponsesBilan(prior) {
     var el = document.getElementById('libre_' + key);
     if (el) el.value = libres[key];
   });
-
-  majProgressBar();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
