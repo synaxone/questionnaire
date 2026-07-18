@@ -495,6 +495,43 @@
     line-height: 1.6;
   }
 
+  /* PAGE DE CONFIRMATION SEULE — affichée à la place de tout le reste après
+     l'envoi (header, intro, questionnaire rempli masqués), pour que le client
+     ne voie plus que l'encart vert, comme une page dédiée. */
+  body.confirmation-page-mode #page-header,
+  body.confirmation-page-mode #progress-bar-wrap,
+  body.confirmation-page-mode #intro-card,
+  body.confirmation-page-mode #questionnaire-container,
+  body.confirmation-page-mode #erreur-config,
+  body.confirmation-page-mode #restore-banner-bilan {
+    display: none !important;
+  }
+  body.confirmation-page-mode main {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding-top: 40px;
+    padding-bottom: 40px;
+  }
+  body.confirmation-page-mode #confirmation {
+    margin-top: 0;
+    width: 100%;
+  }
+
+  /* IMPRESSION DU QUESTIONNAIRE REMPLI — déclenchée depuis l'encart de
+     confirmation ; on ré-affiche le questionnaire (masqué à l'écran par le
+     mode "page de confirmation" ci-dessus) et on masque tout le reste. */
+  @media print {
+    #page-header, #progress-bar-wrap, #intro-card, #confirmation,
+    #erreur-config, #restore-banner-bilan, .submit-section {
+      display: none !important;
+    }
+    #questionnaire-container {
+      display: block !important;
+    }
+    body { background: white; }
+  }
+
   /* ERREUR CONFIG */
   #erreur-config {
     display: none;
@@ -545,19 +582,19 @@
 </head>
 <body>
 
-<header>
+<header id="page-header">
   <div class="logo">Synaxone</div>
   <div class="subtitle">Bilan d'évolution — 10 séances</div>
 </header>
 
-<div class="progress-bar-wrap">
+<div class="progress-bar-wrap" id="progress-bar-wrap">
   <div class="progress-bar"><div class="progress-bar-fill" id="progress-fill"></div></div>
   <span class="progress-label" id="progress-label">0 %</span>
 </div>
 
 <main>
 
-  <div class="intro-card">
+  <div class="intro-card" id="intro-card">
     <h2>Votre bilan d'évolution</h2>
     <p>Ce questionnaire vous est envoyé par votre praticien pour faire le point après vos 10 dernières séances de neurofeedback.</p>
     <p>Pour chaque symptôme, indiquez comment vous vous sentez <strong>aujourd'hui</strong>, de 0 (pas du tout) à 10 (au maximum). Il n'y a pas de bonne ou mauvaise réponse — soyez le plus honnête possible.</p>
@@ -623,6 +660,11 @@
     </div>
 
     <p style="font-size:13px;margin:16px 0 0 0">Merci beaucoup, et à très bientôt 🌿</p>
+
+    <button type="button" onclick="imprimerQuestionnaireRempli()" id="btn_imprimer_bilan"
+      style="width:100%;max-width:340px;margin:18px auto 0;display:block;padding:13px 20px;background:white;color:var(--green);border:1.5px solid var(--green);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer">
+      🖨️ Imprimer le questionnaire rempli
+    </button>
   </div>
 
 </main>
@@ -3768,7 +3810,20 @@ async function envoyerBilan() {
 function afficherConfirmation() {
   document.getElementById('submit-section').style.display = 'none';
   document.getElementById('confirmation').style.display = 'block';
+  // Bascule vers une "page" dédiée : tout le reste (en-tête, intro, questionnaire
+  // rempli) est masqué, seul l'encart vert reste visible — voir CSS
+  // body.confirmation-page-mode. Le questionnaire n'est pas perdu, juste masqué :
+  // imprimerQuestionnaireRempli() le ré-affiche pour l'impression.
+  document.body.classList.add('confirmation-page-mode');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Imprime le questionnaire rempli (réponses telles que saisies par le client),
+// pas l'encart de confirmation. On utilise la mise en page CSS @media print
+// définie plus haut (masque tout sauf #questionnaire-container) plutôt que de
+// reconstruire une vue séparée — même contenu que ce que le client a rempli.
+function imprimerQuestionnaireRempli() {
+  window.print();
 }
 
 // ─────────────────────────────────────────────
