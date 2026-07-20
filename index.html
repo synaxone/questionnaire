@@ -1194,7 +1194,7 @@
   <div class="section-title"><span class="section-num">✉</span>Envoyer le questionnaire</div>
 
   <div style="background:var(--accent-light);border-left:3px solid var(--accent);padding:16px 20px;border-radius:0 8px 8px 0;margin-bottom:24px;font-size:13px;color:var(--text-muted);line-height:1.7">
-    Merci d'avoir complété ce questionnaire. Vérifiez vos réponses puis cliquez sur <strong>Envoyer</strong> pour transmettre le questionnaire par email.
+    Merci d'avoir complété ce questionnaire. Vérifiez vos réponses puis cliquez sur <strong>Valider et télécharger</strong> : votre fichier sera enregistré sur votre appareil. <strong>Il ne me parviendra que si vous me l'envoyez ensuite par email</strong> — la marche à suivre (en 2 étapes) vous sera indiquée juste après.
   </div>
 
   <div class="patient-info-card">
@@ -1249,7 +1249,7 @@
   <button onclick="envoyerQuestionnaire()"
     style="width:100%;margin-top:20px;padding:16px;background:var(--accent);color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;letter-spacing:0.02em;transition:background 0.2s"
     onmouseover="this.style.background='#A0622A'" onmouseout="this.style.background='var(--accent)'">
-    ✅ Terminer et télécharger mon questionnaire
+    ✅ Valider et télécharger mon fichier (à envoyer ensuite par email)
   </button>
 
   <div id="envoi_confirmation" hidden style="margin-top:16px;padding:14px 20px;background:#e8f5e9;border-radius:10px;border:1px solid #2d6a4f;color:#1b4332;font-size:14px;font-weight:600;text-align:center">
@@ -5284,7 +5284,7 @@ async function envoyerQuestionnaire() {
   // réactivait le bouton trop tôt et permettait un double-clic → 2 plans identiques.
   setTimeout(function() {
     var b = document.querySelector('[onclick="envoyerQuestionnaire()"]');
-    if (b && b.disabled && !_envoiValide) { b.disabled = false; b.textContent = '✅ Terminer et télécharger mon questionnaire'; }
+    if (b && b.disabled && !_envoiValide) { b.disabled = false; b.textContent = '✅ Valider et télécharger mon fichier (à envoyer ensuite par email)'; }
   }, 90000);
 
   var msg = construireBodyReponses();
