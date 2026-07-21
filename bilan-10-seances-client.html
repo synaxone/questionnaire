@@ -3828,13 +3828,13 @@ function creerCarteSlider(qnum, label, labelRange) {
     <div class="slider-container">
       <div class="slider-wrapper">
         <input type="range" id="${id}" min="0" max="10" value="0"
-               oninput="majSlider(this)">
+               oninput="majSlider(this, true)">
         <div class="slider-labels">
           <span>${rangeMin}</span>
           <span>${rangeMax}</span>
         </div>
       </div>
-      <div class="slider-value" id="val_${id}">0</div>
+      <div class="slider-value" id="val_${id}">–</div>
     </div>
   `;
   setTimeout(function() {
@@ -3872,13 +3872,23 @@ function creerCarteLibre(id, label, hint) {
 
 // Curseur simple des QUESTIONS_COMMUNES uniquement — les cartes du vrai moteur
 // utilisent leur propre updateIntensity() (portée avec le reste du moteur ci-dessus).
-function majSlider(inp) {
+// `touche` (21/07/2026, remonté par Camille : des questions du bilan "à zéro" sans
+// que ce soit forcément une vraie réponse) distingue un curseur réellement manipulé
+// par le client d'un curseur resté à sa position de départ (value="0" par défaut) —
+// sans ce distinguo, un curseur jamais touché était exporté comme un vrai "0/10",
+// indiscernable d'une réponse authentique au pire score possible (contrairement aux
+// symptômes spécifiques, dont le moteur partagé ignore déjà toute valeur <1, voir
+// construireBodyReponses() dans index.html). Seul l'événement oninput (interaction
+// réelle) marque le curseur "touché" — l'appel d'initialisation (juste après la
+// création de la carte, pour peindre le dégradé) ne le fait pas.
+function majSlider(inp, touche) {
   var val = parseInt(inp.value);
+  if (touche) inp.dataset.touche = '1';
   var pct = val * 10;
   inp.style.background = 'linear-gradient(to right, var(--accent) 0%, var(--accent) ' + pct + '%, var(--border) ' + pct + '%, var(--border) 100%)';
   var vid = 'val_' + inp.id;
   var valEl = document.getElementById(vid);
-  if (valEl) valEl.textContent = val;
+  if (valEl) valEl.textContent = inp.dataset.touche === '1' ? val : '–';
 }
 
 
@@ -3906,7 +3916,8 @@ function construireDonneesBilan() {
 
   var generales = QUESTIONS_COMMUNES.map(function(q) {
     var inp = document.getElementById('slider_' + q.num);
-    return { num: q.num, texte: q.texte, valeur: inp ? parseInt(inp.value, 10) : null };
+    var repondu = inp && inp.dataset.touche === '1';
+    return { num: q.num, texte: q.texte, valeur: repondu ? parseInt(inp.value, 10) : null };
   });
 
   var changements = document.getElementById('libre_changements');
@@ -4741,7 +4752,7 @@ function restaurerReponsesBilan(prior) {
   (prior.questionsGenerales || []).forEach(function(q) {
     if (q.valeur === null || q.valeur === undefined) return;
     var inp = document.getElementById('slider_' + q.num);
-    if (inp) { inp.value = q.valeur; majSlider(inp); }
+    if (inp) { inp.value = q.valeur; majSlider(inp, true); }
   });
 
   var libres = prior.libres || {};
