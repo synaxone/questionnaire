@@ -1370,10 +1370,17 @@ function addPlacementManuelItem(qid) {
   var container = document.getElementById('pm_items_' + qid);
   if (!container) return;
   var div = document.createElement('div');
-  div.style.cssText = 'display:grid;grid-template-columns:130px 1fr;gap:8px;margin-bottom:6px;align-items:center';
+  div.style.cssText = 'display:grid;grid-template-columns:130px 1fr 60px;gap:8px;margin-bottom:6px;align-items:center';
   var options = PM_PLACEMENT_ZONES.map(function(z) { return '<option value="' + z[0] + '">' + z[1] + '</option>'; }).join('');
+  // Note /10 (29/08/2026, demandé par Camille : "il faut des notes car c'est cela qui
+  // conditionne l'entrainement et son suivi") — un placement manuel n'est relié à
+  // aucun curseur du questionnaire, donc pas de note automatique possible ; la
+  // praticienne la saisit elle-même ici, sur la même échelle 0-10 que le reste du
+  // plan (tri et couleur de sévérité s'appliquent alors normalement, voir
+  // appliquerPlacementsManuels côté electron-index.html).
   div.innerHTML = '<select class="field-input" style="background:white">' + options + '</select>'
-    + '<input class="field-input" type="text" placeholder="Annotation (ex : Fibromyalgie diagnostiquée…)" style="background:white">';
+    + '<input class="field-input" type="text" placeholder="Annotation (ex : Fibromyalgie diagnostiquée…)" style="background:white">'
+    + '<input class="field-input" type="number" min="0" max="10" step="1" placeholder="Note" title="Note /10 — conditionne le placement dans le plan" style="background:white;text-align:center">';
   container.appendChild(div);
   garantirIdsTousLesChamps();
 }
@@ -3530,9 +3537,11 @@ function construireBodyReponses() {
     container.querySelectorAll(':scope > div').forEach(function(row) {
       var sel = row.querySelector('select');
       var inp = row.querySelector('input[type=text]');
+      var noteInp = row.querySelector('input[type=number]');
       var emplacement = sel ? sel.value : '';
       var annotation = inp && inp.value ? inp.value.trim() : '';
-      if (emplacement) parts.push(emplacement + '|' + annotation);
+      var noteVal = noteInp && noteInp.value !== '' ? noteInp.value.trim() : '';
+      if (emplacement) parts.push(emplacement + '|' + annotation + '|' + noteVal);
     });
     if (parts.length) msg += 'Q' + qidNum + ' [placement_manuel] : ' + parts.join(' ⏎ ') + '\n';
   });
@@ -4615,17 +4624,23 @@ function restoreFromTextBilan(text) {
         var pmContainer = document.getElementById('pm_items_' + qid);
         if (pmContainer) {
           valStr.split(' ⏎ ').forEach(function(part) {
-            var pipeIdx = part.indexOf('|');
-            if (pipeIdx === -1) return;
-            var zone = part.substring(0, pipeIdx).trim();
-            var annotation = part.substring(pipeIdx + 1).trim();
+            // Format "emplacement|annotation|note" — le 3e segment (note) est absent
+            // sur les entrées enregistrées avant le 29/08/2026, rétrocompatible (pas de
+            // note restaurée dans ce cas, plutôt qu'une valeur inventée).
+            var segs = part.split('|');
+            if (!segs.length || !segs[0].trim()) return;
+            var zone = segs[0].trim();
+            var annotation = (segs[1] || '').trim();
+            var noteRaw = segs.length >= 3 ? segs.slice(2).join('|').trim() : '';
             addPlacementManuelItem(qid);
             var row = pmContainer.lastElementChild;
             if (!row) return;
             var sel = row.querySelector('select');
             var inp = row.querySelector('input[type=text]');
+            var noteInp = row.querySelector('input[type=number]');
             if (sel) sel.value = zone;
             if (inp) inp.value = annotation;
+            if (noteInp && noteRaw !== '') noteInp.value = noteRaw;
           });
           count++;
         }
