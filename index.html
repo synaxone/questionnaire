@@ -434,6 +434,7 @@
     body.print-vierge input[type=range] { display: none !important; }
     body.print-vierge .range-labels { display: none !important; }
     body.print-vierge .yesno-group { display: none !important; }
+    body.print-vierge .count-choice-group { display: none !important; }
     body.print-vierge textarea.field-input { display: none !important; }
     body.print-vierge input.field-input { display: none !important; }
     body.print-vierge .question-main {
@@ -555,6 +556,35 @@
 
   .yesno-btn.selected-oui,
   .yesno-btn.selected-non {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  /* CHOIX MULTIPLE À BOUTONS (29/08/2026, Q6 réveils/nuit — remplace un champ texte
+     libre imprévisible par un choix obligatoire, garantissant toujours une vraie note
+     exploitable, voir plan-logic.js) */
+  .count-choice-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .count-choice-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-muted);
+  }
+
+  .count-choice-btn.selected {
     background: var(--accent-light);
     border-color: var(--accent);
     color: var(--text-muted);
@@ -2002,6 +2032,7 @@ function restoreFromText(text) {
 
   // Recalcule l'âge à partir de la date de naissance restaurée
   calcAgeSel();
+  syncCountChoiceButtons();
   updateAnswerHighlights();
   if (statusEl) statusEl.textContent = '✓ ' + count + ' réponse(s) rechargée(s) dans le formulaire.';
 }
@@ -2115,6 +2146,39 @@ function selectYesNo(btn, val, id) {
   var card = btn.closest('.question-card');
   if (val === 'oui') card.classList.add('has-answer');
   else card.classList.remove('has-answer');
+}
+
+// ===== CHOIX MULTIPLE À BOUTONS (29/08/2026) =====
+// Généralise selectYesNo à N options : le bouton porte la vraie valeur dans data-val
+// (jamais une note inventée — voir Q6 réveils/nuit dans sommeilQuestions/plan-logic.js,
+// remonté par Camille : "pas de valeur arbitraire"), écrite telle quelle dans le champ
+// texte caché ciblé par data-target du groupe. Ce champ reste un input[type=text]
+// normal (juste masqué par l'attribut hidden) pour rester capté sans rien changer par
+// les deux mécanismes d'export déjà en place (ligne sémantique Q… ET filet de sécurité
+// Complément[id] — voir construireBodyReponses).
+function selectCountChoice(btn) {
+  var group = btn.closest('.count-choice-group');
+  if (!group) return;
+  var input = document.getElementById(group.dataset.target);
+  group.querySelectorAll('.count-choice-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  if (input) input.value = btn.dataset.val;
+  var card = btn.closest('.question-card');
+  if (card) card.classList.add('has-answer');
+}
+
+// Remet en surbrillance le bon bouton après un rechargement (restoreFromText,
+// brouillon) : la valeur réelle est déjà restaurée dans le champ caché par les
+// mécanismes génériques existants (Complément[id]/brouillon par id) — il ne reste qu'à
+// resynchroniser l'affichage des boutons sur cette valeur.
+function syncCountChoiceButtons() {
+  document.querySelectorAll('.count-choice-group[data-target]').forEach(function(group) {
+    var input = document.getElementById(group.dataset.target);
+    var val = input ? input.value : '';
+    group.querySelectorAll('.count-choice-btn').forEach(function(btn) {
+      btn.classList.toggle('selected', !!val && btn.dataset.val === val);
+    });
+  });
 }
 
 // ===== MODE TOGGLE =====
@@ -2743,9 +2807,16 @@ function buildQuestionCard(q) {
         <input type="hidden" id="yn_${id}">
         <div id="reveils_detail_${id}" style="display:none">
           <div class="response-grid">
-            <div class="response-group">
+            <div class="response-group" style="grid-column:1/-1">
               <label>Combien de fois par nuit ?</label>
-              <input class="field-input" type="text" placeholder="ex : 2, 3-4…" id="val_${id}">
+              <div class="count-choice-group" data-target="val_${id}">
+                <button type="button" class="count-choice-btn" data-val="1" onclick="selectCountChoice(this)">1 fois</button>
+                <button type="button" class="count-choice-btn" data-val="2" onclick="selectCountChoice(this)">2 fois</button>
+                <button type="button" class="count-choice-btn" data-val="3" onclick="selectCountChoice(this)">3 fois</button>
+                <button type="button" class="count-choice-btn" data-val="4" onclick="selectCountChoice(this)">4 fois</button>
+                <button type="button" class="count-choice-btn" data-val="5" onclick="selectCountChoice(this)">5 fois ou plus</button>
+              </div>
+              <input class="field-input" type="text" id="val_${id}" readonly hidden>
             </div>
             <div class="response-group">
             <div class="response-group">
@@ -6136,6 +6207,7 @@ function restaurerBrouillon(data) {
       });
     });
     if (data['_section'] !== undefined) goToSection(data['_section']);
+    syncCountChoiceButtons();
   } catch(e) {}
 }
 
