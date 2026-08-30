@@ -957,7 +957,7 @@ var sommeilQuestions = [
   { num: 7,  text: "Avez-vous un sommeil irrégulier à certaines périodes ?", pContexts: ["Problème émotionnel"] },
   { num: 8,  text: "Faites-vous des cauchemars ou des rêves très vivants ?", special: "q8_choices" },
   { num: 9,  text: "Bougez-vous beaucoup les jambes dans votre sommeil ?" },
-  { num: 10, text: "Souffrez-vous du syndrome des jambes sans repos ou « impatiences » ? (besoin irrépressible de bouger les jambes : douleurs, sensations désagréables, picotements, fourmillements, décharges électriques, spasmes…)", pContexts: ["Stress / fatigue / addictions", "Problème émotionnel / addictions"] },
+  { num: 10, text: "Souffrez-vous du syndrome des jambes sans repos ou « impatiences » ? (besoin irrépressible de bouger les jambes : douleurs, sensations désagréables, picotements, fourmillements, décharges électriques, spasmes…)", pContexts: ["Stress / fatigue / addictions / émotionnel"] },
   { num: 11, text: "Avez-vous des terreurs nocturnes ?", note: "Les terreurs nocturnes sont des épisodes survenant généralement en début de nuit : la personne se redresse brusquement, crie, semble paniquée, les yeux ouverts, mais n'est pas réellement réveillée et n'en garde aucun souvenir le lendemain. Différentes des cauchemars, elles surviennent pendant le sommeil profond." },
   { num: 12, text: "Avez-vous des sueurs nocturnes ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · toutes les nuits"], range2: ["0 · légères", "5", "10 · très abondantes"] },
   { num: 13, text: "Avez-vous des apnées du sommeil (arrêts respiratoires) ?", special: "q13_apnee" },
@@ -1011,7 +1011,7 @@ var perceptionQuestions = [
   { num: 47, text: "Avez-vous des troubles visuels ?", special: "domaines_cursor", contexts: ["Déficit visuel (vue basse, flou, difficultés à lire…)", "Hypersensibilité visuelle (lumière insupportable, écrans difficiles à supporter…)"], noTooltip: true },
   { num: 48, text: "Avez-vous des problèmes au niveau du toucher ? (À quoi par exemple ?)", special: "domaines_cursor", contexts: ["Hypersensible au toucher (ex : étiquettes vêtements, texture aliments, contact physique)", "Pas du tout sensible au toucher (sous-réactivité)"] },
   { num: 49, text: "Avez-vous parfois <strong>le</strong> vertige (c'est-à-dire la peur du vide) ? Précisez les circonstances.", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
-  { num: 50, text: "Avez-vous des intolérances ou allergies à des produits ou substances chimiques ?", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"] },
+  { num: 50, text: "Avez-vous des intolérances ou allergies à des produits ou substances chimiques ?", special: "q8_choices", contexts: ["Intolérance", "Allergie", "Produits ou substances chimiques"] },
   { num: 51, text: "Êtes-vous malade en voiture, en bateau ou en avion ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité du malaise", range1: ["0 · jamais", "5", "10 · toujours"], range2: ["0 · très léger", "5", "10 · très intense"] },
   { num: 52, text: "Avez-vous des fluctuations d'énergie dans la journée ?", note: "Par exemple : coup de fatigue après le repas, pics d'énergie le soir, difficultés à démarrer le matin, énergie irrégulière selon les jours…", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · tout le temps"], range2: ["0 · très légères", "5", "10 · très intenses"] },
   { num: 53, text: "Autres symptômes à nous indiquer ?" },
@@ -1591,6 +1591,12 @@ function buildQuestionCard(q) {
           </div>
         </div>
       </div>
+      ${(q.pContexts && q.pContexts.length) ? `<div class="practitioner-only" style="margin:0 16px 10px;padding:8px;background:var(--practitioner-light);border-radius:8px;border-left:3px solid var(--practitioner)">
+        <div style="font-size:10px;font-weight:600;color:var(--practitioner);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">Précisions praticien</div>
+        ${q.pContexts.map((ctx, i) => `<label style="display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:12px;cursor:pointer">
+          <input type="checkbox" id="pctx_${id}_${i}" style="accent-color:var(--practitioner)"> ${ctx}
+        </label>`).join('')}
+      </div>` : ''}
       <div class="practitioner-annotation" id="annot_${id}">
         <label>Annotation praticien</label>
         <textarea placeholder="Notes, observations…"></textarea>
@@ -1839,9 +1845,11 @@ function buildQuestionCard(q) {
     </div>`;
   }
 
-  // Special: Q8 cauchemars / rêves très vivants with cursors
+  // Special: Q8 cauchemars / rêves très vivants with cursors — généralisé le
+  // 30/08/2026 (Camille, Q50) pour accepter n'importe quelle liste de cases via
+  // q.contexts (même patron que domaines_cursor), sans dupliquer ce bloc.
   if (q.special === 'q8_choices') {
-    var q8items = ['Cauchemars','Rêves très vivants'];
+    var q8items = q.contexts || ['Cauchemars','Rêves très vivants'];
     return `<div class="question-card" id="qcard_${id}">
       <div class="question-main">
         <div class="question-label">
@@ -3355,6 +3363,54 @@ function construireBodyReponses() {
     var depEl = document.getElementById('dep_' + qidNum);
     if (depEl && champDansBlocMasque(depEl, card)) depEl = null;
     if (depEl && depEl.value) msg += qid + ' [depuis] : ' + depEl.value + '\n';
+
+    // Commentaires/« depuis quand » PAR CASE (special:"q8_choices" — Q8, Q50…) :
+    // contrairement au commentaire unique com_<qid> ci-dessus, chaque case a son
+    // propre champ com8_<qid>_<i>/dep8_<qid>_<i> (voir buildQuestionCard). Combinés
+    // en une seule ligne [commentaire]/[depuis] par qid, préfixée du nom de la
+    // case concernée, pour alimenter answerComments/answerDepuis (donc les
+    // annotations 💬/📅 affichées dans le Plan) — remonté par Camille le
+    // 30/08/2026 : "chaque commentaire doit être intégré au plan".
+    var com8Parts = [], dep8Parts = [];
+    card.querySelectorAll('textarea[id^="com8_' + qidNum + '_"]').forEach(function(ta) {
+      if (champDansBlocMasque(ta, card)) return;
+      if (!ta.value || !ta.value.trim()) return;
+      var idx8 = ta.id.split('_').pop();
+      var chkLbl8 = document.getElementById('chk_' + qidNum + '_' + idx8);
+      var itemLabel8 = (chkLbl8 && chkLbl8.nextElementSibling) ? chkLbl8.nextElementSibling.textContent.trim() : ('Case ' + idx8);
+      com8Parts.push(itemLabel8 + ' : ' + ta.value.trim());
+    });
+    card.querySelectorAll('input[type=text][id^="dep8_' + qidNum + '_"]').forEach(function(inp) {
+      if (champDansBlocMasque(inp, card)) return;
+      if (!inp.value || !inp.value.trim()) return;
+      var idxD8 = inp.id.split('_').pop();
+      var chkLblD8 = document.getElementById('chk_' + qidNum + '_' + idxD8);
+      var itemLabelD8 = (chkLblD8 && chkLblD8.nextElementSibling) ? chkLblD8.nextElementSibling.textContent.trim() : ('Case ' + idxD8);
+      dep8Parts.push(itemLabelD8 + ' : ' + inp.value.trim());
+    });
+    if (com8Parts.length) msg += qid + ' [commentaire] : ' + com8Parts.join(' ⏎ ') + '\n';
+    if (dep8Parts.length) msg += qid + ' [depuis] : ' + dep8Parts.join(' ⏎ ') + '\n';
+
+    // Idem pour Q67 (special:"q68_crises" — Colère/Rage/Violence) : ids
+    // historiquement figés "c68_"/"d68_" (pas paramétrés par qid, puisqu'une
+    // seule question utilise ce special). Même règle (30/08/2026, Camille :
+    // "chaque case un item avec sa note et son commentaire").
+    if (qidNum === '67') {
+      var items68Labels = ['Colère', 'Rage', 'Violence'];
+      var c68Parts = [], d68Parts = [];
+      items68Labels.forEach(function(lbl68, i68) {
+        var cEl68 = document.getElementById('c68_' + i68);
+        if (cEl68 && !champDansBlocMasque(cEl68, card) && cEl68.value && cEl68.value.trim()) {
+          c68Parts.push(lbl68 + ' : ' + cEl68.value.trim());
+        }
+        var dEl68 = document.getElementById('d68_' + i68);
+        if (dEl68 && !champDansBlocMasque(dEl68, card) && dEl68.value && dEl68.value.trim()) {
+          d68Parts.push(lbl68 + ' : ' + dEl68.value.trim());
+        }
+      });
+      if (c68Parts.length) msg += qid + ' [commentaire] : ' + c68Parts.join(' ⏎ ') + '\n';
+      if (d68Parts.length) msg += qid + ' [depuis] : ' + d68Parts.join(' ⏎ ') + '\n';
+    }
 
     // Champ "libre" pur (special:'libre' — Q58, 58b, 112, 175, 182, 189…) : un simple
     // textarea id="val_<qid>", sans .response-group/label, donc pas capté par le bloc
