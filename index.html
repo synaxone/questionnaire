@@ -5368,6 +5368,31 @@ function construireBodyReponses() {
   return msg;
 }
 
+// Q107 "Burn out" a un curseur d'intensité optionnel (alsoIntensity, 0→10) qui
+// n'apparaît qu'après avoir répondu "Oui" — s'il n'est jamais bougé, le symptôme
+// retombe côté plan sur une note générique "1", sans signification clinique
+// (remonté par Camille le 11/09/2026, sur un cas réel : "1 n'est pas possible, il
+// faut demander à mettre une note"). Contrairement à un simple Oui/Non sans
+// curseur (ex. épilepsie, refusé explicitement le 30/08 — voir plan-logic.js), ici
+// le mécanisme de saisie existe déjà : on bloque donc l'envoi tant que "Oui" est
+// répondu sans avoir bougé le curseur, plutôt que d'accepter silencieusement cette
+// note par défaut trompeuse. Même patron que le blocage RGPD juste au-dessus
+// (contour rouge + scroll + message explicite, jamais un blocage silencieux).
+function verifierBurnOutRempli() {
+  var yn = document.getElementById('yn_107');
+  if (!yn || yn.value !== 'oui') return true;
+  var range = document.querySelector('#intensity_detail_107 input[type=range]');
+  if (range && parseInt(range.value, 10) > 0) return true;
+  var card = document.getElementById('qcard_107');
+  if (card) {
+    card.style.outline = '2px solid #c0392b';
+    card.style.borderRadius = '8px';
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  alert('⚠️ Merci de préciser l\'intensité du burn out (curseur 0→10, question "Êtes-vous actuellement ou avez-vous été diagnostiqué(e) en burn out ?") avant de continuer — une réponse "Oui" seule ne suffit pas.');
+  return false;
+}
+
 async function envoyerQuestionnaire() {
   // Adresse destinataire : pré-remplie et masquée (le client ne la saisit plus).
   // Repli en dur au cas où le champ serait vide, pour ne jamais bloquer l'envoi.
@@ -5400,6 +5425,12 @@ async function envoyerQuestionnaire() {
     if (s.style.display === 'none') { hiddenSections.push(s); s.style.display = 'block'; }
   });
   var hiddenSubs = showAllSubDivs();
+
+  if (!verifierBurnOutRempli()) {
+    hiddenSections.forEach(function(s) { s.style.display = 'none'; });
+    restoreSubDivs(hiddenSubs);
+    return;
+  }
 
   var btn = document.querySelector('[onclick="envoyerQuestionnaire()"]');
   if (btn) { btn.textContent = '⏳ Préparation du fichier…'; btn.disabled = true; }
