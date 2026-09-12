@@ -2404,6 +2404,7 @@ var perceptionQuestions = [
   { num: 46, text: "Souffrez-vous d'acouphènes ? (sifflements, bourdonnements dans les oreilles)", special: "double_cursor", label1: "Intensité", label2: "Fréquence", range1: ["0 · imperceptible","5","10 · très fort"], range2: ["0 · rarement","5","10 · en permanence"] },
   { num: 47, text: "Avez-vous des troubles visuels ?", special: "domaines_cursor", contexts: ["Déficit visuel (vue basse, flou, difficultés à lire…)", "Hypersensibilité visuelle (lumière insupportable, écrans difficiles à supporter…)"], noTooltip: true },
   { num: 48, text: "Avez-vous des problèmes au niveau du toucher ? (À quoi par exemple ?)", special: "domaines_cursor", contexts: ["Hypersensible au toucher (ex : étiquettes vêtements, texture aliments, contact physique)", "Pas du tout sensible au toucher (sous-réactivité)"] },
+  { num: "48b", text: "Avez-vous des problèmes au niveau de l'odorat ? (À quoi par exemple ?)", special: "domaines_cursor", contexts: ["Hypersensible aux odeurs (odeurs insupportables, besoin d'air)", "Perte ou faiblesse de l'odorat (anosmie)"] },
   { num: 49, text: "Avez-vous parfois <strong>le</strong> vertige (c'est-à-dire la peur du vide) ? Précisez les circonstances.", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
   { num: 50, text: "Avez-vous des intolérances ou allergies à des produits ou substances chimiques ?", special: "q8_choices", contexts: ["Intolérance", "Allergie", "Produits ou substances chimiques"] },
   { num: 51, text: "Êtes-vous malade en voiture, en bateau ou en avion ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité du malaise", range1: ["0 · jamais", "5", "10 · toujours"], range2: ["0 · très léger", "5", "10 · très intense"] },
@@ -4739,7 +4740,7 @@ function collectAllAnswers() {
 // ne correspondent plus au moment d'un import, Synaxone NFB affiche un
 // avertissement — voir importerIntake(). À mettre à jour à chaque fois
 // qu'une question change de format ici.
-var VERSION_QUESTIONNAIRE = "2026-09-11";
+var VERSION_QUESTIONNAIRE = "2026-09-12";
 
 // GARDE-FOU CHIFFREMENT — clé PUBLIQUE du praticien (Camille), sans danger à exposer
 // ici (c'est prévu pour). Sert à chiffrer le questionnaire avant téléchargement, voir
