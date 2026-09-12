@@ -5112,6 +5112,16 @@ function construireBodyReponses() {
     var qidNum = qid.replace('Q', '');
     var commentEl = document.getElementById('com_' + qidNum);
     if (commentEl && champDansBlocMasque(commentEl, card)) commentEl = null; // bloc refermé (voir garde-fou 17/07/2026)
+    // Q1 ("Combien d'heures dormez-vous ?") n'a jamais suivi la convention com_<qid> —
+    // sa case "Commentaires" a l'id historique q1_comment. Sans ce cas particulier, le
+    // texte tapé n'était capté QUE par le filet de sécurité Complément[q1_comment]
+    // (fidèle au rechargement du questionnaire dans le navigateur du client), jamais
+    // transmis à plan-logic.js/Synaxone — contrairement à toute autre question. Trouvé
+    // le 12/09/2026 en creusant les faux positifs __autoid_pm_items_* du script de
+    // vérification (voir verification/check-questionnaire-integrite.js) : la correction
+    // d'un bug de collision de témoins dans CE script a démasqué celui-ci.
+    if (!commentEl && qidNum === '1') commentEl = document.getElementById('q1_comment');
+    if (commentEl && champDansBlocMasque(commentEl, card)) commentEl = null;
     if (commentEl && commentEl.value) msg += qid + ' [commentaire] : ' + commentEl.value.replace(/\r?\n/g, ' ⏎ ') + '\n';
     // Case "Commentaires" additionnelle (commentaireLibre, ex. Q142) : distincte de
     // com_<qid> qui, sur ce type de carte (q_medicament), sert déjà à noter le nom
