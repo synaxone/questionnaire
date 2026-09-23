@@ -726,11 +726,6 @@
        colorés à l'intérieur. Sans animation, le texte reste net partout. */
   }
 
-  /* Sur ordinateur, les étapes d'envoi par email sont affichées d'emblée (pas
-     de pièce jointe automatique possible depuis un navigateur) ; sur mobile
-     elles restent en repli, le partage natif joignant le fichier tout seul. */
-  body.env-desktop #partage_fallback_note { display: block !important; }
-
   .question-card:nth-child(1) { animation-delay: 0.05s; }
   .question-card:nth-child(2) { animation-delay: 0.08s; }
   .question-card:nth-child(3) { animation-delay: 0.11s; }
@@ -1322,21 +1317,14 @@
       <div style="flex-shrink:0;width:30px;height:30px;border-radius:50%;background:#6b4e00;color:white;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:16px">2</div>
       <div style="flex:1">
         <div style="font-size:16px;font-weight:700;margin-bottom:10px">Envoyez-moi le fichier par email</div>
+        <div style="font-size:14px;line-height:1.7;margin-bottom:12px;color:#6b4e00">
+          Votre fichier, nommé <strong>« synaxone-intake-… »</strong>, est dans votre dossier <strong>Téléchargements</strong>. Ouvrez un nouvel email à l'adresse copiée ci-dessus (bouton ci-dessous, ou votre messagerie habituelle), joignez ce fichier (icône trombone 📎), puis envoyez.
+        </div>
         <button onclick="partagerIntake()" id="btn_partager_intake"
           style="width:100%;padding:18px;background:#2d6a4f;color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:17px;font-weight:700;cursor:pointer">
           📧 M'envoyer par email
         </button>
-        <div style="font-size:14px;line-height:1.7;margin-top:12px;color:#6b4e00">
-          Votre messagerie va s'ouvrir. <strong>Collez mon adresse</strong> dans le champ « À », <strong>joignez le fichier</strong> déjà téléchargé (icône trombone 📎), puis envoyez.
-        </div>
       </div>
-    </div>
-
-    <div id="partage_fallback_note" hidden style="margin-top:12px;padding:14px 16px;background:#fdf6ea;border:1px solid #d4a72c;border-radius:10px;font-size:14px;line-height:1.8;color:#6b4e00">
-      <div style="font-weight:700;margin-bottom:8px">📎 Comment me le faire parvenir (3 étapes)</div>
-      <div style="margin-bottom:5px"><strong>1.</strong> Votre fichier est <strong>déjà enregistré</strong> dans le dossier <strong>« Téléchargements »</strong> de votre appareil (rien à faire pour ça).</div>
-      <div style="margin-bottom:5px"><strong>2.</strong> Ouvrez votre boîte mail et écrivez-moi à l'adresse ci-dessus (bouton <strong>« 📋 Copier l'adresse »</strong>).</div>
-      <div><strong>3.</strong> <strong>Joignez ce fichier</strong> à l'email (icône trombone 📎), puis envoyez. C'est tout !</div>
     </div>
 
     <div style="margin-top:16px;padding:14px 16px;background:#fdf6ea;border:1px solid #d4a72c;border-radius:10px;font-size:13px;line-height:1.7;color:#6b4e00">
@@ -5631,23 +5619,21 @@ function partagerIntake() {
   if (!_lastIntakeBlob) return;
   var email = _lastIntakeDestEmail || 'contact@synaxone-nfb.fr';
 
-  // Affiche la consigne « le fichier est déjà téléchargé, joignez-le à un email ».
-  // On NE re-télécharge PAS (le fichier a déjà été téléchargé au clic « Terminer »).
-  var montrerConsigne = function () {
-    var note = document.getElementById('partage_fallback_note');
-    if (note) {
-      note.hidden = false;
-      note.removeAttribute('hidden');
-      note.style.display = 'block';
-      try { note.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
-    }
-  };
-
   // Le canal est TOUJOURS l'email. Sur MOBILE (téléphone/tablette), la feuille de
   // partage native permet de joindre le fichier en un geste → on la privilégie.
   // Sur ORDINATEUR, cette feuille (fenêtre « Partager » de Windows) est confuse et
   // ne gère pas bien l'email : on ouvre directement la messagerie (mailto), le
   // fichier étant déjà téléchargé, à joindre.
+  //
+  // CORRECTIF (23/09/2026, demande de Camille : les étapes affichées étaient
+  // incohérentes — "2 gestes" annoncés, puis un encart séparé "3 étapes" apparaissait
+  // en plus dès le clic, sans lien clair entre les deux). Le succès du mailto/partage
+  // natif ne peut de toute façon pas être détecté de façon fiable en JS (rien ne dit
+  // si une messagerie s'est réellement ouverte) — la consigne "joignez le fichier
+  // téléchargé" est donc désormais TOUJOURS visible directement à l'étape 2 de la
+  // page (jamais un encart séparé qui apparaît/disparaît), qu'une messagerie
+  // s'ouvre ou non. On se contente ici de tenter l'ouverture, sans rien afficher de
+  // plus en JS.
   var estMobile = /Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(navigator.userAgent || '');
 
   if (estMobile) {
@@ -5658,17 +5644,15 @@ function partagerIntake() {
           files: [file],
           title: 'Questionnaire Synaxone',
           text: 'Voici mon questionnaire rempli pour Synaxone.'
-        }).catch(function () { montrerConsigne(); });
+        }).catch(function () {});
         return;
       }
     } catch (e) {}
-    montrerConsigne();
     return;
   }
 
-  // Ordinateur : ouvrir la messagerie pré-adressée. On affiche aussi la consigne
-  // (au cas où aucune messagerie par défaut n'est configurée → rien ne s'ouvre).
-  montrerConsigne();
+  // Ordinateur : ouvrir la messagerie pré-adressée si une messagerie par défaut est
+  // configurée (sinon rien ne se passe — la consigne de l'étape 2 reste affichée).
   var subject = encodeURIComponent('Mon questionnaire Synaxone');
   var corps = "Bonjour,\n\nVoici mon questionnaire rempli.\n\n"
     + "IMPORTANT : le fichier a été téléchargé sur mon ordinateur (dossier « Téléchargements »). "
@@ -5676,13 +5660,12 @@ function partagerIntake() {
   try { window.location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + encodeURIComponent(corps); } catch (e) {}
 }
 
-// Sur ordinateur : afficher d'emblée les 3 étapes d'envoi (via la classe env-desktop)
-// et adapter le libellé du bouton (il ouvre la messagerie, il n'envoie pas tout seul).
+// Sur ordinateur, adapte le libellé du bouton d'envoi (il ouvre la messagerie,
+// il n'envoie pas tout seul — contrairement au partage natif mobile).
 (function () {
   try {
     var estMobile = /Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(navigator.userAgent || '');
-    if (!estMobile && document.body) {
-      document.body.classList.add('env-desktop');
+    if (!estMobile) {
       var b = document.getElementById('btn_partager_intake');
       if (b) b.textContent = '📧 Ouvrir ma messagerie';
     }
