@@ -949,10 +949,10 @@ var diffLabels = ['aucune difficulté','presque aucune','très peu','légère di
 // ══════════════════════════════════════════════════════
 
 var sommeilQuestions = [
-  { num: 2,  text: "Avez-vous un sommeil <strong>non</strong> récupérateur ?", rangeLabels: ["0 · très récupérateur", "5", "10 · pas récupérateur du tout"], noTooltip: true },
+  { num: 2,  text: "Avez-vous un sommeil <strong>non</strong> récupérateur ?", rangeLabels: ["0 · très récupérateur", "5", "10 · pas récupérateur du tout"], noTooltip: true, pContexts: ["Parce que se réveille"] },
   { num: 3,  text: "Votre sommeil est-il agité ?", rangeLabels: ["0 · pas agité", "5", "10 · très agité"], pContexts: ["Problème émotionnel", "Pensées qui tournent (petit vélo)"] },
   { num: 4,  text: "Avez-vous des difficultés à vous endormir ?", special: "yesno_then_cursor", pContexts: ["Je suis agité(e)", "J'ai des peurs ou de l'hypervigilance", "J'ai des pensées qui n'arrêtent pas"] },
-  { num: 5,  text: "Avez-vous des difficultés à vous réveiller le matin ?", rangeLabels: ["0 · pas de difficulté", "5", "10 · beaucoup de difficultés"], pContexts: ["Dépression", "Travail de nuit"] },
+  { num: 5,  text: "Avez-vous des difficultés à vous réveiller le matin ?", rangeLabels: ["0 · pas de difficulté", "5", "10 · beaucoup de difficultés"], pContexts: ["Dépression / fatigue", "Travail de nuit / désynchronisation", "Brouillard (au réveil)"] },
   { num: 6,  text: "Avez-vous des réveils fréquents la nuit ?", special: "reveils_yesno", pContexts: ["Problème émotionnel", "Pensées qui tournent (petit vélo)"] },
   { num: 7,  text: "Avez-vous un sommeil irrégulier à certaines périodes ?", pContexts: ["Problème émotionnel"] },
   { num: 8,  text: "Faites-vous des cauchemars ou des rêves très vivants ?", special: "q8_choices" },
@@ -977,7 +977,7 @@ var cognitionQuestions = [
   { num: 24, text: "Avez-vous des difficultés à lire ?", rangeLabels: ["0 · aucune difficulté", "5", "10 · grande difficulté"] },
   { num: 25, text: "Avez-vous des difficultés à planifier des tâches, à vous organiser ?", special: "domaines_cursor", contexts: ["Au travail","À la maison"], contextLabels: ["0 · aucune difficulté", "5", "10 · beaucoup de difficultés"] },
   { num: 26, text: "Avez-vous des difficultés à terminer des tâches ?", rangeLabels: ["0 · aucune difficulté", "5", "10 · beaucoup de difficultés"] },
-  { num: 27, text: "Avez-vous des difficultés à suivre une conversation ou à participer à une discussion ?", special: "domaines_cursor", contexts: ["En tête-à-tête","En groupe / réunion","En famille"], contextLabels: ["0 · aucune difficulté", "5", "10 · beaucoup de difficultés"], pContexts: ["Expression verbale"] },
+  { num: 27, text: "Avez-vous des difficultés à suivre une conversation ou à participer à une discussion ?", special: "domaines_cursor", contexts: ["En tête-à-tête","En groupe / réunion","En famille","Au travail"], contextLabels: ["0 · aucune difficulté", "5", "10 · beaucoup de difficultés"], pContexts: ["Expression verbale"] },
   { num: 28, text: "Avez-vous des difficultés à...", special: "q28_multi", pContexts: ["Compréhension du langage", "Contrôle des impulsions, attention vers un objectif"] },
   { num: 29, text: "Avez-vous tendance à procrastiner ? (remettre des tâches à plus tard…)", rangeLabels: ["0 · ne procrastine pas du tout", "5", "10 · procrastine tout le temps"] },
   { num: 30, text: "Avez-vous des difficultés à prendre des décisions ?", special: "domaines_cursor", contexts: ["Affectif","Personnel","Professionnel"], contextLabels: ["0 · aucune difficulté", "5", "10 · beaucoup de difficultés"] },
@@ -987,7 +987,7 @@ var cognitionQuestions = [
   { num: 32, text: "Avez-vous des difficultés à vous rappeler des noms et des prénoms ?", rangeLabels: ["0 · pas du tout", "5", "10 · grande difficulté"], pContexts: ["Alzheimer"] },
   { num: 33, text: "Avez-vous des problèmes de mémoire à court terme ?", rangeLabels: ["0", "5", "10"] },
   { num: 34, text: "Avez-vous des problèmes de mémoire à long terme ? (pas ou peu de souvenirs anciens)", rangeLabels: ["0", "5", "10"] },
-  { num: 35, text: "Avez-vous des difficultés à assimiler de nouvelles connaissances ?", special: "domaines_cursor", contexts: ["Lecture / compréhension","Mémorisation","Mise en pratique","Concentration"], contextLabels: ["0 · aucune difficulté", "5", "10 · beaucoup de difficultés"] },
+  { num: 35, text: "Avez-vous des difficultés à assimiler de nouvelles connaissances dans les apprentissages ?", rangeLabels: ["0 · aucune difficulté", "5", "10 · beaucoup de difficultés"] },
   { num: 36, text: "Êtes-vous facilement démotivé(e) dans l'apprentissage ?", rangeLabels: ["0 · jamais démotivé(e)", "5", "10 · très démotivé(e)"] },
   { num: 37, text: "Êtes-vous diagnostiqué(e) HPI (Haut Potentiel Intellectuel) ?", noIntensity: true },
   { num: 38, text: "Êtes-vous diagnostiqué(e) HPE (Haut Potentiel Émotionnel) ?", noIntensity: true, note: "Sensibilité émotionnelle très intense, grande empathie, émotions vécues de façon amplifiée." },
@@ -1010,6 +1010,7 @@ var perceptionQuestions = [
   { num: 46, text: "Souffrez-vous d'acouphènes ? (sifflements, bourdonnements dans les oreilles)", special: "double_cursor", label1: "Intensité", label2: "Fréquence", range1: ["0 · imperceptible","5","10 · très fort"], range2: ["0 · rarement","5","10 · en permanence"] },
   { num: 47, text: "Avez-vous des troubles visuels ?", special: "domaines_cursor", contexts: ["Déficit visuel (vue basse, flou, difficultés à lire…)", "Hypersensibilité visuelle (lumière insupportable, écrans difficiles à supporter…)"], noTooltip: true },
   { num: 48, text: "Avez-vous des problèmes au niveau du toucher ? (À quoi par exemple ?)", special: "domaines_cursor", contexts: ["Hypersensible au toucher (ex : étiquettes vêtements, texture aliments, contact physique)", "Pas du tout sensible au toucher (sous-réactivité)"] },
+  { num: "48b", text: "Avez-vous des problèmes au niveau de l'odorat ? (À quoi par exemple ?)", special: "domaines_cursor", contexts: ["Hypersensible aux odeurs (odeurs insupportables, besoin d'air)", "Perte ou faiblesse de l'odorat (anosmie)"] },
   { num: 49, text: "Avez-vous parfois <strong>le</strong> vertige (c'est-à-dire la peur du vide) ? Précisez les circonstances.", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
   { num: 50, text: "Avez-vous des intolérances ou allergies à des produits ou substances chimiques ?", special: "q8_choices", contexts: ["Intolérance", "Allergie", "Produits ou substances chimiques"] },
   { num: 51, text: "Êtes-vous malade en voiture, en bateau ou en avion ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité du malaise", range1: ["0 · jamais", "5", "10 · toujours"], range2: ["0 · très léger", "5", "10 · très intense"] },
@@ -1024,7 +1025,7 @@ var comportementsQuestions = [
   { num: 57, text: "Avez-vous du mal à vous détendre ?", rangeLabels: ["0 · je me détends facilement", "5", "10 · jamais détendu(e)"], noTooltip: true },
   { num: 58, text: "Quand vous êtes stressé(e), comment cela se manifeste-t-il chez vous ?", special: "libre", note: "Par exemple : tensions dans la nuque ou les épaules, mâchoires serrées, estomac noué, maux de tête, palpitations, respiration courte, transpiration, fatigue soudaine, douleurs dans le dos, troubles digestifs, agitation, insomnie, envie de pleurer…" },
   { num: "58b", text: "Comment se manifeste chez vous la détente ?", special: "libre", note: "Par exemple : muscles qui se relâchent, sensation de chaleur dans le corps, respiration qui ralentit, bâillements, larmes de soulagement, envie de dormir, légèreté mentale, relâchement émotionnel, sentiment de sécurité, ralentissement des pensées, douceur dans le regard, envie de sourire, silence intérieur…" },
-  { num: 59, text: "Avez-vous des difficultés à vous affirmer ?", rangeLabels: ["0 · aucune difficulté", "5", "10 · beaucoup de difficultés"] },
+  { num: 59, text: "Avez-vous des difficultés à vous affirmer ?", rangeLabels: ["0 · aucune difficulté", "5", "10 · beaucoup de difficultés"], note: "S'affirmer, c'est exprimer ses besoins, ses opinions et ses limites avec clarté et respect. Avoir du mal à s'affirmer, c'est principalement : ne pas savoir dire non (par peur de déplaire ou de créer un conflit), subir au lieu d'agir (se taire, s'adapter toujours aux autres, garder sa frustration), ou basculer dans l'agressivité quand la limite est dépassée." },
   { num: "59b", text: "Avez-vous du mal à vous ouvrir aux autres ?", rangeLabels: ["0 · pas du tout", "5", "10 · beaucoup"] },
   { num: 60, text: "Avez-vous le sens de l'humour ?", rangeLabels: ["0 · pas du tout", "5", "10 · beaucoup"] },
   { num: "60b", text: "Faites-vous ou faisiez-vous le clown en classe, enfant ?", noIntensity: true },
@@ -1062,7 +1063,7 @@ var emotionnelQuestions = [
   { num: 91, text: "Avez-vous des phobies ?", special: "q_trauma_list", placeholder: "ex : araignées, avion, sang, hauteurs… précisez et datez si possible", note: "Une phobie est une peur intense, irrationnelle et incontrôlable d'un objet ou d'une situation spécifique qui provoque une réaction d'évitement." },
   { num: 92, text: "Êtes-vous parfois embarrassé(e) ? (facilement gêné(e) en public, incertain(e) de votre discours, de vos choix…)", special: "domaines_cursor", contexts: ["Dans la vie quotidienne (rue, transports, espaces publics…)", "En situation professionnelle ou scolaire", "Dans les relations sociales et amicales"], contextLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"] },
   { num: 93, text: "Êtes-vous méfiant(e) vis-à-vis des autres ?", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"] },
-  { num: 94, text: "Avez-vous parfois ou avez-vous eu des attaques de panique ?", rangeLabels: ["0 · jamais", "5", "10 · très souvent"], note: "Une attaque de panique est une montée brutale et intense d'anxiété avec des symptômes physiques : palpitations, essoufflement, sueurs, vertiges, sensation de mort imminente ou de devenir fou(folle). Elle dure généralement quelques minutes à une demi-heure et peut survenir sans raison apparente." },
+  { num: 94, text: "Avez-vous parfois ou avez-vous eu des attaques de panique ?", special: "yesno_then_cursor", rangeLabels: ["0 · jamais", "5", "10 · très souvent"], note: "Une attaque de panique est une montée brutale et intense d'anxiété avec des symptômes physiques : palpitations, essoufflement, sueurs, vertiges, sensation de mort imminente ou de devenir fou(folle). Elle dure généralement quelques minutes à une demi-heure et peut survenir sans raison apparente." },
   { num: 95, text: "Êtes-vous souvent triste actuellement ?", rangeLabels: ["0 · pas du tout", "5", "10 · très souvent"], pContexts: ["Effet antidépresseur et énergisant recherché"] },
   { num: 96, text: "Manquez-vous de joie et de plaisirs ?", rangeLabels: ["0 · pas du tout", "5", "10 · beaucoup"], pContexts: ["Pour effet antidépresseur fort et énergisant"] },
   { num: 97, text: "Avez-vous peu ou trop d'empathie envers les autres ?", special: "q97_empathie" },
@@ -1078,8 +1079,8 @@ var emotionnelQuestions = [
   { num: 107, text: "Êtes-vous actuellement ou avez-vous été diagnostiqué(e) en burn out ?", noIntensity: true, alsoIntensity: true, note: "Le burn out est un épuisement professionnel intense — physique, émotionnel et mental — lié à un stress chronique, souvent au travail. Il se traduit par un sentiment de vide, de perte de sens, d'incapacité à faire face.", pContexts: ["Pour effet antidépresseur fort et énergisant"] },
   { num: 108, text: "Pensez-vous qu'à certains moments vous n'êtes pas dans la réalité ?", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
   { num: 109, text: "Avez-vous eu dans le passé des épisodes dissociatifs ?", noIntensity: true, note: "La dissociation est une perturbation de la conscience, de la mémoire, de l'identité ou des émotions. Elle peut se manifester par : sentiment de se voir de l'extérieur (dépersonnalisation), impression de vivre dans un rêve ou derrière une vitre (déréalisation), vide mental soudain, perte de mémoire d'événements récents, engourdissement émotionnel, sensation que certaines parties du corps sont étrangères ou disproportionnées, changements brusques d'humeur sans raison apparente, ou impression d'être 'ailleurs' pendant une conversation. Souvent liée à un stress intense ou à un traumatisme." },
-  { num: 110, text: "Avez-vous parfois des hallucinations ?", rangeLabels: ["0 · jamais", "5", "10 · souvent"] },
-  { num: 111, text: "Avez-vous en ce moment, ou avez-vous eu par le passé des pensées suicidaires ?", special: "q111_toggle" },
+  { num: 110, text: "Avez-vous parfois des hallucinations ?", special: "yesno_then_cursor", rangeLabels: ["0 · jamais", "5", "10 · souvent"] },
+  { num: 111, text: "Avez-vous en ce moment, ou avez-vous eu par le passé des pensées suicidaires ?", special: "q111_toggle", rangeLabels: ["0 · rare, sans intention", "5", "10 · fréquent, avec intention"] },
   { num: 112, text: "Autres problèmes émotionnels à mentionner ?", special: "libre" },
 ];
 
@@ -1087,30 +1088,30 @@ var physiqueQuestions = [
   { num: 113, text: "Êtes-vous fatigué(e) ?", special: "q113_fatigue" },
   { num: 114, text: "Avez-vous des tensions musculaires ? À quels endroits du corps ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"], commentPlaceholder: "Précisez où (nuque, épaules, dos, mâchoires…)" },
   { num: 115, text: "Avez-vous une faiblesse motrice ?", special: "domaines_cursor", contexts: ["Pour vous déplacer", "Pour bouger certains membres", "Des rigidités dans le corps"], pContexts: ["Si AVC"] },
-  { num: 116, text: "Avez-vous un manque de coordination dans les mouvements ?", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], note: "Le manque de coordination (ataxie) se manifeste par des gestes imprécis ou maladroits : difficultés à attraper un objet, trébucher fréquemment, écriture désordonnée, problèmes à boutonner ses vêtements, mouvements saccadés ou mal synchronisés.", pContexts: ["Si AVC"] },
-  { num: 117, text: "Avez-vous des tics musculaires ?", rangeLabels: ["0 · jamais", "5", "10 · très souvent"], note: "Les tics musculaires sont des contractions involontaires, brèves et répétitives d'un ou plusieurs muscles : tressaillement de la paupière, crispation du visage, secousse d'une épaule ou d'un membre. Ils sont souvent aggravés par le stress ou la fatigue." },
-  { num: 118, text: "Avez-vous des crampes musculaires ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · très souvent"], range2: ["0 · très légères", "5", "10 · très intenses"], note: "Une crampe est une contraction musculaire involontaire, soudaine et douloureuse, qui dure de quelques secondes à plusieurs minutes. Elle touche souvent les mollets, les pieds, les mains ou le ventre." },
+  { num: 116, text: "Avez-vous un manque de coordination dans les mouvements ?", special: "yesno_then_cursor", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], note: "Le manque de coordination (ataxie) se manifeste par des gestes imprécis ou maladroits : difficultés à attraper un objet, trébucher fréquemment, écriture désordonnée, problèmes à boutonner ses vêtements, mouvements saccadés ou mal synchronisés.", pContexts: ["Si AVC"] },
+  { num: 117, text: "Avez-vous des tics musculaires ?", special: "yesno_then_cursor", rangeLabels: ["0 · jamais", "5", "10 · très souvent"], note: "Les tics musculaires sont des contractions involontaires, brèves et répétitives d'un ou plusieurs muscles : tressaillement de la paupière, crispation du visage, secousse d'une épaule ou d'un membre. Ils sont souvent aggravés par le stress ou la fatigue." },
+  { num: 118, text: "Avez-vous des crampes musculaires ?", special: "double_cursor", yesnoGate: true, label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · très souvent"], range2: ["0 · très légères", "5", "10 · très intenses"], note: "Une crampe est une contraction musculaire involontaire, soudaine et douloureuse, qui dure de quelques secondes à plusieurs minutes. Elle touche souvent les mollets, les pieds, les mains ou le ventre." },
   { num: 119, text: "Avez-vous des difficultés physiques dans le travail ?", special: "yesno_then_cursor", rangeLabels: ["0 · aucune difficulté", "5", "10 · beaucoup de difficultés"], commentPlaceholder: "Si oui, précisez lesquelles…" },
-  { num: 120, text: "Avez-vous un problème de spasticité ?", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], note: "La spasticité est une raideur ou une résistance musculaire involontaire liée à une atteinte du système nerveux central. Les muscles se contractent de façon incontrôlée, rendant les mouvements difficiles et douloureux. Elle peut toucher les bras, les jambes ou l'ensemble du corps." },
-  { num: 121, text: "Avez-vous des troubles de l'équilibre ?", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], note: "Par exemple : instabilité à la marche, tendance à tituber, difficulté à rester debout les yeux fermés, sensation de flottement, mauvaise coordination des mouvements, chutes fréquentes." },
-  { num: 122, text: "Avez-vous des tremblements ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · très souvent"], range2: ["0 · très légers", "5", "10 · très intenses"] },
+  { num: 120, text: "Avez-vous un problème de spasticité ?", special: "yesno_then_cursor", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], note: "La spasticité est une raideur ou une résistance musculaire involontaire liée à une atteinte du système nerveux central. Les muscles se contractent de façon incontrôlée, rendant les mouvements difficiles et douloureux. Elle peut toucher les bras, les jambes ou l'ensemble du corps." },
+  { num: 121, text: "Avez-vous des troubles de l'équilibre ?", special: "yesno_then_cursor", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], note: "Par exemple : instabilité à la marche, tendance à tituber, difficulté à rester debout les yeux fermés, sensation de flottement, mauvaise coordination des mouvements, chutes fréquentes." },
+  { num: 122, text: "Avez-vous des tremblements ?", special: "double_cursor", yesnoGate: true, label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · très souvent"], range2: ["0 · très légers", "5", "10 · très intenses"] },
   { num: 123, text: "Vous a-t-on diagnostiqué la maladie de Parkinson ?", noIntensity: true },
   { num: 124, text: "Avez-vous une ou des allergies ?", special: "yesno_then_cursor", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], commentPlaceholder: "Précisez lesquelles…" },
   { num: 125, text: "Avez-vous de l'asthme ?", noIntensity: true },
-  { num: 126, text: "Avez-vous le syndrome de l'intestin irritable ?", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], note: "Le syndrome de l'intestin irritable (SII) est un trouble digestif chronique caractérisé par des douleurs abdominales, des ballonnements, des gaz, et des alternances de constipation et de diarrhée — sans lésion organique détectable. Il est souvent aggravé par le stress et les émotions." },
-  { num: 127, text: "Avez-vous de la constipation chronique ?", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
-  { num: 128, text: "Avez-vous des diarrhées ?", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
+  { num: 126, text: "Avez-vous le syndrome de l'intestin irritable ?", special: "yesno_then_cursor", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], note: "Le syndrome de l'intestin irritable (SII) est un trouble digestif chronique caractérisé par des douleurs abdominales, des ballonnements, des gaz, et des alternances de constipation et de diarrhée — sans lésion organique détectable. Il est souvent aggravé par le stress et les émotions." },
+  { num: 127, text: "Avez-vous de la constipation chronique ?", special: "yesno_then_cursor", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
+  { num: 128, text: "Avez-vous des diarrhées ?", special: "yesno_then_cursor", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
   { num: 129, text: "Avez-vous des reflux, des brûlures d'estomac ?", special: "yesno_then_cursor", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
   { num: 130, text: "Avez-vous du mal à digérer les aliments sucrés ?", special: "yesno_then_cursor", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"] },
   { num: 131, text: "Avez-vous souvent des nausées ? Dans quelles circonstances ?", special: "yesno_then_cursor", rangeLabels: ["0 · jamais", "5", "10 · très souvent"], commentPlaceholder: "Dans quelles circonstances ?" },
   { num: 132, text: "Avez-vous des vertiges et/ou des évanouissements ?", rangeLabels: ["0 · jamais", "5", "10 · très souvent"], note: "Les vertiges et évanouissements peuvent prendre différentes formes : sensation que la pièce tourne (vertige rotatoire), instabilité à la marche, sensation de flottement ou de tête vide, noir devant les yeux, perte de connaissance brève. Causes possibles : problème de l'oreille interne (labyrinthite, VPPB), tension artérielle basse (hypotension orthostatique), hypoglycémie, déshydratation, stress intense, hyperventilation, problème cardiaque, troubles neurologiques, médicaments, anémie, ou encore fatigue extrême." },
-  { num: 133, text: "Votre peau est-elle souvent irritée ou réactive ?", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"] },
-  { num: 134, text: "Avez-vous des troubles du syndrome prémenstruel (SPM) ? Lesquels ?", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], note: "Le SPM peut inclure : douleurs abdominales ou lombaires, gonflement des seins, ballonnements, maux de tête, fatigue intense, sautes d'humeur, irritabilité, anxiété, pleurs inexpliqués, difficultés de concentration, troubles du sommeil, envies alimentaires compulsives.", commentPlaceholder: "Précisez lesquels…", pContexts: ["Bouffées de chaleur / migraines", "Si agressivité", "Brouillard cérébral"] },
-  { num: 135, text: "Avez-vous des bouffées de chaleur ?", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
+  { num: 133, text: "Votre peau est-elle souvent irritée ou réactive ?", special: "yesno_then_cursor", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"] },
+  { num: 134, text: "Avez-vous des troubles du syndrome prémenstruel (SPM) ? Lesquels ?", special: "yesno_then_cursor", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], note: "Le SPM peut inclure : douleurs abdominales ou lombaires, gonflement des seins, ballonnements, maux de tête, fatigue intense, sautes d'humeur, irritabilité, anxiété, pleurs inexpliqués, difficultés de concentration, troubles du sommeil, envies alimentaires compulsives.", commentPlaceholder: "Précisez lesquels…", pContexts: ["Bouffées de chaleur / migraines", "Si agressivité", "Brouillard cérébral"] },
+  { num: 135, text: "Avez-vous des bouffées de chaleur ?", special: "yesno_then_cursor", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
   { num: 136, text: "Êtes-vous ménopausé(e) ou à l'andropause ?", noIntensity: true },
   { num: 137, text: "Avez-vous des problèmes liés à la ménopause ou à l'andropause ?", special: "q137_menopause" },
-  { num: 138, text: "Transpirez-vous en cas de stress ?", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
-  { num: 139, text: "Transpirez-vous fréquemment ?", rangeLabels: ["0 · jamais", "5", "10 · très souvent"], commentPlaceholder: "Précisez le rythme si possible…" },
+  { num: 138, text: "Transpirez-vous en cas de stress ?", special: "yesno_then_cursor", rangeLabels: ["0 · jamais", "5", "10 · très souvent"] },
+  { num: 139, text: "Transpirez-vous fréquemment ?", special: "yesno_then_cursor", rangeLabels: ["0 · jamais", "5", "10 · très souvent"], commentPlaceholder: "Précisez le rythme si possible…" },
   { num: 140, text: "Avez-vous des incontinences émotionnelles ? (liées au stress)", special: "domaines_cursor", contexts: ["Urinaires", "Fécales"] },
   { num: 141, text: "Avez-vous des incontinences fonctionnelles ?", noIntensity: true, note: "L'incontinence fonctionnelle survient non pas à cause d'un problème physique de la vessie, mais parce que la personne n'arrive pas à atteindre les toilettes à temps — souvent liée à une mobilité réduite, un trouble cognitif ou une difficulté à reconnaître les signaux corporels." },
   { num: 142, text: "Faites-vous de l'arythmie ou de la tachycardie ? (problème de rythme cardiaque — palpitations)", special: "q_medicament", commentaireLibre: true, pContexts: ["Si émotionnel"] },
@@ -1124,17 +1125,17 @@ var physiqueQuestions = [
   { num: 150, text: "Avez-vous, ou avez-vous eu par le passé, des migraines ?", special: "q150_migraines", note: "La migraine est un trouble neurologique caractérisé par des crises de maux de tête intenses, souvent d'un seul côté, pulsatiles, accompagnées de nausées, de vomissements et d'une hypersensibilité à la lumière et au bruit. Les crises durent de 4 à 72 heures et peuvent être très invalidantes." },
   { num: 151, text: "Avez-vous des névralgies ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"], note: "Une névralgie est une douleur intense ressentie le long d'un nerf, sans lésion de ce nerf — le nerf est intact mais « sonne l'alarme » de façon excessive.", pContexts: ["Chronique et hyperréactif"] },
   { num: 152, text: "Avez-vous des douleurs neuropathiques ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · très légères", "5", "10 · insupportables"], note: "Une neuropathie est une douleur due à une lésion réelle du nerf : brûlures, chocs électriques, engourdissements, hypersensibilité au toucher. Contrairement à la névralgie, le nerf est structurellement endommagé (chimiothérapie, diabète, compression…)." },
-  { num: 153, text: "Avez-vous des névralgies du trijumeau ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"] },
-  { num: 154, text: "Avez-vous des névralgies d'Arnold ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"] },
-  { num: 155, text: "Avez-vous des douleurs chroniques des nerfs sciatiques ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"] },
-  { num: 156, text: "Avez-vous des douleurs des sinus ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"] },
-  { num: 157, text: "Avez-vous des douleurs musculaires ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"], commentPlaceholder: "Précisez où…" },
+  { num: 153, text: "Avez-vous des névralgies du trijumeau ?", special: "double_cursor", yesnoGate: true, label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"] },
+  { num: 154, text: "Avez-vous des névralgies d'Arnold ?", special: "double_cursor", yesnoGate: true, label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"] },
+  { num: 155, text: "Avez-vous des douleurs chroniques des nerfs sciatiques ?", special: "double_cursor", yesnoGate: true, label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"] },
+  { num: 156, text: "Avez-vous des douleurs des sinus ?", special: "double_cursor", yesnoGate: true, label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"] },
+  { num: 157, text: "Avez-vous des douleurs musculaires ?", special: "double_cursor", yesnoGate: true, label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"], commentPlaceholder: "Précisez où…" },
   { num: 158, text: "Êtes-vous diagnostiqué(e) fibromyalgique ?", noIntensity: true, note: "La fibromyalgie est une maladie chronique caractérisée par des douleurs diffuses dans tout le corps, une fatigue persistante et des troubles du sommeil." },
-  { num: 159, text: "Avez-vous des douleurs d'estomac ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"] },
-  { num: 160, text: "Avez-vous des douleurs d'intestin ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"] },
-  { num: 161, text: "Avez-vous des douleurs urinaires ?", special: "double_cursor", label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"], pContexts: ["Cystite"] },
+  { num: 159, text: "Avez-vous des douleurs d'estomac ?", special: "double_cursor", yesnoGate: true, label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"] },
+  { num: 160, text: "Avez-vous des douleurs d'intestin ?", special: "double_cursor", yesnoGate: true, label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"] },
+  { num: 161, text: "Avez-vous des douleurs urinaires ?", special: "double_cursor", yesnoGate: true, label1: "Fréquence", label2: "Intensité", range1: ["0 · jamais", "5", "10 · constamment"], range2: ["0 · légères", "5", "10 · insupportables"], pContexts: ["Cystite"] },
   { num: 162, text: "Tolérez-vous bien les douleurs ?", rangeLabels: ["0 · très bien", "5", "10 · très mal"], noTooltip: true, pContexts: ["Faible"] },
-  { num: 163, text: "Avez-vous des maladies en « ite » ?", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], note: "Les maladies en « ite » sont des maladies inflammatoires : cystite, arthrite, méningite, gastrite, bronchite, pancréatite…", commentPlaceholder: "Précisez lesquelles…" },
+  { num: 163, text: "Avez-vous des maladies en « ite » ?", special: "yesno_then_cursor", rangeLabels: ["0 · pas du tout", "5", "10 · vraiment beaucoup"], note: "Les maladies en « ite » sont des maladies inflammatoires : cystite, arthrite, méningite, gastrite, bronchite, pancréatite…", commentPlaceholder: "Précisez lesquelles…" },
   { num: 164, text: "Avez-vous de l'épilepsie ?", special: "q164_epilepsie" },
   { num: 165, text: "Avez-vous une faiblesse immunitaire ?", rangeLabels: ["0 · très bonne immunité", "5", "10 · très mauvaise immunité"] },
   { num: 166, text: "Avez-vous un Covid Long ?", noIntensity: true },
@@ -1164,6 +1165,7 @@ var petiteEnfanceQuestions = [
 var traumaQuestions = [
   { num: 183, text: "Avez-vous subi des traumatismes physiques ? (accident, chute, fracture, opération, agression, choc crânien, accouchement difficile…)", special: "q_trauma_list", placeholder: "Précisez si possible : date approximative, type de traumatisme, séquelles éventuelles…" },
   { num: 184, text: "Avez-vous subi des traumatismes émotionnels ?", special: "q_trauma_list", placeholder: "ex : séparation, deuil, abandon, violence, agression, harcèlement…" },
+  { num: "184b", text: "Avez-vous subi des agressions ?", special: "q_trauma_list", placeholder: "Précisez si possible : date approximative, type d’agression, circonstances…" },
 ];
 
 var medicQuestions = [
@@ -1539,6 +1541,10 @@ function buildQuestionCard(q) {
 
   // Special: double cursor (e.g. Q46 acouphènes)
   if (q.special === 'double_cursor') {
+    // yesnoGate (23/09/2026, Q118) : gate Oui/Non optionnel devant les 2 curseurs —
+    // opt-in (q.yesnoGate) pour ne rien changer aux ~20 autres questions double_cursor
+    // qui doivent rester affichées d'emblée (comportement historique inchangé si absent).
+    var dcGate = !!q.yesnoGate;
     return `<div class="question-card" id="qcard_${id}">
       <div class="question-main">
         <div class="question-label">
@@ -1546,6 +1552,12 @@ function buildQuestionCard(q) {
           <span class="q-text">${q.text}</span>
         </div>
         ${noteHtml}
+        ${dcGate ? `<div class="yesno-group" style="margin-bottom:10px">
+          <button class="yesno-btn" onclick="selectYesNo(this,'oui','yn_${id}');document.getElementById('dc_detail_${id}').removeAttribute('hidden')">Oui</button>
+          <button class="yesno-btn" onclick="selectYesNo(this,'non','yn_${id}');document.getElementById('dc_detail_${id}').setAttribute('hidden','')">Non</button>
+        </div>
+        <input type="hidden" id="yn_${id}">` : ''}
+        <div id="dc_detail_${id}"${dcGate ? ' hidden' : ''}>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px">
           <div class="response-group">
             <label>${q.label1 || 'Intensité'} (0–10)</label>
@@ -1589,6 +1601,7 @@ function buildQuestionCard(q) {
             <label>Depuis quand ?</label>
             <input class="field-input" type="text" placeholder="ex : 6 mois…" id="dep_${id}">
           </div>
+        </div>
         </div>
       </div>
       ${(q.pContexts && q.pContexts.length) ? `<div class="practitioner-only" style="margin:0 16px 10px;padding:8px;background:var(--practitioner-light);border-radius:8px;border-left:3px solid var(--practitioner)">
@@ -1847,7 +1860,10 @@ function buildQuestionCard(q) {
 
   // Special: Q8 cauchemars / rêves très vivants with cursors — généralisé le
   // 30/08/2026 (Camille, Q50) pour accepter n'importe quelle liste de cases via
-  // q.contexts (même patron que domaines_cursor), sans dupliquer ce bloc.
+  // q.contexts (même patron que domaines_cursor), sans dupliquer ce bloc : chaque
+  // case garde son propre curseur ET son propre commentaire/« depuis quand »,
+  // contrairement à domaines_cursor qui n'a qu'un commentaire partagé pour toute
+  // la question.
   if (q.special === 'q8_choices') {
     var q8items = q.contexts || ['Cauchemars','Rêves très vivants'];
     return `<div class="question-card" id="qcard_${id}">
@@ -2530,7 +2546,8 @@ function buildQuestionCard(q) {
   if (q.special === 'q113_fatigue') {
     var items113 = [
       "Particulièrement en ce moment",
-      "De manière chronique (fatigue persistante au long cours)"
+      "De manière chronique (fatigue persistante au long cours)",
+      "Rapidement après l'effort"
     ];
     return `<div class="question-card" id="qcard_${id}">
       <div class="question-main">
@@ -3035,6 +3052,7 @@ function buildQuestionCard(q) {
 
   // Special: Q111 toggle - fields appear when Oui selected
   if (q.special === 'q111_toggle') {
+    var rl111 = q.rangeLabels || ["0 · rare, sans intention", "5", "10 · fréquent, avec intention"];
     return `<div class="question-card" id="qcard_${id}">
       <div class="question-main">
         <div class="question-label">
@@ -3047,6 +3065,13 @@ function buildQuestionCard(q) {
         </div>
         <input type="hidden" id="yn_${id}">
         <div id="q111fields_${id}" hidden style="padding:12px;background:var(--accent-light);border-radius:8px">
+          <div class="intensity-display" style="margin-bottom:8px">
+            <span class="intensity-val" id="val_${id}">—</span>
+            <div style="flex:1">
+              <input type="range" min="0" max="10" step="1" value="0" oninput="updateIntensity('${id}',this.value)" id="range_${id}">
+              <div class="range-labels"><span>${rl111[0]}</span><span>${rl111[1]}</span><span>${rl111[2]}</span></div>
+            </div>
+          </div>
           <div class="response-group" style="margin-bottom:8px">
             <label>Quand ?</label>
             <input class="field-input" type="text" placeholder="ex : en ce moment, il y a 2 ans…" id="dep_${id}" style="background:white">
@@ -3252,7 +3277,27 @@ function construireBodyReponses() {
           wrapperGen = wrapperGen.parentElement;
         }
         var labelGen = (wrapperGen && wrapperGen !== card && wrapperGen.previousElementSibling && wrapperGen.previousElementSibling.tagName === 'LABEL') ? wrapperGen.previousElementSibling : null;
-        if (labelGen) rlbl = labelGen.textContent.trim().replace(/\s+/g, ' ');
+        if (labelGen) {
+          // CORRECTIF (23/09/2026, remonté par Camille : du texte explicatif complet —
+          // "je me ressource en société", "colère irritation intense" — apparaissait
+          // tronqué à 25 caractères dans le Plan). Certains "special" (q68_crises,
+          // q150 migraines…) ont un <label> qui contient un COURT libellé en gras
+          // (span[style="font-size:13px;font-weight:600"]) SUIVI d'un texte explicatif
+          // plus long (description clinique, pas un vrai sous-contexte) — .textContent
+          // seul les concatène, et la troncature à 25 car. dans plan-logic.js
+          // (construction de noteDisplay) coupait alors n'importe où au milieu de la
+          // description. On isole désormais CE span court quand il existe (ex.
+          // "Colère", "Sans aura") plutôt que tout le texte du label.
+          // ⚠️ Piège rencontré en testant : NE PAS vider rlbl pour un label long sans
+          // span court (ex. Q54 choix_curseur_54, Q97 empathie) — restoreFromText()
+          // s'appuie sur CE texte complet pour retrouver quel curseur correspond à
+          // quelle ligne au rechargement (check:restorefromtext l'a détecté : Q97
+          // cassait). Le texte complet reste donc exporté tel quel dans ce cas — le
+          // nettoyage de l'AFFICHAGE dans le Plan se fait à la source qui construit
+          // noteDisplay, dans plan-logic.js, pas ici.
+          var shortSpanGen = labelGen.querySelector('span[style="font-size:13px;font-weight:600"]');
+          rlbl = (shortSpanGen ? shortSpanGen.textContent : labelGen.textContent).trim().replace(/\s+/g, ' ');
+        }
       }
       // CORRECTIF (16/07/2026, remonté par Camille : "0 → 10 : 3" inutile dans le
       // plan) : le repli générique ci-dessus retrouve pour un curseur SIMPLE (sans
@@ -3306,11 +3351,15 @@ function construireBodyReponses() {
     card.querySelectorAll('input[type=hidden][id^=yn_]').forEach(function(inp) {
       if (champDansBlocMasque(inp, card)) return;
       if (!inp.value) return;
-      // CORRECTIF DE PERTE DE DONNÉES (18/07/2026, aligné sur index.html/
-      // questionnaire-client.html suite au bug remonté par Camille sur Q13 apnées) :
-      // une carte peut contenir plusieurs champs yn_ (question principale + sous-
-      // question imbriquée) ; sans distinction, les deux étaient exportées sous le
-      // même numéro Q<id>, indiscernables l'une de l'autre.
+      // CORRECTIF DE PERTE DE DONNÉES (18/07/2026, remonté par Camille sur Q13
+      // apnées) : une carte peut contenir PLUSIEURS champs yn_ (la question
+      // principale + une sous-question imbriquée, ex. yn_app_13 "appareillé(e) ?").
+      // Sans distinction, les deux étaient exportées sous le MÊME numéro Q<id>,
+      // rendant les deux réponses indiscernables au rechargement (restoreFromText
+      // reclique alors le bouton PRINCIPAL pour les deux lignes, la seconde écrasant
+      // la première). Le tag [sous:<id exact>] ne s'applique qu'aux champs autres que
+      // le principal, pour garder le format historique (donc la compatibilité avec
+      // plan-logic.js) inchangé sur la question principale.
       if (inp.id === ynMainId) {
         cardLines.push(qid + ' — ' + (ql ? ql.textContent.substring(0,60) : '') + ' : ' + inp.value);
       } else {
@@ -3352,6 +3401,16 @@ function construireBodyReponses() {
     var qidNum = qid.replace('Q', '');
     var commentEl = document.getElementById('com_' + qidNum);
     if (commentEl && champDansBlocMasque(commentEl, card)) commentEl = null; // bloc refermé (voir garde-fou 17/07/2026)
+    // Q1 ("Combien d'heures dormez-vous ?") n'a jamais suivi la convention com_<qid> —
+    // sa case "Commentaires" a l'id historique q1_comment. Sans ce cas particulier, le
+    // texte tapé n'était capté QUE par le filet de sécurité Complément[q1_comment]
+    // (fidèle au rechargement du questionnaire dans le navigateur du client), jamais
+    // transmis à plan-logic.js/Synaxone — contrairement à toute autre question. Trouvé
+    // le 12/09/2026 en creusant les faux positifs __autoid_pm_items_* du script de
+    // vérification (voir verification/check-questionnaire-integrite.js) : la correction
+    // d'un bug de collision de témoins dans CE script a démasqué celui-ci.
+    if (!commentEl && qidNum === '1') commentEl = document.getElementById('q1_comment');
+    if (commentEl && champDansBlocMasque(commentEl, card)) commentEl = null;
     if (commentEl && commentEl.value) msg += qid + ' [commentaire] : ' + commentEl.value.replace(/\r?\n/g, ' ⏎ ') + '\n';
     // Case "Commentaires" additionnelle (commentaireLibre, ex. Q142) : distincte de
     // com_<qid> qui, sur ce type de carte (q_medicament), sert déjà à noter le nom
@@ -3366,11 +3425,15 @@ function construireBodyReponses() {
 
     // Commentaires/« depuis quand » PAR CASE (special:"q8_choices" — Q8, Q50…) :
     // contrairement au commentaire unique com_<qid> ci-dessus, chaque case a son
-    // propre champ com8_<qid>_<i>/dep8_<qid>_<i> (voir buildQuestionCard). Combinés
-    // en une seule ligne [commentaire]/[depuis] par qid, préfixée du nom de la
-    // case concernée, pour alimenter answerComments/answerDepuis (donc les
-    // annotations 💬/📅 affichées dans le Plan) — remonté par Camille le
-    // 30/08/2026 : "chaque commentaire doit être intégré au plan".
+    // propre champ com8_<qid>_<i>/dep8_<qid>_<i> (voir buildQuestionCard). Avant
+    // le 30/08/2026, ces champs n'étaient captés que par le filet de sécurité
+    // (fidèles au rechargement du questionnaire, mais jamais lus par
+    // plan-logic.js) — remonté par Camille : "chaque commentaire doit être
+    // intégré au plan". Combinés en une seule ligne [commentaire]/[depuis] par
+    // qid, préfixée du nom de la case concernée, pour alimenter answerComments/
+    // answerDepuis (donc les annotations 💬/📅 affichées dans le Plan) exactement
+    // comme n'importe quelle autre question — même limite déjà acceptée pour Q56
+    // (un seul commentaire affiché par qid, partagé entre ses cases).
     var com8Parts = [], dep8Parts = [];
     card.querySelectorAll('textarea[id^="com8_' + qidNum + '_"]').forEach(function(ta) {
       if (champDansBlocMasque(ta, card)) return;
@@ -3392,9 +3455,10 @@ function construireBodyReponses() {
     if (dep8Parts.length) msg += qid + ' [depuis] : ' + dep8Parts.join(' ⏎ ') + '\n';
 
     // Idem pour Q67 (special:"q68_crises" — Colère/Rage/Violence) : ids
-    // historiquement figés "c68_"/"d68_" (pas paramétrés par qid, puisqu'une
-    // seule question utilise ce special). Même règle (30/08/2026, Camille :
-    // "chaque case un item avec sa note et son commentaire").
+    // historiquement figés "c68_"/"d68_" (pas paramétrés par qid, contrairement à
+    // com8_/dep8_, puisqu'une seule question utilise ce special). Même règle
+    // (30/08/2026, Camille : "chaque case un item avec sa note et son
+    // commentaire") : combinés en une seule ligne [commentaire]/[depuis].
     if (qidNum === '67') {
       var items68Labels = ['Colère', 'Rage', 'Violence'];
       var c68Parts = [], d68Parts = [];
@@ -3673,7 +3737,18 @@ function resoudreSymptomesSpecifiques(symptomesSpecifiques) {
   if (!Array.isArray(symptomesSpecifiques)) return symptomesSpecifiques;
   return symptomesSpecifiques.map(function(s) {
     if (typeof s === 'string') {
-      return SYMPTOME_PAR_ID[s] || { id: s, num: s, texte: s, categorie: 'Autres' };
+      if (SYMPTOME_PAR_ID[s]) return SYMPTOME_PAR_ID[s];
+      // Depuis le 24/09/2026, Synaxone peut proposer au bilan TOUTE question qui compte
+      // dans le Plan (plus seulement les 82 de CATEGORIES_SYMPTOMES) : un id "s<qnum>"
+      // inconnu de cette table est résolu directement vers la question du moteur
+      // (ex. "s31b" → Q31b), rendue par buildQuestionCard comme n'importe quelle autre.
+      var m = /^s(\d+[a-z]?)$/.exec(s);
+      if (m) {
+        var q = QUESTIONS_PAR_NUM[m[1]];
+        var texte = q ? String(q.text || '').replace(/<[^>]*>/g, '') : 'Question ' + m[1];
+        return { id: s, num: m[1], texte: texte, categorie: CATEGORIE_PAR_NUM[m[1]] || 'Autres' };
+      }
+      return { id: s, num: s, texte: s, categorie: 'Autres' };
     }
     return s;
   });
